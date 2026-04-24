@@ -4,9 +4,12 @@
 
     function getBackendBase() {
         const rawHost = window.location.hostname || '';
-        const backendHost = rawHost === 'localhost' || !rawHost ? '127.0.0.1' : rawHost;
-        const proto = (window.location.protocol === 'file:') ? 'http:' : window.location.protocol;
-        return `${proto}//${backendHost}:5000/api`;
+        // Local development
+        if (rawHost === 'localhost' || rawHost === '127.0.0.1' || !rawHost) {
+            return 'http://127.0.0.1:5000/api';
+        }
+        // Production — use Render backend
+        return 'https://smart-web-exam-system.onrender.com/api';
     }
 
     function readAccessTokenFromStorage() {
