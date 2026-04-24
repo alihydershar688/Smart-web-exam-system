@@ -1,0 +1,3134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%234f46e5'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='28' fill='white' font-family='Arial' font-weight='bold'%3ESE%3C/text%3E%3C/svg%3E">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Student Dashboard | Smart Exam System</title>
+    <script>
+        // Prevent back button - create deeper history stack
+        function disableBackButton() {
+            history.pushState(null, null, location.href);
+            history.pushState(null, null, location.href);
+            history.pushState(null, null, location.href);
+        }
+        disableBackButton();
+        
+        window.onpopstate = function(event) {
+            disableBackButton();
+        };
+        
+        // Essential functions for HTML onclick handlers (must be defined early)
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId)
+            if (!section) return
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            // Also update sidebar active state
+            const navMap = {
+                'coursesSection':   'courses',
+                'availableSection': 'exams',
+                'completedSection': 'results'
+            }
+            if (navMap[sectionId]) setStudentSidebarActive(navMap[sectionId])
+        }
+
+        function setStudentSidebarActive(navKey) {
+            document.querySelectorAll('.sidebar-link[data-nav]').forEach((link) => {
+                link.classList.toggle('active', link.dataset.nav === navKey)
+            })
+        }
+
+        function hideAllSections() {
+            // Don't hide — just scroll to the right section
+        }
+
+        function openCoursesSection() {
+            setStudentSidebarActive('courses');
+            const el = document.getElementById('coursesSection');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function openUpcomingSection() {
+            setStudentSidebarActive('exams');
+            const el = document.getElementById('availableSection');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function openCompletedSection() {
+            setStudentSidebarActive('results');
+            const el = document.getElementById('completedSection');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function openTopSection() {
+            setStudentSidebarActive('dashboard');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Ensure functions are globally accessible for inline handlers and module scopes.
+        window.scrollToSection = scrollToSection;
+        window.hideAllSections = hideAllSections;
+        window.openCoursesSection = openCoursesSection;
+        window.openUpcomingSection = openUpcomingSection;
+        window.openCompletedSection = openCompletedSection;
+        window.openTopSection = openTopSection;
+        window.setStudentSidebarActive = setStudentSidebarActive;
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #F0F4FF;
+            --surface: #FFFFFF;
+            --surface-soft: #EFF6FF;
+            --border: #BFDBFE;
+            --text: #1E3A8A;
+            --muted: #6B7280;
+            --brand: #1E3A8A;
+            --brand-strong: #1e40af;
+            --shadow: 0 1px 3px rgba(30,58,138,0.07);
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: var(--bg);
+            color: #1F2937;
+            position: relative;
+            overflow-x: clip;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 10% 12%, rgba(30,58,138,0.04), transparent 38%),
+                radial-gradient(circle at 88% 12%, rgba(59, 130, 246, 0.08), transparent 35%),
+                radial-gradient(circle at 75% 78%, rgba(59, 130, 246, 0.04), transparent 35%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes backgroundFloat {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+
+        .navbar {
+            background: #1E3A8A;
+            backdrop-filter: none;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 8px rgba(30, 58, 138, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1001;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(140deg, #1E3A8A, #3B82F6);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-name {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(226, 232, 240, 0.52);
+        }
+
+        .brand-page {
+            font-size: 16px;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .navbar-links {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: rgba(226, 232, 240, 0.78);
+            font-weight: 700;
+            padding: 0.6rem 0.95rem;
+            border-radius: 10px;
+            transition: all 0.25s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255,255,255,0.12);
+            color: #ffffff;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .sidebar-footer-button.btn-logout {
+            background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+            padding: 0.75rem 1.25rem !important;
+            font-weight: 600 !important;
+            font-size: 0.95rem !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 0.5rem !important;
+            cursor: pointer !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+        .sidebar-footer-button.btn-logout:hover {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important;
+            box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+            transform: translateY(-2px) !important;
+        }
+        .sidebar-footer-button.btn-logout:active {
+            transform: translateY(0) !important;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+        }
+        .sidebar-footer-button.btn-logout i {
+            font-size: 1.1rem !important;
+            transition: transform 0.3s ease !important;
+        }
+        .sidebar-footer-button.btn-logout:hover i {
+            transform: translateX(2px) !important;
+        }
+
+
+        .container {
+            max-width: none;
+            width: 100%;
+            margin: 0;
+            padding: 1.35rem 1.5rem 1.8rem 0.85rem;
+        }
+
+        .app-shell {
+            display: grid;
+            grid-template-columns: 336px minmax(0, 1fr);
+            gap: 1.25rem;
+            align-items: start;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 92px;
+            min-height: calc(100vh - 112px);
+            max-height: calc(100vh - 112px);
+            display: flex;
+            flex-direction: column;
+            background: #1E3A8A;
+            border: none;
+            border-radius: 22px;
+            box-shadow: 0 2px 8px rgba(30, 58, 138, 0.15);
+            padding: 1.1rem;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(96, 165, 250, 0.06), transparent 30%);
+            pointer-events: none;
+        }
+
+        .sidebar-head,
+        .sidebar-nav,
+        .sidebar-summary {
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar-head {
+            margin-bottom: 1rem;
+            padding: 0.2rem 0.15rem 0.95rem;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+        }
+
+        .sidebar-title {
+            font-size: 0.74rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(191, 219, 254, 0.7);
+            font-weight: 800;
+            margin-bottom: 0.9rem;
+            padding: 0 0.35rem;
+        }
+
+        .sidebar-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0 0.35rem;
+        }
+
+        .sidebar-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #f8fafc;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+        }
+
+        .sidebar-profile-name {
+            display: block;
+            font-size: 1rem;
+            font-weight: 800;
+            color: #f8fafc;
+        }
+
+        .sidebar-profile-meta {
+            display: block;
+            margin-top: 0.18rem;
+            font-size: 0.82rem;
+            color: #94a3b8;
+        }
+
+        .sidebar-nav {
+            display: grid;
+            gap: 0.45rem;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.9rem;
+            text-decoration: none;
+            color: #e2e8f0;
+            padding: 0.76rem 0.88rem;
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.04);
+            transition: all 0.22s ease, transform 0.2s ease;
+            font-weight: 700;
+            position: relative;
+        }
+
+        .sidebar-link::before {
+            content: '';
+            position: absolute;
+            left: -1px;
+            top: 12px;
+            bottom: 12px;
+            width: 3px;
+            border-radius: 999px;
+            background: transparent;
+            transition: background 0.22s ease;
+        }
+
+        .sidebar-link-main {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            min-width: 0;
+        }
+
+        .sidebar-link-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: rgba(148, 163, 184, 0.12);
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            color: #cbd5e1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            flex-shrink: 0;
+        }
+
+        .sidebar-link-icon svg,
+        .sidebar-link-icon i {
+            width: 18px;
+            height: 18px;
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .sidebar-link-title {
+            display: block;
+            color: #f8fafc;
+            font-size: 0.92rem;
+            font-weight: 800;
+            line-height: 1.1;
+        }
+
+        .sidebar-link-desc {
+            display: block;
+            margin-top: 0.22rem;
+            color: #94a3b8;
+            font-size: 0.76rem;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .sidebar-link-meta {
+            color: #94a3b8;
+            font-size: 0.73rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            flex-shrink: 0;
+        }
+
+        .sidebar-link:hover,
+        .sidebar-link.active {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            transform: translateX(2px);
+        }
+
+        .sidebar-link:hover::before,
+        .sidebar-link.active::before {
+            background: linear-gradient(180deg, #93C5FD, #BFDBFE);
+        }
+
+        .sidebar-summary {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.16);
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .sidebar-summary-card {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 14px;
+            padding: 0.85rem 0.95rem;
+        }
+
+        .sidebar-summary-label {
+            display: block;
+            color: #94a3b8;
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+            margin-bottom: 0.35rem;
+        }
+
+        .sidebar-summary-value {
+            display: block;
+            color: #f8fafc;
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.16);
+        }
+
+        /* -- Logout button — standardized red across all dashboards -- */
+        .sidebar-footer-button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.28);
+            border-radius: 12px;
+            padding: 0.8rem 1rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.22s ease;
+            font-family: 'Manrope', sans-serif;
+            min-height: 46px;
+        }
+
+        .sidebar-footer-button:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.45);
+            color: #fecaca;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.18);
+        }
+
+        .sidebar-footer-button:active {
+            transform: translateY(0);
+        }
+
+        .sidebar-footer-button i {
+            font-size: 1rem;
+        }
+
+        .content-column {
+            min-width: 0;
+        }
+
+        .dashboard-hero {
+            margin-bottom: 1.25rem;
+            background: linear-gradient(135deg, #1E3A8A, #2563EB);
+            border: none;
+            border-radius: 18px;
+            padding: 1.3rem 1.4rem;
+            box-shadow: 0 4px 12px rgba(30,58,138,0.15);
+        }
+
+        .dashboard-hero h1 {
+            font-size: 1.68rem;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.35rem;
+        }
+
+        .dashboard-hero p {
+            color: var(--muted);
+            font-size: 0.96rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1.1rem;
+            margin-bottom: 1.45rem;
+        }
+
+        .stat-card {
+            background: #FFFFFF;
+            padding: 1.2rem;
+            border-radius: 14px;
+            box-shadow: 0 1px 3px rgba(30,58,138,0.07);
+            border: 1px solid #DBEAFE;
+        }
+
+        .stat-card.clickable {
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card.clickable:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(30,58,138,0.12);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .stat-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .stat-icon i {
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .stat-icon.blue { background: rgba(59, 130, 246, 0.18); color: #93c5fd; }
+        .stat-icon.green { background: rgba(16, 185, 129, 0.18); color: #6ee7b7; }
+        .stat-icon.orange { background: rgba(245, 158, 11, 0.18); color: #fcd34d; }
+        .stat-icon.purple { background: rgba(15,110,86,0.15); color: #d8b4fe; }
+
+        .stat-value {
+            font-size: 1.72rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: #1E3A8A;
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-size: 0.86rem;
+        }
+
+        .section {
+            background: var(--surface);
+            padding: 1.2rem;
+            border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(30,58,138,0.05);
+            margin-bottom: 1.45rem;
+            border: 1px solid var(--border);
+            animation: fadeIn 0.3s ease;
+            scroll-margin-top: 80px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.08rem;
+            font-weight: 600;
+            color: #1E3A8A;
+        }
+
+        @media (max-width: 900px) {
+            .navbar {
+                padding: 0.9rem 1rem;
+                flex-wrap: wrap;
+                gap: 0.75rem;
+            }
+
+            .navbar-links {
+                display: none;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .app-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                min-height: auto;
+                max-height: none;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .exam-details {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .exam-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.95rem;
+        }
+
+        .course-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.05rem;
+            background: var(--surface-soft);
+        }
+
+        .course-code {
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #99f6e4;
+            margin-bottom: 0.45rem;
+        }
+
+        .course-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 0.35rem;
+        }
+
+        .course-meta { color: #6B7280;
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+
+        .exam-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.4rem;
+            transition: all 0.3s;
+            background: #FFFFFF;
+        }
+
+        .exam-card:hover {
+            border-color: #67e8f9;
+            box-shadow: 0 4px 12px rgba(30,58,138,0.08);
+        }
+
+        .exam-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .exam-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #1E3A8A; } .exam-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .badge-upcoming { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+        .badge-active { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+        .badge-completed { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }
+
+        .exam-details {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.85rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #F0F7FF;
+            border-radius: 8px;
+            border: 1px solid #DBEAFE;
+        }
+
+        .exam-detail {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #374151; } .detail-key {
+            color: #1E3A8A;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #1E3A8A;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 500;
+        }
+
+        .btn-primary:hover {
+            background: #1e40af;
+        }
+
+        .btn-secondary {
+            background: #EFF6FF;
+            color: #1E3A8A;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 500;
+            border: 1px solid #BFDBFE;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .results-table th {
+            background: #1E3A8A;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: none;
+            color: #FFFFFF;
+            text-transform: uppercase;
+            font-size: 0.78rem;
+            letter-spacing: 0.05em;
+        }
+
+        .results-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #EFF6FF;
+            color: #1F2937;
+        }
+
+        .results-table tbody tr:nth-child(even) { background: #FFFFFF; }
+
+        .results-table tr:hover {
+            background: #EFF6FF;
+        }
+
+        .score-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .score-excellent { background: #D1FAE5; color: #065F46; }
+        .score-good { background: #DBEAFE; color: #1E3A8A; }
+        .score-average { background: #FEF3C7; color: #92400E; }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #cbd5e1;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #cbd5e1;
+        }
+
+        .empty-state-icon {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            opacity: 0.85;
+            letter-spacing: 0.06em;
+            color: #99f6e4;
+            text-transform: uppercase;
+        }
+    </style>
+    <link rel="stylesheet" href="css/ui-system.css?v=1776841876">
+    <link rel="stylesheet" href="css/product-theme.css?v=1776841876">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=1776841876">
+    <link rel="stylesheet" href="css/role-dashboard-match.css?v=1776841876">
+    <style>
+/* -- Global polish ------------------------------------- */
+* { -webkit-font-smoothing: antialiased; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: rgba(30,58,138,0.08); }
+::-webkit-scrollbar-thumb { background: rgba(30,58,138,0.3); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(30,58,138,0.5); }
+
+/* -- Colorful stat icons ------------------------------- */
+.stat-icon.blue { background: linear-gradient(135deg, rgba(59,130,246,0.25), rgba(37,99,235,0.15)) !important; }
+.stat-icon.green { background: linear-gradient(135deg, rgba(16,185,129,0.25), rgba(5,150,105,0.15)) !important; }
+.stat-icon.orange { background: linear-gradient(135deg, rgba(245,158,11,0.25), rgba(217,119,6,0.15)) !important; }
+.stat-icon.purple { background: linear-gradient(135deg, rgba(30,58,138,0.15), rgba(30,58,138,0.15)) !important; }
+
+/* -- Colored stat card left accents -------------------- */
+.stats-grid .stat-card:nth-child(1) { border-left: 3px solid #3b82f6 !important; }
+.stats-grid .stat-card:nth-child(2) { border-left: 3px solid #10b981 !important; }
+.stats-grid .stat-card:nth-child(3) { border-left: 3px solid #f59e0b !important; }
+.stats-grid .stat-card:nth-child(4) { border-left: 3px solid #1E3A8A !important; }
+
+.stat-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    border: 1px solid #DBEAFE !important;
+}
+.stat-card:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 12px 28px rgba(30,58,138,0.15) !important;
+    border-color: #BFDBFE !important;
+}
+
+/* -- Course cards with colored top border -------------- */
+.course-card {
+    border-top: 2px solid #BFDBFE !important;
+    transition: all 0.2s ease !important;
+}
+.course-card:hover {
+    transform: translateY(-2px) !important;
+    border-top-color: #1E3A8A !important;
+    box-shadow: 0 8px 20px rgba(30,58,138,0.12) !important;
+}
+
+/* -- Exam cards ---------------------------------------- */
+.exam-card {
+    transition: all 0.2s ease !important;
+    border: 1px solid #DBEAFE !important;
+}
+.exam-card:hover {
+    border-color: #BFDBFE !important;
+    box-shadow: 0 8px 24px rgba(30,58,138,0.12) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* -- Stat value enhancement ---------------------------- */
+.stat-value {
+    font-size: 1.9rem !important;
+    font-weight: 900 !important;
+    color: #1E3A8A !important;
+    -webkit-text-fill-color: #1E3A8A !important;
+}
+
+/* -- Shimmer animation --------------------------------- */
+@keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+
+/* -- btn-primary gradient ------------------------------ */
+.btn-primary {
+    background: #1E3A8A !important;
+    box-shadow: 0 4px 14px rgba(30,58,138,0.25) !important;
+}
+.btn-primary:hover {
+    background: #1e40af !important;
+    box-shadow: 0 8px 22px rgba(30,58,138,0.35) !important;
+}
+
+/* -- Consistent border-radius -------------------------- */
+.stat-card, .section, .course-card, .exam-card { border-radius: 14px !important; }
+.exam-badge, .score-badge { border-radius: 999px !important; }
+
+/* -- Clean shadow override — remove dark/heavy shadows -- */
+html body.student-dashboard-page .section,
+html body.student-dashboard-page .card,
+html body.student-dashboard-page .panel,
+html body.student-dashboard-page .stat-card,
+html body.student-dashboard-page .exam-card,
+html body.student-dashboard-page .course-card,
+html body.student-dashboard-page .activity-item,
+html body.student-dashboard-page .summary-item {
+    box-shadow: 0 2px 8px rgba(30,58,138,0.05) !important;
+    border: 1px solid #D6E4FF !important;
+    backdrop-filter: none !important;
+}
+html body.student-dashboard-page .section:hover,
+html body.student-dashboard-page .exam-card:hover,
+html body.student-dashboard-page .course-card:hover {
+    box-shadow: 0 4px 12px rgba(30,58,138,0.08) !important;
+}
+html body.student-dashboard-page .stat-card {
+    box-shadow: 0 1px 4px rgba(30,58,138,0.06) !important;
+    border: 1px solid #DBEAFE !important;
+}
+html body.student-dashboard-page .stat-card:hover {
+    box-shadow: 0 4px 14px rgba(30,58,138,0.1) !important;
+    transform: translateY(-2px);
+}
+html body.student-dashboard-page .dashboard-hero {
+    background: linear-gradient(135deg, #1E3A8A, #2563EB) !important;
+    border: none !important;
+    box-shadow: 0 4px 16px rgba(30,58,138,0.15) !important;
+}
+/* Fix exam detail row dark background */
+html body.student-dashboard-page .exam-details {
+    background: #F0F7FF !important;
+    border: 1px solid #DBEAFE !important;
+    box-shadow: none !important;
+}
+html body.student-dashboard-page .exam-detail {
+    color: #374151 !important;
+}
+html body.student-dashboard-page .detail-key {
+    color: #1E3A8A !important;
+    font-weight: 600 !important;
+}
+html body.student-dashboard-page .exam-title {
+    color: #1E3A8A !important;
+}
+html body.student-dashboard-page .exam-card {
+    background: #FFFFFF !important;
+    border: 1px solid #DBEAFE !important;
+    box-shadow: 0 1px 3px rgba(30,58,138,0.07) !important;
+}
+html body.student-dashboard-page .course-meta {
+    color: #6B7280 !important;
+}
+/* Fix results table */
+html body.student-dashboard-page .results-table th {
+    background: #1E3A8A !important;
+    color: #FFFFFF !important;
+    border-bottom: none !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.06em !important;
+}
+html body.student-dashboard-page .results-table td { color: #1F2937 !important; border-bottom: 1px solid #E8F0FE !important; background: #FFFFFF !important; padding: 0.9rem 1rem !important; }
+html body.student-dashboard-page .results-table tbody tr:nth-child(even) td,
+html body.student-dashboard-page .results-table tbody tr:nth-child(odd) td { background: #FFFFFF !important; }
+html body.student-dashboard-page .results-table tr:hover td { background: #F0F7FF !important; transition: background 0.15s ease !important; }
+/* Fix btn-secondary */
+html body.student-dashboard-page .btn-secondary {
+    background: #EFF6FF !important;
+    color: #1E3A8A !important;
+    border: 1px solid #BFDBFE !important;
+}
+html body.student-dashboard-page .btn-secondary:hover {
+    background: #DBEAFE !important;
+}
+/* Fix score badges */
+html body.student-dashboard-page .score-excellent { background: #D1FAE5 !important; color: #065F46 !important; }
+html body.student-dashboard-page .score-good      { background: #DBEAFE !important; color: #1E3A8A !important; }
+html body.student-dashboard-page .score-average   { background: #FEF3C7 !important; color: #92400E !important; }
+html body.student-dashboard-page .score-poor      { background: #FEE2E2 !important; color: #991B1B !important; }
+/* Remove ALL remaining dark shadows from content area */
+html body.student-dashboard-page .section,
+html body.student-dashboard-page .card,
+html body.student-dashboard-page .panel {
+    box-shadow: 0 1px 3px rgba(30,58,138,0.07) !important;
+    border: 1px solid #D6E4FF !important;
+    background: #FFFFFF !important;
+    backdrop-filter: none !important;
+}
+
+/* Final student-dashboard polish: compact, professional light workspace */
+html body.student-dashboard-page {
+    --student-blue: #1E3A8A;
+    --student-blue-2: #2563EB;
+    --student-ink: #0f172a;
+    --student-muted: #64748b;
+    --student-line: #dbe7fb;
+    --student-soft: #f6f9ff;
+    background: linear-gradient(180deg, #eef4ff 0%, #f8fbff 42%, #f3f7fe 100%) !important;
+    color: var(--student-ink) !important;
+}
+
+html body.student-dashboard-page .navbar {
+    background: linear-gradient(90deg, #1E3A8A 0%, #213f99 56%, #1f4fb4 100%) !important;
+    box-shadow: 0 10px 28px rgba(30, 58, 138, 0.16) !important;
+}
+
+html body.student-dashboard-page .navbar-content {
+    min-height: 64px !important;
+    padding: 0 34px 0 22px !important;
+}
+
+html body.student-dashboard-page .brand-mark {
+    width: 30px !important;
+    height: 30px !important;
+}
+
+html body.student-dashboard-page .brand-page {
+    font-size: 12px !important;
+}
+
+html body.student-dashboard-page .header-profile-trigger {
+    width: 42px !important;
+    height: 42px !important;
+}
+
+html body.student-dashboard-page .container {
+    padding: 18px 22px 28px 12px !important;
+}
+
+html body.student-dashboard-page .sidebar {
+    top: 78px !important;
+    min-height: calc(100vh - 92px) !important;
+    max-height: calc(100vh - 92px) !important;
+    border-radius: 18px !important;
+    background: linear-gradient(180deg, #1E3A8A 0%, #1d3b8f 60%, #183477 100%) !important;
+    box-shadow: 0 14px 34px rgba(30, 58, 138, 0.2) !important;
+}
+
+html body.student-dashboard-page .sidebar-link {
+    text-transform: none !important;
+}
+
+html body.student-dashboard-page .content-column {
+    display: grid !important;
+    gap: 16px !important;
+}
+
+html body.student-dashboard-page .dashboard-hero {
+    margin-bottom: 0 !important;
+    padding: 22px 26px !important;
+    border-radius: 22px !important;
+    background:
+        linear-gradient(135deg, rgba(255,255,255,0.98), rgba(246,249,255,0.98)),
+        radial-gradient(circle at 92% 18%, rgba(37,99,235,0.18), transparent 34%) !important;
+    border: 1px solid var(--student-line) !important;
+    box-shadow: 0 18px 38px rgba(30, 58, 138, 0.08) !important;
+}
+
+html body.student-dashboard-page .dashboard-hero h1 {
+    color: var(--student-ink) !important;
+    font-size: clamp(1.75rem, 2.4vw, 2.45rem) !important;
+    letter-spacing: -0.045em !important;
+    margin-bottom: 8px !important;
+}
+
+html body.student-dashboard-page .dashboard-hero p {
+    max-width: 780px !important;
+    color: var(--student-muted) !important;
+    font-size: 0.94rem !important;
+    line-height: 1.55 !important;
+}
+
+html body.student-dashboard-page .stats-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+    margin-bottom: 0 !important;
+}
+
+html body.student-dashboard-page .stat-card {
+    min-height: 130px !important;
+    padding: 18px 18px 16px !important;
+    border-radius: 18px !important;
+    background: rgba(255,255,255,0.96) !important;
+    border: 1px solid var(--student-line) !important;
+}
+
+html body.student-dashboard-page .stat-icon {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 12px !important;
+    margin-bottom: 12px !important;
+}
+
+html body.student-dashboard-page .stat-icon i {
+    font-size: 20px !important;
+}
+
+html body.student-dashboard-page .stat-value {
+    font-size: 1.72rem !important;
+    line-height: 1 !important;
+    margin-bottom: 7px !important;
+    color: var(--student-blue) !important;
+}
+
+html body.student-dashboard-page .stat-label {
+    color: var(--student-muted) !important;
+    font-size: 0.83rem !important;
+    font-weight: 600 !important;
+}
+
+html body.student-dashboard-page .section {
+    margin-bottom: 0 !important;
+    padding: 24px 28px 28px !important;
+    border-radius: 22px !important;
+    border: 1px solid var(--student-line) !important;
+    background: rgba(255,255,255,0.98) !important;
+    box-shadow: 0 14px 34px rgba(30, 58, 138, 0.06) !important;
+}
+
+html body.student-dashboard-page .section-header {
+    margin-bottom: 18px !important;
+}
+
+html body.student-dashboard-page .section-title {
+    color: var(--student-ink) !important;
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.02em !important;
+}
+
+html body.student-dashboard-page .course-grid {
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)) !important;
+    gap: 14px !important;
+}
+
+html body.student-dashboard-page .course-card {
+    min-height: 106px !important;
+    padding: 16px 18px !important;
+    border-radius: 16px !important;
+    background: linear-gradient(180deg, #fbfdff, #f5f9ff) !important;
+    border: 1px solid var(--student-line) !important;
+    border-top: 3px solid #93c5fd !important;
+}
+
+html body.student-dashboard-page .course-code {
+    color: #14b8a6 !important;
+    font-size: 0.73rem !important;
+    letter-spacing: 0.16em !important;
+    margin-bottom: 10px !important;
+}
+
+html body.student-dashboard-page .course-name {
+    color: var(--student-ink) !important;
+    font-size: 0.95rem !important;
+    font-weight: 800 !important;
+}
+
+html body.student-dashboard-page .course-meta {
+    color: var(--student-muted) !important;
+    font-size: 0.82rem !important;
+}
+
+html body.student-dashboard-page .exam-grid {
+    gap: 14px !important;
+}
+
+html body.student-dashboard-page .exam-card {
+    padding: 20px 22px !important;
+    border-radius: 18px !important;
+    background: #ffffff !important;
+    border: 1px solid var(--student-line) !important;
+}
+
+html body.student-dashboard-page .exam-header {
+    margin-bottom: 14px !important;
+}
+
+html body.student-dashboard-page .exam-title {
+    color: var(--student-blue) !important;
+    font-size: 1.02rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.01em !important;
+}
+
+html body.student-dashboard-page .exam-details {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 10px 18px !important;
+    padding: 14px 16px !important;
+    margin: 14px 0 !important;
+    border-radius: 14px !important;
+    background: #f1f7ff !important;
+    border: 1px solid #d9e8fb !important;
+}
+
+html body.student-dashboard-page .exam-detail {
+    font-size: 0.86rem !important;
+}
+
+html body.student-dashboard-page .btn-primary,
+html body.student-dashboard-page .btn-secondary {
+    min-height: 42px !important;
+    padding: 0 18px !important;
+    border-radius: 11px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.85rem !important;
+    font-weight: 800 !important;
+}
+
+html body.student-dashboard-page .btn-secondary[disabled] {
+    opacity: 0.82 !important;
+    cursor: not-allowed !important;
+}
+
+html body.student-dashboard-page .results-table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+html body.student-dashboard-page #recentResults {
+    overflow-x: auto !important;
+    padding-bottom: 2px !important;
+}
+
+html body.student-dashboard-page .results-table th {
+    background: #1E3A8A !important;
+    padding: 13px 14px !important;
+    font-size: 0.72rem !important;
+}
+
+html body.student-dashboard-page .results-table td {
+    padding: 12px 14px !important;
+    font-size: 0.88rem !important;
+}
+
+html body.student-dashboard-page .score-badge,
+html body.student-dashboard-page .result-status-badge {
+    min-width: 68px !important;
+    justify-content: center !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    border-radius: 999px !important;
+    padding: 6px 11px !important;
+    font-size: 0.76rem !important;
+    font-weight: 800 !important;
+}
+
+html body.student-dashboard-page .exam-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 999px !important;
+    padding: 6px 11px !important;
+    font-size: 0.72rem !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+}
+
+html body.student-dashboard-page .badge-active {
+    background: rgba(34,197,94,0.13) !important;
+    color: #15803d !important;
+    border: 1px solid rgba(34,197,94,0.25) !important;
+}
+
+html body.student-dashboard-page .badge-completed {
+    background: rgba(148,163,184,0.14) !important;
+    color: #475569 !important;
+    border: 1px solid rgba(148,163,184,0.25) !important;
+}
+
+html body.student-dashboard-page .status-graded {
+    background: rgba(34,197,94,0.14) !important;
+    color: #15803d !important;
+    border: 1px solid rgba(34,197,94,0.24) !important;
+}
+
+html body.student-dashboard-page .status-pending {
+    background: rgba(245,158,11,0.16) !important;
+    color: #b45309 !important;
+    border: 1px solid rgba(245,158,11,0.28) !important;
+}
+
+html body.student-dashboard-page .status-neutral {
+    background: rgba(148,163,184,0.14) !important;
+    color: #475569 !important;
+    border: 1px solid rgba(148,163,184,0.24) !important;
+}
+
+html body.student-dashboard-page .empty-state,
+html body.student-dashboard-page .loading {
+    color: var(--student-muted) !important;
+    padding: 34px 18px !important;
+}
+
+html body.student-dashboard-page #chatbot-fab {
+    right: 38px !important;
+    bottom: 38px !important;
+    width: 52px !important;
+    height: 52px !important;
+    border-radius: 16px !important;
+    background: linear-gradient(135deg, #2563eb, #4f46e5) !important;
+    box-shadow: 0 16px 34px rgba(37,99,235,0.28) !important;
+}
+
+html body.student-dashboard-page #chatbot-window {
+    right: 38px !important;
+    bottom: 104px !important;
+}
+
+@media (max-width: 1200px) {
+    html body.student-dashboard-page .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 720px) {
+    html body.student-dashboard-page .navbar-content {
+        padding: 0 16px !important;
+    }
+
+    html body.student-dashboard-page .stats-grid,
+    html body.student-dashboard-page .exam-details {
+        grid-template-columns: 1fr !important;
+    }
+
+    html body.student-dashboard-page .section {
+        padding: 18px !important;
+    }
+}
+
+/* Keep the student sidebar fixed while the main dashboard content scrolls. */
+html body.student-dashboard-page .app-shell {
+    display: block !important;
+}
+
+html body.student-dashboard-page .sidebar {
+    position: fixed !important;
+    left: 12px !important;
+    top: 78px !important;
+    bottom: 12px !important;
+    width: 228px !important;
+    min-height: auto !important;
+    max-height: none !important;
+    z-index: 900 !important;
+}
+
+html body.student-dashboard-page .content-column {
+    margin-left: 246px !important;
+    width: calc(100% - 246px) !important;
+}
+
+html body.student-dashboard-page .sidebar-footer {
+    margin-top: auto !important;
+    margin-bottom: 0 !important;
+    padding-top: 14px !important;
+    border-top: 1px solid rgba(219, 234, 254, 0.16) !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button {
+    position: relative !important;
+    width: 100% !important;
+    min-height: 50px !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+    padding: 6px 12px 6px 8px !important;
+    border-radius: 15px !important;
+    border: 1px solid rgba(248, 113, 113, 0.28) !important;
+    background:
+        linear-gradient(135deg, rgba(127, 29, 29, 0.22), rgba(255, 255, 255, 0.055)),
+        rgba(15, 23, 42, 0.12) !important;
+    color: #fff1f2 !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 10px 24px rgba(15, 23, 42, 0.12) !important;
+    overflow: hidden !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button::after {
+    content: 'Sign out' !important;
+    margin-left: auto !important;
+    color: rgba(254, 202, 202, 0.72) !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.09em !important;
+    text-transform: uppercase !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button span:first-child {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #fecaca !important;
+    flex: 0 0 36px !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button span:last-child {
+    color: #fff7f7 !important;
+    font-size: 13px !important;
+    font-weight: 850 !important;
+    letter-spacing: 0.01em !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button i {
+    font-size: 17px !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button:hover {
+    background:
+        linear-gradient(135deg, rgba(220, 38, 38, 0.78), rgba(153, 27, 27, 0.76)),
+        rgba(127, 29, 29, 0.42) !important;
+    border-color: rgba(254, 202, 202, 0.45) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 14px 30px rgba(127, 29, 29, 0.25), inset 0 1px 0 rgba(255,255,255,0.12) !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button:hover span:first-child {
+    background: rgba(255, 255, 255, 0.16) !important;
+    border-color: rgba(255, 255, 255, 0.22) !important;
+    color: #ffffff !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button:hover::after {
+    color: rgba(255, 255, 255, 0.82) !important;
+}
+
+@media (max-width: 1024px) {
+    html body.student-dashboard-page .app-shell {
+        display: grid !important;
+    }
+
+    html body.student-dashboard-page .content-column {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    html body.student-dashboard-page .sidebar {
+        left: 12px !important;
+        top: 88px !important;
+        bottom: 12px !important;
+        width: min(272px, calc(100vw - 24px)) !important;
+    }
+}
+
+/* Admin-style student shell: sticky topbar, fixed sidebar, content-only scrolling. */
+html body.student-dashboard-page {
+    min-height: 100vh !important;
+    background: #edf3ff !important;
+}
+
+html body.student-dashboard-page .navbar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1200 !important;
+    min-height: 84px !important;
+    padding: 0 !important;
+    background: #1E3A8A !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 12px 30px rgba(30, 58, 138, 0.16) !important;
+}
+
+html body.student-dashboard-page .navbar-content {
+    width: 100% !important;
+    min-height: 84px !important;
+    margin: 0 !important;
+    padding: 0 28px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+html body.student-dashboard-page .header-brand-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 18px !important;
+}
+
+html body.student-dashboard-page .shell-toggle {
+    width: 54px !important;
+    height: 54px !important;
+    border-radius: 16px !important;
+    background: rgba(15, 23, 42, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+}
+
+html body.student-dashboard-page .brand-mark {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 10px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+html body.student-dashboard-page .brand-name {
+    color: rgba(219, 234, 254, 0.82) !important;
+    font-size: 0.72rem !important;
+    letter-spacing: 0.14em !important;
+    font-weight: 900 !important;
+}
+
+html body.student-dashboard-page .brand-page {
+    color: #ffffff !important;
+    font-size: 1rem !important;
+    font-weight: 900 !important;
+}
+
+html body.student-dashboard-page .header-profile-trigger {
+    width: 54px !important;
+    height: 54px !important;
+    border-radius: 999px !important;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18) !important;
+}
+
+html body.student-dashboard-page .container {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 18px 22px 34px 14px !important;
+}
+
+html body.student-dashboard-page .app-shell {
+    display: block !important;
+    position: relative !important;
+}
+
+html body.student-dashboard-page .sidebar {
+    position: fixed !important;
+    left: 14px !important;
+    top: 102px !important;
+    bottom: 18px !important;
+    width: 320px !important;
+    min-height: auto !important;
+    max-height: none !important;
+    padding: 18px !important;
+    border-radius: 22px !important;
+    overflow: hidden !important;
+    z-index: 1000 !important;
+    background: #1E3A8A !important;
+    box-shadow: 0 18px 38px rgba(30, 58, 138, 0.2) !important;
+}
+
+html body.student-dashboard-page .sidebar::before {
+    display: none !important;
+}
+
+html body.student-dashboard-page .sidebar-head {
+    margin-bottom: 16px !important;
+    padding: 0 0 16px !important;
+}
+
+html body.student-dashboard-page .sidebar-nav {
+    gap: 10px !important;
+    overflow-y: auto !important;
+    padding-right: 2px !important;
+}
+
+html body.student-dashboard-page .sidebar-link {
+    min-height: 66px !important;
+    padding: 13px 15px !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.065) !important;
+    border: 1px solid rgba(219, 234, 254, 0.08) !important;
+    transform: none !important;
+}
+
+html body.student-dashboard-page .sidebar-link:hover,
+html body.student-dashboard-page .sidebar-link.active {
+    background: rgba(255, 255, 255, 0.13) !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+html body.student-dashboard-page .sidebar-link-icon {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.09) !important;
+}
+
+html body.student-dashboard-page .sidebar-link-title {
+    font-size: 0.98rem !important;
+    font-weight: 900 !important;
+}
+
+html body.student-dashboard-page .sidebar-footer {
+    padding-top: 16px !important;
+}
+
+html body.student-dashboard-page .content-column {
+    margin-left: 342px !important;
+    width: calc(100% - 342px) !important;
+    max-width: none !important;
+    display: grid !important;
+    gap: 18px !important;
+}
+
+html body.student-dashboard-page .dashboard-hero,
+html body.student-dashboard-page .section,
+html body.student-dashboard-page .stat-card {
+    box-shadow: 0 16px 34px rgba(30, 58, 138, 0.08) !important;
+}
+
+html body.student-dashboard-page .section {
+    scroll-margin-top: 108px !important;
+}
+
+/* Match the admin sidebar visual scale exactly on the student dashboard. */
+html body.student-dashboard-page .sidebar {
+    width: 340px !important;
+    padding: 28px 16px 26px !important;
+    border-radius: 12px 16px 16px 0 !important;
+    background: #213f98 !important;
+}
+
+html body.student-dashboard-page .content-column {
+    margin-left: 362px !important;
+    width: calc(100% - 362px) !important;
+}
+
+html body.student-dashboard-page .sidebar-nav {
+    gap: 12px !important;
+}
+
+html body.student-dashboard-page .sidebar-head {
+    display: none !important;
+}
+
+html body.student-dashboard-page .sidebar-link {
+    min-height: 66px !important;
+    padding: 0.82rem 0.9rem !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.055) !important;
+    border: 1px solid rgba(255, 255, 255, 0.03) !important;
+}
+
+html body.student-dashboard-page .sidebar-link::before {
+    left: -1px !important;
+    top: 10px !important;
+    bottom: 10px !important;
+    width: 3px !important;
+    border-radius: 999px !important;
+}
+
+html body.student-dashboard-page .sidebar-link.active::before,
+html body.student-dashboard-page .sidebar-link:hover::before {
+    background: #5bd7ff !important;
+}
+
+html body.student-dashboard-page .sidebar-link-main {
+    gap: 14px !important;
+}
+
+html body.student-dashboard-page .sidebar-link-icon {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 12px !important;
+    color: rgba(226, 232, 240, 0.78) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html body.student-dashboard-page .sidebar-link-icon i {
+    font-size: 20px !important;
+}
+
+html body.student-dashboard-page .sidebar-link-title {
+    color: #f8fbff !important;
+    font-size: 0.98rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.01em !important;
+}
+
+html body.student-dashboard-page .sidebar-link:hover,
+html body.student-dashboard-page .sidebar-link.active {
+    background: rgba(255, 255, 255, 0.075) !important;
+    border-color: rgba(255, 255, 255, 0.055) !important;
+}
+
+html body.student-dashboard-page .sidebar-link:hover .sidebar-link-icon,
+html body.student-dashboard-page .sidebar-link.active .sidebar-link-icon {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+
+html body.student-dashboard-page .sidebar-footer {
+    padding-top: 18px !important;
+    border-top: 1px solid rgba(219, 234, 254, 0.16) !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button {
+    min-height: 60px !important;
+    padding: 6px 14px 6px 16px !important;
+    gap: 14px !important;
+    border-radius: 16px !important;
+    background: rgba(79, 70, 229, 0.3) !important;
+    border: 1px solid rgba(199, 210, 254, 0.18) !important;
+    box-shadow: none !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button::after {
+    content: none !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button span:first-child {
+    width: 50px !important;
+    height: 50px !important;
+    flex: 0 0 50px !important;
+    border-radius: 14px !important;
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button span:last-child {
+    color: #ffffff !important;
+    font-size: 0.98rem !important;
+    font-weight: 800 !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button:hover {
+    background: rgba(99, 102, 241, 0.36) !important;
+    border-color: rgba(199, 210, 254, 0.26) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+@media (max-width: 1024px) {
+    html body.student-dashboard-page .navbar,
+    html body.student-dashboard-page .navbar-content {
+        min-height: 74px !important;
+    }
+
+    html body.student-dashboard-page .navbar-content {
+        padding: 0 14px !important;
+    }
+
+    html body.student-dashboard-page .container {
+        padding: 14px !important;
+    }
+
+    html body.student-dashboard-page .app-shell {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    html body.student-dashboard-page .sidebar {
+        position: static !important;
+        width: 100% !important;
+        min-height: auto !important;
+        max-height: none !important;
+        margin-bottom: 16px !important;
+    }
+
+    html body.student-dashboard-page .content-column {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+}
+
+/* Final admin-dashboard match for the student page shell and content scale. */
+html body.student-dashboard-page {
+    --student-admin-bg: #eef2f9;
+    --student-admin-card: #ffffff;
+    --student-admin-border: #dbe4f2;
+    --student-admin-heading: #1f2937;
+    --student-admin-text: #334155;
+    --student-admin-muted: #6b7280;
+    --student-admin-blue: #1e3a8a;
+    background: var(--student-admin-bg) !important;
+}
+
+html body.student-dashboard-page .navbar {
+    min-height: 82px !important;
+    background: #1e3a8a !important;
+    box-shadow: 0 10px 24px rgba(30, 58, 138, 0.14) !important;
+}
+
+html body.student-dashboard-page .navbar-content {
+    min-height: 82px !important;
+    padding: 0 1.75rem !important;
+}
+
+html body.student-dashboard-page .shell-toggle {
+    width: 54px !important;
+    height: 54px !important;
+    border-radius: 14px !important;
+}
+
+html body.student-dashboard-page .brand-name {
+    font-size: 0.65rem !important;
+    color: #bfdbfe !important;
+}
+
+html body.student-dashboard-page .brand-page {
+    font-size: 0.95rem !important;
+}
+
+html body.student-dashboard-page .header-profile-trigger {
+    width: 54px !important;
+    height: 54px !important;
+}
+
+html body.student-dashboard-page .container {
+    padding: 1.2rem 1.4rem 1.6rem 0.85rem !important;
+}
+
+html body.student-dashboard-page .sidebar {
+    left: 15px !important;
+    top: 98px !important;
+    bottom: 16px !important;
+    width: 342px !important;
+    padding: 1rem !important;
+    border-radius: 14px !important;
+    background: #1e3a8a !important;
+    border: 1px solid rgba(219, 234, 254, 0.12) !important;
+    box-shadow: 0 10px 28px rgba(30, 58, 138, 0.18) !important;
+}
+
+html body.student-dashboard-page .content-column {
+    margin-left: 368px !important;
+    width: calc(100% - 368px) !important;
+    gap: 0.9rem !important;
+}
+
+html body.student-dashboard-page .sidebar-nav {
+    gap: 0.55rem !important;
+}
+
+html body.student-dashboard-page .sidebar-link {
+    min-height: 64px !important;
+    padding: 0.7rem 0.85rem !important;
+    border-radius: 14px !important;
+    background: rgba(255, 255, 255, 0.055) !important;
+    border-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+html body.student-dashboard-page .sidebar-link::before {
+    left: 0 !important;
+    top: 10px !important;
+    bottom: 10px !important;
+    width: 3px !important;
+    background: transparent !important;
+}
+
+html body.student-dashboard-page .sidebar-link.active,
+html body.student-dashboard-page .sidebar-link:hover {
+    background: rgba(255, 255, 255, 0.09) !important;
+    border-color: rgba(191, 219, 254, 0.18) !important;
+}
+
+html body.student-dashboard-page .sidebar-link.active::before,
+html body.student-dashboard-page .sidebar-link:hover::before {
+    background: #60a5fa !important;
+}
+
+html body.student-dashboard-page .sidebar-link-main {
+    gap: 0.75rem !important;
+}
+
+html body.student-dashboard-page .sidebar-link-icon {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 9px !important;
+    color: #bfdbfe !important;
+    background: rgba(255, 255, 255, 0.07) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html body.student-dashboard-page .sidebar-link-icon i {
+    font-size: 18px !important;
+}
+
+html body.student-dashboard-page .sidebar-link-title {
+    font-size: 0.95rem !important;
+    font-weight: 800 !important;
+    color: #f8fafc !important;
+}
+
+html body.student-dashboard-page .sidebar-footer {
+    padding-top: 0.9rem !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button {
+    min-height: 58px !important;
+    padding: 0.45rem 0.95rem !important;
+    border-radius: 14px !important;
+    background: rgba(79, 70, 229, 0.28) !important;
+    border-color: rgba(199, 210, 254, 0.18) !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button span:first-child {
+    width: 44px !important;
+    height: 44px !important;
+    flex-basis: 44px !important;
+    border-radius: 12px !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button span:last-child {
+    font-size: 0.95rem !important;
+    font-weight: 800 !important;
+}
+
+html body.student-dashboard-page .dashboard-hero {
+    padding: 0.9rem 1.15rem !important;
+    border-radius: 10px !important;
+    background: var(--student-admin-card) !important;
+    border: 1px solid var(--student-admin-border) !important;
+    box-shadow: 0 2px 8px rgba(30, 58, 138, 0.08) !important;
+}
+
+html body.student-dashboard-page .dashboard-hero h1 {
+    font-size: 1.35rem !important;
+    color: var(--student-admin-heading) !important;
+    margin-bottom: 0.2rem !important;
+}
+
+html body.student-dashboard-page .dashboard-hero p {
+    font-size: 0.82rem !important;
+    color: var(--student-admin-muted) !important;
+    max-width: 720px !important;
+}
+
+html body.student-dashboard-page .stats-grid {
+    gap: 0.75rem !important;
+    margin-bottom: 0 !important;
+}
+
+html body.student-dashboard-page .stat-card {
+    min-height: 112px !important;
+    padding: 1rem !important;
+    border-radius: 10px !important;
+    background: var(--student-admin-card) !important;
+    border: 1px solid var(--student-admin-border) !important;
+    box-shadow: 0 2px 8px rgba(30, 58, 138, 0.07) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+html body.student-dashboard-page .stat-card::before {
+    content: "" !important;
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: 4px !important;
+    background: #2563eb !important;
+}
+
+html body.student-dashboard-page .stat-card:nth-child(2)::before {
+    background: #16a34a !important;
+}
+
+html body.student-dashboard-page .stat-card:nth-child(3)::before {
+    background: #f59e0b !important;
+}
+
+html body.student-dashboard-page .stat-card:nth-child(4)::before {
+    background: #1e3a8a !important;
+}
+
+html body.student-dashboard-page .stat-icon {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 9px !important;
+    margin-bottom: 0.7rem !important;
+}
+
+html body.student-dashboard-page .stat-icon i {
+    font-size: 18px !important;
+}
+
+html body.student-dashboard-page .stat-value {
+    font-size: 1.65rem !important;
+    font-weight: 900 !important;
+    color: var(--student-admin-blue) !important;
+}
+
+html body.student-dashboard-page .stat-label {
+    color: var(--student-admin-muted) !important;
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+}
+
+html body.student-dashboard-page .section {
+    padding: 1rem !important;
+    border-radius: 10px !important;
+    background: var(--student-admin-card) !important;
+    border: 1px solid var(--student-admin-border) !important;
+    box-shadow: 0 2px 8px rgba(30, 58, 138, 0.07) !important;
+}
+
+html body.student-dashboard-page .section-title {
+    font-size: 0.95rem !important;
+    color: var(--student-admin-heading) !important;
+}
+
+html body.student-dashboard-page .course-card,
+html body.student-dashboard-page .exam-card {
+    border-radius: 10px !important;
+    background: #f8fafc !important;
+    border: 1px solid var(--student-admin-border) !important;
+    box-shadow: none !important;
+}
+
+/* Exact admin sidebar proportions for the student dashboard. */
+html body.student-dashboard-page .sidebar {
+    width: 342px !important;
+    padding: 16px !important;
+    border-radius: 14px !important;
+    background: #1e3a8a !important;
+}
+
+html body.student-dashboard-page .content-column {
+    margin-left: 368px !important;
+    width: calc(100% - 368px) !important;
+}
+
+html body.student-dashboard-page .sidebar-nav {
+    gap: 0.55rem !important;
+}
+
+html body.student-dashboard-page .sidebar-link {
+    height: 64px !important;
+    min-height: 64px !important;
+    max-height: 64px !important;
+    padding: 0.7rem 0.8rem !important;
+    border-radius: 10px !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid transparent !important;
+}
+
+html body.student-dashboard-page .sidebar-link::before {
+    left: 0 !important;
+    top: 8px !important;
+    bottom: 8px !important;
+    width: 3px !important;
+}
+
+html body.student-dashboard-page .sidebar-link-main {
+    gap: 0.75rem !important;
+}
+
+html body.student-dashboard-page .sidebar-link-icon {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 8px !important;
+    color: #93c5fd !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(191, 219, 254, 0.14) !important;
+}
+
+html body.student-dashboard-page .sidebar-link-icon i {
+    font-size: 16px !important;
+}
+
+html body.student-dashboard-page .sidebar-link-title {
+    font-size: 0.95rem !important;
+    font-weight: 800 !important;
+    color: #f8fafc !important;
+}
+
+html body.student-dashboard-page .sidebar-link:hover,
+html body.student-dashboard-page .sidebar-link.active {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(96, 165, 250, 0.2) !important;
+}
+
+html body.student-dashboard-page .sidebar-link.active::before {
+    background: #bfdbfe !important;
+}
+
+html body.student-dashboard-page .sidebar-footer {
+    padding-top: 0.85rem !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button {
+    height: 60px !important;
+    min-height: 60px !important;
+    padding: 0.45rem 0.9rem !important;
+    gap: 0.75rem !important;
+    border-radius: 14px !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button span:first-child {
+    width: 44px !important;
+    height: 44px !important;
+    flex: 0 0 44px !important;
+    border-radius: 12px !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button span:last-child {
+    font-size: 0.95rem !important;
+    font-weight: 800 !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button {
+    background: #DC2626 !important;
+    border-color: #DC2626 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 10px 20px rgba(220, 38, 38, 0.18) !important;
+}
+
+html body.student-dashboard-page .sidebar-footer-button:hover {
+    background: #B91C1C !important;
+    border-color: #B91C1C !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 12px 24px rgba(185, 28, 28, 0.22) !important;
+}
+
+@media (max-width: 1024px) {
+    html body.student-dashboard-page .sidebar {
+        position: static !important;
+        width: 100% !important;
+        margin-bottom: 1rem !important;
+    }
+
+    html body.student-dashboard-page .content-column {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+}
+    </style>
+</head>
+<body class="student-dashboard-page">
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="header-brand-group">
+                <button class="shell-toggle" type="button" data-sidebar-toggle aria-label="Toggle sidebar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                        <path d="M4 7h16M4 12h16M4 17h16" />
+                    </svg>
+                </button>
+                <a href="dashboard-student.html" class="brand">
+                    <div class="brand-mark">SE</div>
+                    <div class="brand-text">
+                        <div class="brand-name">Smart Exam System</div>
+                        <div class="brand-page">Student Dashboard</div>
+                    </div>
+                </a>
+            </div>
+            <div class="header-utility">
+                <a class="header-profile-trigger" href="profile.html" aria-label="Open profile">
+                    <span class="header-profile-avatar" id="headerProfileAvatar">ST</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="app-shell">
+            <aside class="sidebar">
+                <div class="sidebar-head">
+                    <div class="sidebar-profile">
+                        <span class="sidebar-avatar" id="sidebarAvatar">ST</span>
+                        <div>
+                            <span class="sidebar-profile-name" id="sidebarName">Student</span>
+                            <span class="sidebar-profile-meta" id="sidebarEmail">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <nav class="sidebar-nav">
+                    <a href="#" class="sidebar-link active" data-nav="dashboard" onclick="openTopSection(); return false;">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon" aria-hidden="true">
+                                <i class="bi bi-grid-1x2-fill"></i>
+                            </span>
+                            <span class="sidebar-link-copy">
+                                <span class="sidebar-link-title">Dashboard</span>
+                            </span>
+                        </span>
+                    </a>
+                    <a href="#" class="sidebar-link" data-nav="courses" onclick="openCoursesSection(); return false;">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon" aria-hidden="true">
+                                <i class="bi bi-book"></i>
+                            </span>
+                            <span class="sidebar-link-copy">
+                                <span class="sidebar-link-title">My Courses</span>
+                            </span>
+                        </span>
+                    </a>
+                    <a href="#" class="sidebar-link" data-nav="exams" onclick="openUpcomingSection(); return false;">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon" aria-hidden="true">
+                                <i class="bi bi-journal-text"></i>
+                            </span>
+                            <span class="sidebar-link-copy">
+                                <span class="sidebar-link-title">Available Exams</span>
+                            </span>
+                        </span>
+                    </a>
+                    <a href="#" class="sidebar-link" data-nav="results" onclick="openCompletedSection(); return false;">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon" aria-hidden="true">
+                                <i class="bi bi-trophy"></i>
+                            </span>
+                            <span class="sidebar-link-copy">
+                                <span class="sidebar-link-title">Results</span>
+                            </span>
+                        </span>
+                    </a>
+                </nav>
+                <div class="sidebar-footer">
+                    <button class="sidebar-footer-button btn-logout" type="button" onclick="logout()">
+                        <span aria-hidden="true">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </span>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </aside>
+
+            <div class="content-column">
+                <div class="dashboard-hero">
+                    <h1>Student Dashboard</h1>
+                    <p>Only approved-course exams are visible here, along with your submitted papers and finalized results.</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card clickable" onclick="scrollToSection('availableSection')" title="Go to Available Exams">
+                        <div class="stat-icon blue" aria-hidden="true">
+                            <i class="bi bi-journal-text"></i>
+                        </div>
+                        <div class="stat-value" id="upcomingCount">0</div>
+                        <div class="stat-label">Available Exams</div>
+                    </div>
+                    <div class="stat-card clickable" onclick="scrollToSection('completedSection')" title="Go to Completed Exams">
+                        <div class="stat-icon green" aria-hidden="true">
+                            <i class="bi bi-check2-circle"></i>
+                        </div>
+                        <div class="stat-value" id="completedCount">0</div>
+                        <div class="stat-label">Completed Exams</div>
+                    </div>
+                    <div class="stat-card clickable" onclick="scrollToSection('completedSection')" title="Go to Performance and Completed Exams">
+                        <div class="stat-icon orange" aria-hidden="true">
+                            <i class="bi bi-bar-chart-line"></i>
+                        </div>
+                        <div class="stat-value" id="averageScore">0%</div>
+                        <div class="stat-label">Average Score</div>
+                    </div>
+                    <div class="stat-card clickable" onclick="scrollToSection('completedSection')" title="Go to Performance and Completed Exams">
+                        <div class="stat-icon purple" aria-hidden="true">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div class="stat-value" id="currentGrade">-</div>
+                        <div class="stat-label">Current Grade</div>
+                    </div>
+                </div>
+
+                <div class="section" id="coursesSection">
+                    <div class="section-header">
+                        <h2 class="section-title">My Courses</h2>
+                    </div>
+                    <div id="myCourses" class="course-grid">
+                        <div class="loading">Loading enrolled courses...</div>
+                    </div>
+                </div>
+
+                <div class="section" id="availableSection">
+                    <div class="section-header">
+                        <h2 class="section-title">Available Exams</h2>
+                    </div>
+                    <div id="upcomingExams" class="exam-grid">
+                        <div class="loading">Loading exams...</div>
+                    </div>
+                </div>
+
+                <div class="section" id="completedSection">
+                    <div class="section-header">
+                        <h2 class="section-title">Completed Exams</h2>
+                    </div>
+                    <div id="recentResults">
+                        <div class="loading">Loading completed exams...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/supabase.min.js"></script>
+    <script src="js/app-config.js?v=20260314-admin-student-fix"></script>
+    <script src="js/error-handler.js"></script>
+    <script src="js/session-manager.js?v=20260314-admin-student-fix"></script>
+    <script src="js/user-profile.js?v=20260314-admin-student-fix"></script>
+    <script src="js/app-shell.js?v=20260314-admin-student-fix"></script>
+    <script src="js/mobile-nav.js?v=20260314-admin-student-fix"></script>
+    <script>
+        const { SUPABASE_URL, SUPABASE_ANON_KEY, getBackendBase } = window.AppConfig
+        const AI_BACKEND_URL = getBackendBase()
+        const DASHBOARD_STUDENT_VERSION = '2026-02-18-v5'
+
+        if (window.AppShell) {
+            window.AppShell.init()
+        }
+        
+        const { createClient } = supabase
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        let refreshTimer = null
+        let realtimeRefreshTimer = null
+        let realtimeChannel = null
+        let dashboardBroadcast = null
+        let lastInteractionAt = Date.now()
+        let isAutoRefreshing = false
+
+        async function fetchBackendJson(path, options = {}, timeoutMs = 9000) {
+            const controller = new AbortController()
+            const timer = setTimeout(() => controller.abort(), timeoutMs)
+            try {
+                const headers = await window.AppConfig.buildAuthHeaders(supabaseClient, options.headers)
+                const response = await fetch(`${AI_BACKEND_URL}${path}`, {
+                    ...options,
+                    headers,
+                    signal: controller.signal
+                })
+                const text = await response.text()
+                let data = null
+                try {
+                    data = text ? JSON.parse(text) : null
+                } catch (_) {
+                    data = null
+                }
+                if (!response.ok) {
+                    return {
+                        ok: false,
+                        data,
+                        error: (data && (data.error || data.message)) || `HTTP ${response.status}`
+                    }
+                }
+                return { ok: true, data, error: null }
+            } catch (error) {
+                return { ok: false, data: null, error: error?.message || 'Network error' }
+            } finally {
+                clearTimeout(timer)
+            }
+        }
+
+        function normalizeExamStatus(status) {
+            const s = (status || '').toString().trim().toLowerCase()
+            if (s === 'active') return 'published'
+            if (s === 'closed' || s === 'completed' || s === 'inactive') return 'archived'
+            return s || 'draft'
+        }
+
+        function getExamId(exam) {
+            return String(exam?.exam_id || exam?.id || '').trim()
+        }
+
+        function normalizeText(value) {
+            return (value || '')
+                .toString()
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, ' ')
+        }
+
+        function toCleanText(value, fallback = 'N/A') {
+            const text = (value || '').toString().replace(/\s+/g, ' ').trim()
+            return text || fallback
+        }
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;')
+        }
+
+        function cleanExamTitle(value) {
+            const text = (value || '').toString().replace(/\s+/g, ' ').trim()
+            if (!text) return 'Untitled Exam'
+            if (text.length < 2) return 'Untitled Exam'
+            if (/^[^a-zA-Z0-9]+$/.test(text)) return 'Untitled Exam'
+            return text
+        }
+
+        function statusRank(status) {
+            const s = normalizeExamStatus(status)
+            if (s === 'published') return 3
+            if (s === 'archived') return 2
+            if (s === 'draft') return 1
+            return 0
+        }
+
+        function examTimestamp(exam) {
+            const t = exam?.updated_at || exam?.created_at || exam?.scheduled_at
+            const ms = t ? new Date(t).getTime() : 0
+            return Number.isFinite(ms) ? ms : 0
+        }
+
+        function examSignature(exam) {
+            const title = normalizeText(exam?.exam_title || exam?.title)
+            const duration = String(exam?.duration_minutes || exam?.duration || '')
+            const totalMarks = String(exam?.total_marks || '')
+            const teacher = normalizeText(exam?.teacher_id || exam?.created_by || exam?.user_id)
+            return [teacher, title, duration, totalMarks].join('|')
+        }
+
+        function pickPreferredExam(a, b) {
+            const rankA = statusRank(a?.status)
+            const rankB = statusRank(b?.status)
+            if (rankA !== rankB) return rankA > rankB ? a : b
+            return examTimestamp(a) >= examTimestamp(b) ? a : b
+        }
+
+        function dedupeStudentExams(exams) {
+            const normalized = (exams || []).map((exam) => {
+                const copy = { ...exam }
+                copy.status = normalizeExamStatus(copy.status)
+                if (!copy.exam_id && copy.id) copy.exam_id = copy.id
+                return copy
+            })
+
+            const byId = new Map()
+            const withoutId = []
+            normalized.forEach((exam) => {
+                const id = getExamId(exam)
+                if (!id) {
+                    withoutId.push(exam)
+                    return
+                }
+                if (!byId.has(id)) byId.set(id, exam)
+                else byId.set(id, pickPreferredExam(byId.get(id), exam))
+            })
+
+            const bySig = new Map()
+            ;[...byId.values(), ...withoutId].forEach((exam) => {
+                const sig = examSignature(exam)
+                if (!sig || sig === '||||') {
+                    bySig.set(`fallback_${Math.random().toString(36).slice(2)}`, exam)
+                    return
+                }
+                if (!bySig.has(sig)) bySig.set(sig, exam)
+                else bySig.set(sig, pickPreferredExam(bySig.get(sig), exam))
+            })
+
+            return Array.from(bySig.values()).sort((a, b) => examTimestamp(b) - examTimestamp(a))
+        }
+
+        function markUserInteraction() {
+            lastInteractionAt = Date.now()
+            if (window.SessionManager) {
+                window.SessionManager.touch()
+            }
+        }
+
+        function scheduleRealtimeRefresh(userId) {
+            if (!userId) return
+            if (realtimeRefreshTimer) {
+                clearTimeout(realtimeRefreshTimer)
+            }
+            realtimeRefreshTimer = setTimeout(async () => {
+                await Promise.allSettled([
+                    loadUpcomingExams(userId),
+                    loadRecentResults(userId),
+                    loadStatistics(userId)
+                ])
+            }, 900)
+        }
+
+        function setupLiveRefresh(userId) {
+            if (!userId || !supabaseClient) return
+
+            if ('BroadcastChannel' in window) {
+                try {
+                    dashboardBroadcast = new BroadcastChannel('student_dashboard_updates')
+                    dashboardBroadcast.onmessage = (event) => {
+                        if (event?.data?.type === 'ATTEMPT_UPDATED' || event?.data?.type === 'GRADES_UPDATED') {
+                            scheduleRealtimeRefresh(userId)
+                        }
+                    }
+                } catch (_) {}
+            }
+
+            try {
+                realtimeChannel = supabaseClient.channel(`student-live-${userId}`)
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'exam_attempts', filter: `student_id=eq.${userId}` }, () => {
+                        scheduleRealtimeRefresh(userId)
+                    })
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'exams' }, () => {
+                        scheduleRealtimeRefresh(userId)
+                    })
+                    .subscribe()
+            } catch (e) {
+                console.log('Realtime subscription setup skipped:', e.message)
+            }
+        }
+
+        async function maybeAutoRefresh(userId) {
+            if (!userId) return
+            if (document.hidden) return
+            if (isAutoRefreshing) return
+            if (Date.now() - lastInteractionAt < 8000) return
+            try {
+                isAutoRefreshing = true
+                await Promise.allSettled([
+                    loadUpcomingExams(userId),
+                    loadRecentResults(userId),
+                    loadStatistics(userId)
+                ])
+            } finally {
+                isAutoRefreshing = false
+            }
+        }
+
+        // Check authentication
+        window.addEventListener('DOMContentLoaded', async function() {
+            // First try localStorage (fast path)
+            const isLoggedIn = localStorage.getItem('isLoggedIn')
+            const userRole   = localStorage.getItem('userRole')
+
+            if (isLoggedIn && userRole === 'student') {
+                // Already have session in localStorage — proceed
+                if (window.SessionManager && !window.SessionManager.init({ loginUrl: 'login.html' })) return
+                initDashboard()
+            } else {
+                // localStorage cleared (e.g. refresh) — check Supabase session
+                try {
+                    const { data: { session } } = await supabaseClient.auth.getSession()
+                    if (!session) {
+                        window.location.href = 'login.html'
+                        return
+                    }
+                    // Restore session from Supabase
+                    const { data: { user } } = await supabaseClient.auth.getUser()
+                    if (!user) { window.location.href = 'login.html'; return }
+
+                    // Load profile from DB
+                    const { data: profile } = await supabaseClient
+                        .from('users')
+                        .select('*')
+                        .eq('email', user.email)
+                        .limit(1)
+                        .maybeSingle()
+
+                    if (!profile || profile.role !== 'student') {
+                        window.location.href = 'login.html'
+                        return
+                    }
+
+                    // Restore localStorage so rest of dashboard works
+                    localStorage.setItem('isLoggedIn', 'true')
+                    localStorage.setItem('userRole',   profile.role)
+                    localStorage.setItem('userEmail',  profile.email)
+                    localStorage.setItem('userId',     profile.id || profile.user_id || user.id)
+                    localStorage.setItem('userName',   profile.full_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email)
+                    localStorage.setItem('userFirstName', profile.first_name || '')
+                    localStorage.setItem('userLastName',  profile.last_name  || '')
+                    if (profile.student_id) localStorage.setItem('studentId', profile.student_id)
+
+                    if (window.SessionManager && !window.SessionManager.init({ loginUrl: 'login.html' })) return
+                    initDashboard()
+                } catch (err) {
+                    console.error('Session restore failed:', err)
+                    window.location.href = 'login.html'
+                    return
+                }
+            }
+
+            const currentUserId = localStorage.getItem('userId')
+            setupLiveRefresh(currentUserId)
+            ;['click', 'keydown', 'input', 'focusin', 'scroll'].forEach(evt => {
+                window.addEventListener(evt, markUserInteraction, { passive: true })
+            })
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'student_dashboard_refresh') {
+                    const userId = localStorage.getItem('userId')
+                    scheduleRealtimeRefresh(userId)
+                }
+            })
+            refreshTimer = setInterval(() => {
+                const userId = localStorage.getItem('userId')
+                maybeAutoRefresh(userId)
+            }, 30000)
+            window.addEventListener('beforeunload', () => {
+                if (refreshTimer) clearInterval(refreshTimer)
+                if (realtimeRefreshTimer) clearTimeout(realtimeRefreshTimer)
+                if (dashboardBroadcast) {
+                    try { dashboardBroadcast.close() } catch (_) {}
+                }
+                if (realtimeChannel) {
+                    try { supabaseClient.removeChannel(realtimeChannel) } catch (_) {}
+                }
+            })
+        })
+
+        async function initDashboard() {
+            console.log('Student Dashboard version:', DASHBOARD_STUDENT_VERSION)
+            
+            // Show only dashboard, hide content sections
+            window.hideAllSections?.()
+            
+            const profile = window.UserProfile ? window.UserProfile.getStoredProfile() : null
+            const firstName = profile?.first_name || localStorage.getItem('userFirstName')
+            const userName = profile?.displayName || localStorage.getItem('userName')
+            const userId = localStorage.getItem('userId')
+            // Prevent stale exam cards from old local cache after DB cleanup.
+            localStorage.removeItem('exams')
+
+            const welcomeMessageEl = document.getElementById('welcomeMessage')
+            if (welcomeMessageEl) {
+                welcomeMessageEl.textContent = `Welcome back, ${firstName || 'Student'}!`
+            }
+
+            const headerAvatarEl = document.getElementById('headerProfileAvatar')
+            if (headerAvatarEl) {
+                const initials = profile?.initials || (userName || firstName || 'Student').split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]?.toUpperCase() || '').join('') || 'ST'
+                if (window.UserProfile && window.UserProfile.renderAvatar) {
+                    window.UserProfile.renderAvatar(headerAvatarEl, {
+                        name: userName || firstName || 'Student',
+                        initials,
+                        photoUrl: profile?.profile_photo_url || ''
+                    })
+                } else {
+                    headerAvatarEl.textContent = initials
+                }
+            }
+
+            const sidebarAvatarEl = document.getElementById('sidebarAvatar')
+            const sidebarNameEl = document.getElementById('sidebarName')
+            const sidebarEmailEl = document.getElementById('sidebarEmail')
+            if (sidebarAvatarEl || sidebarNameEl) {
+                const initials = profile?.initials || (userName || firstName || 'Student').split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]?.toUpperCase() || '').join('') || 'ST'
+                if (sidebarAvatarEl) sidebarAvatarEl.textContent = initials
+                if (sidebarNameEl) sidebarNameEl.textContent = userName || firstName || 'Student'
+                if (sidebarEmailEl) sidebarEmailEl.textContent = profile?.email || localStorage.getItem('userEmail') || 'user@example.com'
+            }
+
+            try {
+                await Promise.all([
+                    loadEnrolledCourses(userId),
+                    loadUpcomingExams(userId),
+                    loadRecentResults(userId),
+                    loadStatistics(userId)
+                ])
+            } catch (error) {
+                console.error('Dashboard error:', error)
+            }
+        }
+
+        async function loadEnrolledCourses(userId) {
+            const result = await fetchBackendJson('/student/courses', { method: 'GET', cache: 'no-store' })
+            
+            if (!result.ok) {
+                showEmptyState('myCourses', result.error || 'Failed to load enrolled courses')
+                return []
+            }
+            
+            const courseList = Array.isArray(result.data?.courses) ? result.data.courses : []
+            const courses = courseList.map(item => ({
+                id: item.id || item.course_id || item.course_code,
+                course_id: item.course_id || item.id || item.course_code,
+                course_code: item.course_code || '',
+                course_name: item.course_name || item.course_code || 'Course',
+                semester: item.semester || '',
+                academic_year: item.academic_year || '',
+                enrollment_role: item.enrollment_role
+            }))
+            
+            if (courses.length === 0) {
+                showEmptyState('myCourses', 'No approved courses assigned yet. Contact the administrator.')
+                return []
+            }
+            
+            displayEnrolledCourses(courses)
+            return courses
+        }
+
+        async function loadUpcomingExams(userId) {
+            try {
+                // Load attempt history so attempted exams show proper status/actions.
+                const attemptMap = await getAttemptedExamMap(userId)
+
+                const apiData = await fetchExamsFromBackend()
+                const uniqueExams = dedupeStudentExams(apiData?.exams || [])
+
+                // Show all accessible published exams; submitted ones keep a disabled action.
+                const visibleExams = uniqueExams.filter(exam => {
+                    const st = (exam.status || '').toLowerCase()
+                    return st === 'published' || st === 'active'
+                })
+
+                if (visibleExams.length === 0) {
+                    showEmptyState('upcomingExams', 'No exams available');
+                } else {
+                    displayUpcomingExams(visibleExams, attemptMap);
+                }
+            } catch (error) {
+                console.error('Error in loadUpcomingExams:', error);
+                showEmptyState('upcomingExams', 'Error loading exams');
+            }
+        }
+
+        async function getAttemptedExamMap(userId) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('exam_attempts')
+                    .select('attempt_id, exam_id, status, submitted_at, started_at')
+                    .eq('student_id', userId)
+                    .in('status', ['in_progress', 'submitted', 'pending_grading', 'graded', 'completed'])
+
+                if (error || !data) {
+                    return new Map()
+                }
+
+                const map = new Map()
+                const sorted = [...data].sort((a, b) => {
+                    const da = new Date(a.submitted_at || a.started_at || 0).getTime()
+                    const db = new Date(b.submitted_at || b.started_at || 0).getTime()
+                    return db - da
+                })
+
+                sorted.forEach(item => {
+                    const examId = item.exam_id ? String(item.exam_id) : null
+                    if (!examId || map.has(examId)) return
+                    map.set(examId, item)
+                })
+
+                return map
+            } catch (e) {
+                console.log('Attempt history load skipped:', e.message)
+                return new Map()
+            }
+        }
+
+        async function fetchExamsFromBackend() {
+            let lastError = null
+            try {
+                const apiResponse = await fetchBackendJson('/exams?status=published,active', {
+                    method: 'GET',
+                    cache: 'no-store'
+                })
+                if (apiResponse.ok) {
+                    return apiResponse.data
+                }
+                lastError = new Error(apiResponse.error || 'Backend API request failed')
+            } catch (error) {
+                lastError = error
+            }
+            if (lastError) {
+                throw lastError
+            }
+            return null
+        }
+
+        function displayEnrolledCourses(courses) {
+            const container = document.getElementById('myCourses')
+            if (!Array.isArray(courses) || courses.length === 0) {
+                showEmptyState('myCourses', 'No approved courses assigned yet. Contact the administrator.')
+                return
+            }
+            container.innerHTML = courses.map((course) => {
+                const code = toCleanText(course.course_code, 'Course')
+                const name = toCleanText(course.course_name, 'Untitled Course')
+                const semester = toCleanText(course.semester, '')
+                const year = toCleanText(course.academic_year, '')
+                const meta = [semester && `Semester ${semester}`, year].filter(Boolean).join(' | ') || 'Approved course access'
+                return `
+                    <div class="course-card" data-course-id="${escapeHtml(String(course.id || course.course_id || '').trim())}" data-course-name="${escapeHtml(name)}">
+                        <div class="course-code">${escapeHtml(code)}</div>
+                        <div class="course-name">${escapeHtml(name)}</div>
+                        <div class="course-meta">${escapeHtml(meta)}</div>
+                    </div>
+                `
+            }).join('')
+        }
+
+        function displayUpcomingExams(exams, attemptMap = new Map()) {
+            const container = document.getElementById('upcomingExams')
+            
+            if (!exams || exams.length === 0) {
+                showEmptyState('upcomingExams', 'No approved exams are available for your courses yet.')
+                return
+            }
+
+            document.getElementById('upcomingCount').textContent = exams.length
+            const sidebarAvailableEl = document.getElementById('sidebarAvailableCount')
+            if (sidebarAvailableEl) sidebarAvailableEl.textContent = String(exams.length)
+
+            container.innerHTML = exams.map(exam => {
+                // Handle cases where courses might not be loaded
+                const examId = String(exam.exam_id || exam.id || '')
+                const latestAttempt = attemptMap.get(examId)
+                const attemptStatus = (latestAttempt?.status || '').toLowerCase()
+                const isAttempted = !!latestAttempt
+                const canResume = isAttempted && attemptStatus === 'in_progress'
+                const canStart = !isAttempted
+                const examTitle = cleanExamTitle(exam.exam_title || exam.title)
+                const courseLabel = toCleanText(exam.course_name || exam.course_code || exam.subject, 'Assigned Course')
+                const duration = Number(exam.duration_minutes || exam.duration || 0)
+                const marks = Number(exam.total_marks || 0)
+                const opensLabel = formatDateTime(exam.exam_start_time || exam.scheduled_at, 'Not scheduled')
+                const stateLabel = canResume ? 'In Progress' : canStart ? 'Open for Attempt' : 'Submitted'
+                
+                return `
+                <div class="exam-card" data-exam-id="${escapeHtml(examId)}" data-exam-title="${escapeHtml(examTitle)}" data-course-name="${escapeHtml(courseLabel)}">
+                    <div class="exam-header">
+                        <div>
+                            <div class="exam-title">${escapeHtml(examTitle)}</div>
+                            <div class="course-meta" style="margin-top: 0.3rem;">${escapeHtml(courseLabel)}</div>
+                        </div>
+                        <span class="exam-badge ${canStart || canResume ? 'badge-active' : 'badge-completed'}">${escapeHtml(stateLabel)}</span>
+                    </div>
+                    <div class="exam-details">
+                        <div class="exam-detail">
+                            <span class="detail-key">Duration:</span>
+                            <span>${duration || '-'} minutes</span>
+                        </div>
+                        <div class="exam-detail">
+                            <span class="detail-key">Marks:</span>
+                            <span>${marks || '-'} marks</span>
+                        </div>
+                        <div class="exam-detail">
+                            <span class="detail-key">Opens:</span>
+                            <span>${escapeHtml(opensLabel)}</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        ${canResume
+                            ? `<a href="take-exam.html?id=${encodeURIComponent(examId)}&v=${encodeURIComponent(DASHBOARD_STUDENT_VERSION)}" class="btn-primary">Resume Exam</a>`
+                            : canStart
+                            ? `<a href="take-exam.html?id=${encodeURIComponent(examId)}&v=${encodeURIComponent(DASHBOARD_STUDENT_VERSION)}" class="btn-primary">Start Exam</a>`
+                            : `<button class="btn-secondary" disabled title="Already submitted (${attemptStatus || 'submitted'})">Submitted</button>`
+                        }
+                    </div>
+                </div>
+            `}).join('')
+        }
+
+        async function loadRecentResults(userId) {
+            const backendResult = await fetchBackendJson('/submissions?status=submitted,pending_grading,graded,completed')
+
+            if (backendResult.ok && backendResult.data?.success && Array.isArray(backendResult.data.submissions)) {
+                const attempts = backendResult.data.submissions.map((attempt) => ({
+                    ...attempt,
+                    started_at: attempt.started_at || attempt.submitted_at,
+                    exams: {
+                        exam_title: attempt.exam_title || 'Exam',
+                        total_marks: attempt.total_marks || 0
+                    }
+                }))
+                displayRecentResults(dedupeStudentAttempts(attempts))
+                return
+            }
+
+            const { data: attempts, error } = await supabaseClient
+                .from('exam_attempts')
+                .select('attempt_id, exam_id, status, score, percentage, submitted_at, started_at, exams(exam_title, total_marks)')
+                .eq('student_id', userId)
+                .in('status', ['submitted', 'pending_grading', 'graded', 'completed'])
+                .order('submitted_at', { ascending: false })
+                .limit(50)
+
+            if (error) {
+                console.error('Error loading results:', error)
+                showEmptyState('recentResults', 'No completed exams yet')
+                return
+            }
+
+            displayRecentResults(dedupeStudentAttempts(attempts))
+        }
+
+        function attemptStatusRank(status) {
+            const s = String(status || '').toLowerCase()
+            if (s === 'completed' || s === 'graded') return 4
+            if (s === 'submitted' || s === 'pending_grading') return 3
+            if (s === 'in_progress') return 2
+            return 1
+        }
+
+        function attemptTimestamp(attempt) {
+            const t = attempt?.submitted_at || attempt?.started_at || attempt?.updated_at || attempt?.created_at
+            const ms = t ? new Date(t).getTime() : 0
+            return Number.isFinite(ms) ? ms : 0
+        }
+
+        function choosePreferredAttempt(a, b) {
+            const rankA = attemptStatusRank(a?.status)
+            const rankB = attemptStatusRank(b?.status)
+            if (rankA !== rankB) return rankA > rankB ? a : b
+            return attemptTimestamp(a) >= attemptTimestamp(b) ? a : b
+        }
+
+        function dedupeStudentAttempts(attempts) {
+            // Show ALL attempts (full history) — sorted newest first
+            const seen = new Map()
+            ;(attempts || []).forEach((attempt) => {
+                const id = String(attempt?.attempt_id || '').trim()
+                if (id && !seen.has(id)) seen.set(id, attempt)
+            })
+            return Array.from(seen.values()).sort((a, b) => attemptTimestamp(b) - attemptTimestamp(a))
+        }
+
+        function displayRecentResults(attempts) {
+            const container = document.getElementById('recentResults')
+            
+            if (!attempts || attempts.length === 0) {
+                document.getElementById('completedCount').textContent = '0'
+                const sidebarCompletedEl = document.getElementById('sidebarCompletedCount')
+                if (sidebarCompletedEl) sidebarCompletedEl.textContent = '0'
+                showEmptyState('recentResults', 'No completed exams yet')
+                return
+            }
+
+            const uniqueCompletedExams = new Set(
+                attempts.map(a => String(a.exam_id || '')).filter(Boolean)
+            )
+            document.getElementById('completedCount').textContent = uniqueCompletedExams.size
+            const sidebarCompletedEl = document.getElementById('sidebarCompletedCount')
+            if (sidebarCompletedEl) sidebarCompletedEl.textContent = String(uniqueCompletedExams.size)
+
+            container.innerHTML = `
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Exam</th>
+                            <th>Date</th>
+                            <th>Score</th>
+                            <th>Percentage</th>
+                            <th>Grade</th>
+                            <th>Status</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${attempts.map(attempt => {
+                            const st = String(attempt.status || '').toLowerCase()
+                            const isPending = st === 'pending_grading' || st === 'submitted'
+                            const isGraded  = st === 'graded' || st === 'completed'
+                            const statusBadge = isPending
+                                ? `<span class="result-status-badge status-pending">Awaiting Review</span>`
+                                : isGraded
+                                ? `<span class="result-status-badge status-graded">Graded</span>`
+                                : `<span class="result-status-badge status-neutral">${formatAttemptStatus(attempt.status)}</span>`
+                            return `
+                            <tr>
+                                <td>${cleanExamTitle(attempt.exams?.exam_title)}</td>
+                                <td>${formatDate(attempt.submitted_at || attempt.started_at)}</td>
+                                <td>${Number(attempt.score || 0).toFixed(1)}/${Number(attempt.exams?.total_marks || 0)}</td>
+                                <td>
+                                    <span class="score-badge ${getScoreClass(attempt.percentage || 0)}">
+                                        ${Number(attempt.percentage || 0).toFixed(1)}%
+                                    </span>
+                                </td>
+                                <td><strong>${getLetterGrade(Number(attempt.percentage || 0))}</strong></td>
+                                <td>${statusBadge}</td>
+                                <td><a class="btn-secondary" href="exam-results.html?attempt=${encodeURIComponent(attempt.attempt_id)}">View Details</a></td>
+                            </tr>`
+                        }).join('')}
+                    </tbody>
+                </table>
+            `
+        }
+
+        async function loadStatistics(userId) {
+            const { data: analytics, error } = await supabaseClient
+                .from('student_analytics')
+                .select('*')
+                .eq('student_id', userId)
+                .maybeSingle()
+
+            if (error || !analytics) {
+                // Fallback stats from attempt history when analytics table is unavailable.
+                try {
+                    const { data: attempts } = await supabaseClient
+                        .from('exam_attempts')
+                        .select('score, percentage, status')
+                        .eq('student_id', userId)
+                        .in('status', ['graded', 'completed', 'pending_grading'])
+                        .limit(200)
+
+                    const gradedAttempts = (attempts || []).filter(a =>
+                        a && (a.percentage !== null && a.percentage !== undefined)
+                    )
+                    if (gradedAttempts.length > 0) {
+                        const avg = gradedAttempts.reduce((sum, a) => sum + Number(a.percentage || 0), 0) / gradedAttempts.length
+                        document.getElementById('averageScore').textContent = `${avg.toFixed(1)}%`
+                        const grade = getLetterGrade(avg)
+                        document.getElementById('currentGrade').textContent = grade
+                        const sidebarGradeEl = document.getElementById('sidebarGrade')
+                        if (sidebarGradeEl) sidebarGradeEl.textContent = grade
+                    } else {
+                        document.getElementById('averageScore').textContent = '0%'
+                        document.getElementById('currentGrade').textContent = '-'
+                        const sidebarGradeEl = document.getElementById('sidebarGrade')
+                        if (sidebarGradeEl) sidebarGradeEl.textContent = '-'
+                    }
+                } catch (fallbackErr) {
+                    console.log('No analytics data yet')
+                    document.getElementById('currentGrade').textContent = '-'
+                    const sidebarGradeEl = document.getElementById('sidebarGrade')
+                    if (sidebarGradeEl) sidebarGradeEl.textContent = '-'
+                }
+                return
+            }
+
+            document.getElementById('averageScore').textContent = 
+                analytics.average_score ? analytics.average_score.toFixed(1) + '%' : '0%'
+            const currentGrade =
+                analytics.current_grade || analytics.grade || getLetterGrade(Number(analytics.average_score || 0))
+            document.getElementById('currentGrade').textContent = currentGrade
+            const sidebarGradeEl = document.getElementById('sidebarGrade')
+            if (sidebarGradeEl) sidebarGradeEl.textContent = currentGrade
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Not submitted'
+            const date = new Date(dateString)
+            if (Number.isNaN(date.getTime())) return 'Not submitted'
+            const options = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }
+            return date.toLocaleDateString('en-US', options)
+        }
+
+        function formatDateTime(dateString, fallback = 'Not scheduled') {
+            if (!dateString) return fallback
+            const date = new Date(dateString)
+            if (Number.isNaN(date.getTime())) return fallback
+            return date.toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            })
+        }
+
+        function getScoreClass(percentage) {
+            const value = Number(percentage || 0)
+            if (value >= 80) return 'score-excellent'
+            if (value >= 60) return 'score-good'
+            return 'score-average'
+        }
+
+        function getLetterGrade(percentage) {
+            const p = Number(percentage || 0)
+            if (p >= 90) return 'A+'
+            if (p >= 85) return 'A'
+            if (p >= 80) return 'A-'
+            if (p >= 75) return 'B+'
+            if (p >= 70) return 'B'
+            if (p >= 65) return 'B-'
+            if (p >= 60) return 'C+'
+            if (p >= 55) return 'C'
+            if (p >= 50) return 'D'
+            return 'F'
+        }
+
+        function formatAttemptStatus(status) {
+            const s = String(status || '').toLowerCase()
+            if (s === 'submitted') return 'Pending Review'
+            if (s === 'pending_grading') return 'Pending Review'
+            if (s === 'completed') return 'Graded'
+            if (!s) return 'Unknown'
+            return s.replace(/_/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase())
+        }
+
+        function showEmptyState(containerId, message) {
+            const container = document.getElementById(containerId)
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">Info</div>
+                    <p>${toCleanText(message, 'No records available')}</p>
+                </div>
+            `
+        }
+
+        function clearAuthSession() {
+            const keys = [
+                'isLoggedIn',
+                'userRole',
+                'userEmail',
+                'userId',
+                'userName',
+                'userFirstName',
+                'userLastName',
+                'studentId',
+                'teacherId',
+                'authLoginAt',
+                'authLastActivityAt',
+                'authLogoutAt'
+            ]
+            keys.forEach(key => localStorage.removeItem(key))
+        }
+
+        function logout() {
+            if (window.SessionManager) {
+                window.SessionManager.logout('manual')
+                return
+            }
+            clearAuthSession()
+            window.location.href = 'login.html'
+        }
+    </script>
+    <script src="js/ui-feedback.js?v=20260314-admin-student-fix"></script>
+    <script src="js/chatbot.js"></script>
+</body>
+</html>

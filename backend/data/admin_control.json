@@ -1,0 +1,17 @@
+{
+  "active_admin": {
+    "email": "alihydershar688@gmail.com",
+    "admin_id": "A2024001"
+  },
+  "authorized_admins": [
+    {
+      "email": "audit.admin-1773510931020@smart-exam.test",
+      "admin_id": "A0931020"
+    },
+    {
+      "email": "alihydershar688@gmail.com",
+      "admin_id": "A2024001"
+    }
+  ],
+  "transfer_log": []
+}

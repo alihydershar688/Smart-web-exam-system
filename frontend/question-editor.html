@@ -1,0 +1,1556 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%234f46e5'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='28' fill='white' font-family='Arial' font-weight='bold'%3ESE%3C/text%3E%3C/svg%3E">
+    <title>Question Editor | Smart Exam System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="js/app-config.js"></script>
+    <script src="js/session-manager.js"></script>
+    <script src="js/mobile-nav.js"></script>
+    <script src="js/user-profile.js"></script>
+    <script src="js/teacher-shell.js?v=20260314-print-auth-fix"></script>
+    <script src="js/app-shell.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --ink: #1E3A8A;
+            --muted: #6B7280;
+            --brand: #1E3A8A;
+            --brand-strong: #1e40af;
+            --accent: #38bdf8;
+            --surface: #FFFFFF;
+            --surface-alt: #F0F4FF;
+            --border: #BFDBFE;
+            --shadow: 0 2px 8px rgba(30,58,138,0.08);
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            min-height: 100vh;
+            padding: 0;
+            color: #1E3A8A;
+            background-attachment: fixed;
+        }
+
+        .navbar {
+            background: rgba(248, 250, 255, 0.92);
+            backdrop-filter: blur(10px);
+            padding: 16px 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(140deg, #1E3A8A, #3B82F6);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-name {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+        }
+
+        .brand-page {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .navbar-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #1E3A8A;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e40af;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(30, 58, 138, 0.3);
+        }
+
+        .btn-secondary {
+            background: #F8FAFF;
+            color: #1F2937;
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: #F8FAFF;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #3B82F6, #1e40af);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #1e40af, #1d4ed8);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .editor-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .question-list {
+            background: #FFFFFF;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid #DBEAFE;
+            max-height: 600px;
+            overflow-y: auto;
+            
+        }
+
+        .question-item {
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #F8FAFF;
+        }
+
+        .question-item:hover {
+            border-color: #3B82F6;
+            background: #F8FAFF;
+        }
+
+        .question-item.active {
+            border-color: #1E3A8A;
+            background: #EFF6FF;
+            box-shadow: 0 0 0 2px rgba(30,58,138,0.15);
+        }
+
+        .question-item-title {
+            font-weight: 600;
+            color: #1E3A8A;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .question-item-meta {
+            display: flex;
+            gap: 10px;
+            font-size: 12px;
+            color: #6B7280;
+        }
+
+        .badge {
+            background: #F8FAFF;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            color: #374151;
+        }
+
+        .editor-panel {
+            background: #FFFFFF;
+            border-radius: 14px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            border: 1px solid #DBEAFE;
+            backdrop-filter: blur(8px);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #1E3A8A;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input:not([type="radio"]):not([type="checkbox"]),
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-family: 'Manrope', sans-serif;
+            font-size: 14px;
+            transition: border 0.3s ease;
+            background: #F8FAFF;
+            color: #1E3A8A;
+        }
+
+        .form-group input[type="radio"],
+        .form-group input[type="checkbox"] {
+            width: auto;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #67e8f9;
+            outline: none;
+        }
+
+        .form-group input[type="radio"]:focus,
+        .form-group input[type="checkbox"]:focus,
+        .form-group input[type="radio"]:focus-visible,
+        .form-group input[type="checkbox"]:focus-visible {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .form-group input:not([type="radio"]):not([type="checkbox"]):focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #67e8f9;
+            box-shadow: 0 0 0 3px rgba(103, 232, 249, 0.18);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-size: 13px;
+        }
+
+        .option-group {
+            background: #F0F4FF;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .option-label {
+            font-weight: 600;
+            color: #99f6e4;
+            font-size: 13px;
+        }
+
+        .option-remove {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .option-input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .option-correct {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .option-correct input {
+            width: auto;
+            cursor: pointer;
+        }
+
+        .inline-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .editor-footer {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+            border-top: 2px solid var(--border);
+            padding-top: 15px;
+            justify-content: space-between;
+        }
+
+        .preview-panel {
+            background: #FFFFFF;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid #DBEAFE;
+            max-height: 600px;
+            overflow-y: auto;
+            backdrop-filter: blur(8px);
+        }
+
+        .preview-title {
+            font-weight: 700;
+            color: #1E3A8A;
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+
+        .preview-question {
+            background: #F0F4FF;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .preview-question-text {
+            font-weight: 600;
+            color: #1E3A8A;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .preview-option {
+            background: #FFFFFF;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: #1F2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .preview-option.correct {
+            background: rgba(16, 185, 129, 0.2);
+            border-left: 3px solid #34d399;
+        }
+
+        .preview-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #6B7280;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+        }
+
+        .stats-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #F0F4FF;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #DBEAFE;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(8px);
+        }
+
+        .stat-box {
+            background: #FFFFFF;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .navbar-actions .btn {
+            min-width: 140px;
+        }
+        .navbar-actions .btn-secondary {
+            background: #7c8596;
+            color: #1E3A8A;
+            border: 1px solid #8f98aa;
+        }
+        .navbar-actions .btn-secondary:hover {
+            background: #6b7280;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #67e8f9;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6B7280;
+            margin-top: 4px;
+        }
+
+        .workflow-actions-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 16px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: #FFFFFF;
+            border: 1px solid #DBEAFE;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(8px);
+        }
+
+        .workflow-actions-copy {
+            display: grid;
+            gap: 4px;
+        }
+
+        .workflow-actions-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1E3A8A;
+        }
+
+        .workflow-actions-meta {
+            font-size: 12px;
+            color: #6B7280;
+        }
+
+        .workflow-actions-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-outline {
+            background: #F8FAFF;
+            color: #1F2937;
+            border: 1px solid #DBEAFE;
+        }
+
+        .btn-outline:hover {
+            background: #F8FAFF;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.24);
+        }
+
+        .add-option-btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #0f766e, #14b8a6);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .add-option-btn:hover {
+            background: linear-gradient(135deg, #115e59, #0f766e);
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 8px;
+        }
+
+        .difficulty-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border);
+            background: #F8FAFF;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .difficulty-btn.easy { color: #6ee7b7; }
+        .difficulty-btn.medium { color: #fcd34d; }
+        .difficulty-btn.hard { color: #fca5a5; }
+
+        .difficulty-btn.easy.active { background: rgba(16, 185, 129, 0.18); border-color: #34d399; }
+        .difficulty-btn.medium.active { background: rgba(245, 158, 11, 0.18); border-color: #fbbf24; }
+        .difficulty-btn.hard.active { background: rgba(248, 113, 113, 0.18); border-color: #f87171; }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6B7280;
+        }
+
+        .empty-state-icon {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .editor-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .question-list {
+                max-height: 400px;
+            }
+
+            .preview-panel {
+                max-height: 400px;
+            }
+            .navbar-actions {
+                width: 100%;
+                justify-content: flex-end;
+                flex-wrap: wrap;
+            }
+
+            .workflow-actions-card {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .workflow-actions-buttons {
+                justify-content: stretch;
+            }
+
+            .workflow-actions-buttons .btn {
+                width: 100%;
+            }
+        }
+
+    
+        /* Workflow spacing cleanup */
+        .workspace-content .container {
+            padding-top: 0 !important;
+        }
+
+        .stats-panel {
+            margin-top: 0 !important;
+            margin-bottom: 16px !important;
+        }
+
+        .editor-wrapper {
+            margin-top: 0 !important;
+        }
+</style>
+    <link rel="stylesheet" href="css/ui-system.css?v=1776845676">
+    <link rel="stylesheet" href="css/product-theme.css?v=1776845676">
+    <link rel="stylesheet" href="css/workspace-shell.css?v=1776845676">
+</head>
+<body class="workspace-theme sidebar-simple">
+    <script>
+        (function() {
+            const params = new URLSearchParams(window.location.search || '');
+            const isEmbedded = params.get('embed') === '1' || window.top !== window;
+            if (isEmbedded) {
+                window.__TEACHER_SHELL_EMBEDDED__ = true;
+                document.body.classList.add('embedded-shell');
+                document.body.dataset.shellMinHeight = '0';
+            }
+            
+            // Check if this is a redirect after exam creation - if so, allow it
+            const hasGeneratedQuestions = localStorage.getItem('generatedQuestions');
+            const hasExamCreationData = localStorage.getItem('examCreationData');
+            
+            // Only redirect to login if not coming from exam creation and not logged in
+            if (!hasGeneratedQuestions && !hasExamCreationData) {
+                const isLoggedIn = localStorage.getItem('isLoggedIn');
+                const userRole = localStorage.getItem('userRole');
+                if (!isLoggedIn || userRole !== 'teacher') {
+                    window.location.href = 'login.html';
+                }
+            }
+        })();
+    </script>
+    <nav class="workspace-topbar">
+        <div class="workspace-topbar-content">
+            <div class="header-brand-group">
+                <button class="shell-toggle" type="button" data-sidebar-toggle aria-label="Toggle sidebar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                        <path d="M4 7h16M4 12h16M4 17h16" />
+                    </svg>
+                </button>
+                <a href="dashboard-teacher.html" class="workspace-logo">
+                    <span class="workspace-brand-mark">SE</span>
+                    <span class="workspace-brand-copy">
+                        <span class="workspace-brand-name">Smart Exam System</span>
+                        <span class="workspace-brand-page">Question Editor</span>
+                    </span>
+                </a>
+            </div>
+            <div class="header-utility workspace-topbar-actions">
+                <a class="workspace-profile-trigger" href="profile.html" aria-label="Open profile">
+                    <span class="workspace-profile-avatar" id="workspaceHeaderAvatar">QE</span>
+                </a>
+                <button class="btn btn-secondary" onclick="backToExamCreation()">Back</button>
+                <button class="btn btn-secondary" onclick="previewPaper()">Preview</button>
+                <button class="btn btn-outline" onclick="printPaperFromEditor()">Print Paper</button>
+                <button class="btn btn-primary" onclick="publishExamFromEditor()">Publish Exam</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="workspace-shell">
+        <aside class="workspace-sidebar">
+            <div class="workspace-sidebar-head">
+                <div class="workspace-sidebar-title">Teacher Workflow</div>
+                <div class="workspace-sidebar-profile">
+                    <div class="workspace-sidebar-avatar" id="workspaceSidebarAvatar">QE</div>
+                    <div class="workspace-sidebar-profile-copy">
+                        <span class="workspace-sidebar-profile-name" id="workspaceSidebarName">Question Editor</span>
+                        <span class="workspace-sidebar-profile-meta" id="workspaceSidebarMeta">teacher@example.com</span>
+                    </div>
+                </div>
+            </div>
+            <nav class="workspace-sidebar-nav" aria-label="Question Editor Navigation">
+                <a href="dashboard-teacher.html" class="workspace-sidebar-link">
+                    <span class="workspace-sidebar-link-main">
+                        <span class="workspace-sidebar-link-icon">DB</span>
+                        <span class="workspace-sidebar-link-copy">
+                            <span class="workspace-sidebar-link-title">Dashboard</span>
+                            <span class="workspace-sidebar-link-desc">Overview and teaching metrics</span>
+                        </span>
+                    </span>
+                    <span>Home</span>
+                </a>
+                <a href="create-exam.html" class="workspace-sidebar-link">
+                    <span class="workspace-sidebar-link-main">
+                        <span class="workspace-sidebar-link-icon">CE</span>
+                        <span class="workspace-sidebar-link-copy">
+                            <span class="workspace-sidebar-link-title">Create Exam</span>
+                            <span class="workspace-sidebar-link-desc">Return to exam setup and files</span>
+                        </span>
+                    </span>
+                    <span>Setup</span>
+                </a>
+                <a href="question-editor.html" class="workspace-sidebar-link active">
+                    <span class="workspace-sidebar-link-main">
+                        <span class="workspace-sidebar-link-icon">QE</span>
+                        <span class="workspace-sidebar-link-copy">
+                            <span class="workspace-sidebar-link-title">Question Editor</span>
+                            <span class="workspace-sidebar-link-desc">Refine wording, options, and marks</span>
+                        </span>
+                    </span>
+                    <span>Edit</span>
+                </a>
+                <a href="exam-preview.html" class="workspace-sidebar-link">
+                    <span class="workspace-sidebar-link-main">
+                        <span class="workspace-sidebar-link-icon">PV</span>
+                        <span class="workspace-sidebar-link-copy">
+                            <span class="workspace-sidebar-link-title">Preview & Publish</span>
+                            <span class="workspace-sidebar-link-desc">Check paper layout and release it</span>
+                        </span>
+                    </span>
+                    <span>Next</span>
+                </a>
+                <a href="question-bank.html" class="workspace-sidebar-link">
+                    <span class="workspace-sidebar-link-main">
+                        <span class="workspace-sidebar-link-icon">QB</span>
+                        <span class="workspace-sidebar-link-copy">
+                            <span class="workspace-sidebar-link-title">Question Bank</span>
+                            <span class="workspace-sidebar-link-desc">Open reusable saved questions</span>
+                        </span>
+                    </span>
+                    <span>Bank</span>
+                </a>
+                <a href="analytics.html" class="workspace-sidebar-link">
+                    <span class="workspace-sidebar-link-main">
+                        <span class="workspace-sidebar-link-icon">AN</span>
+                        <span class="workspace-sidebar-link-copy">
+                            <span class="workspace-sidebar-link-title">Analytics</span>
+                            <span class="workspace-sidebar-link-desc">Performance and grading insights</span>
+                        </span>
+                    </span>
+                    <span>Live</span>
+                </a>
+            </nav>
+            <div class="workspace-sidebar-footer">
+                <a class="workspace-sidebar-footer-link" href="profile.html">
+                    <span>PF</span>
+                    <span>Profile</span>
+                </a>
+                <button class="workspace-sidebar-footer-button" type="button" onclick="logout()">
+                    <span>LO</span>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="workspace-content">
+    <div class="container">
+        <!-- Stats Panel -->
+        <div class="stats-panel">
+            <div class="stat-box">
+                <div class="stat-value" id="totalQuestions">0</div>
+                <div class="stat-label">Total Questions</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="totalMarks">0</div>
+                <div class="stat-label">Total Marks</div>
+            </div>
+        </div>
+
+        <div class="workflow-actions-card">
+            <div class="workflow-actions-copy">
+                <div class="workflow-actions-title">Finalize This Paper</div>
+                <div class="workflow-actions-meta">Preview, print, or publish the edited exam to the student dashboard.</div>
+            </div>
+            <div class="workflow-actions-buttons">
+                <button class="btn btn-secondary" type="button" onclick="previewPaper()">Preview</button>
+                <button class="btn btn-outline" type="button" onclick="printPaperFromEditor()">Print Paper</button>
+                <button class="btn btn-primary" type="button" onclick="publishExamFromEditor()">Publish Exam</button>
+            </div>
+        </div>
+
+        <!-- Main Editor -->
+        <div class="editor-wrapper">
+            <!-- Question List -->
+            <div class="question-list" id="questionList">
+                <div class="empty-state">
+                    <p>No questions loaded yet</p>
+                </div>
+            </div>
+
+            <!-- Editor Panel -->
+            <div style="grid-column: 2;">
+                <!-- Preview Panel -->
+                <div class="preview-panel">
+                    <div class="preview-title">Live Preview</div>
+                    <div id="previewContent" class="empty-state">
+                        <p>Select a question to preview</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Editor Form -->
+            <div class="editor-panel">
+                <div id="editorContent">
+                    <div class="empty-state">
+                        <p>Select a question from the list to edit</p>
+                    </div>
+                </div>
+        </div>
+    </div>
+        </main>
+    </div>
+
+    <script>
+        // State management
+        let questions = [];
+        let currentQuestionIndex = -1;
+        const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.AppConfig;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Scroll to top when page loads (fresh view)
+            window.scrollTo(0, 0);
+            
+            if (!window.__TEACHER_SHELL_EMBEDDED__ && window.SessionManager) {
+                const ok = window.SessionManager.init({ loginUrl: 'login.html', requireAuth: true });
+                if (!ok) return;
+            }
+            if (window.AppShell) window.AppShell.init();
+            initEditorShell();
+            loadQuestionsFromSession();
+        });
+
+        function initEditorShell() {
+            const profile = window.UserProfile ? window.UserProfile.getStoredProfile() : null;
+            const displayName = profile?.displayName || 'Teacher';
+            const initials = profile?.initials || 'QE';
+            const sidebarMeta = window.UserProfile
+                ? window.UserProfile.getProfileMeta(profile, 'Teacher')
+                : (profile?.email || 'Teacher');
+            document.getElementById('workspaceSidebarName').textContent = displayName;
+            document.getElementById('workspaceSidebarMeta').textContent = sidebarMeta;
+            document.getElementById('workspaceSidebarAvatar').textContent = initials;
+            document.getElementById('workspaceHeaderAvatar').textContent = initials;
+        }
+
+        function loadQuestionsFromSession() {
+            const sessionQuestions = localStorage.getItem('generatedQuestions');
+            if (sessionQuestions) {
+                questions = JSON.parse(sessionQuestions);
+                sanitizeQuestionsForStudentFlow();
+                renderQuestionList();
+                updateStats();
+            }
+        }
+
+        function sanitizeQuestionsForStudentFlow() {
+            questions = questions.map((q) => {
+                const type = (q.question_type || '').toString().trim().toLowerCase();
+                const isDescriptive = type === 'short answer' || type === 'long answer' || type === 'code';
+                if (!isDescriptive) return q;
+                return { ...q, model_answer: '' };
+            });
+        }
+
+        function renderQuestionList() {
+            const listDiv = document.getElementById('questionList');
+            
+            if (questions.length === 0) {
+                listDiv.innerHTML = `
+                    <div class="empty-state">
+                        <p>No questions available</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listDiv.innerHTML = questions.map((q, idx) => `
+                <div class="question-item ${currentQuestionIndex === idx ? 'active' : ''}" 
+                     onclick="selectQuestion(${idx})" style="position:relative;">
+                    <div class="question-item-title">Q${idx + 1}: ${q.question.substring(0, 40)}...</div>
+                    <div class="question-item-meta" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;">
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                            <span class="badge">${q.question_type}</span>
+                            <span class="badge difficulty-${q.difficulty}">${q.difficulty}</span>
+                            <span class="badge">${q.marks || 1} marks</span>
+                        </div>
+                        <button onclick="event.stopPropagation();deleteQuestion(${idx})" 
+                          style="background:rgba(239,68,68,0.12);color:#fca5a5;border:1px solid rgba(239,68,68,0.25);padding:6px 12px;border-radius:8px;font-size:0.8rem;font-weight:700;cursor:pointer;">
+                          Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectQuestion(index) {
+            currentQuestionIndex = index;
+            renderQuestionList();
+            renderEditor();
+            renderPreview();
+        }
+
+        function renderEditor() {
+            const editorDiv = document.getElementById('editorContent');
+            if (currentQuestionIndex === -1) return;
+
+            const q = questions[currentQuestionIndex];
+            let optionsHTML = '';
+
+            if (q.question_type === 'MCQ' || q.question_type === 'Multiple Choice') {
+                optionsHTML = (q.options || []).map((opt, idx) => `
+                    <div class="option-group">
+                        <div class="option-header">
+                            <span class="option-label">Option ${String.fromCharCode(65 + idx)}</span>
+                            <button class="option-remove" onclick="removeOption(${idx})">Remove</button>
+                        </div>
+                        <input type="text" class="option-input" value="${opt.text || ''}" 
+                               onchange="updateOption(${idx}, this.value)">
+                        <label class="option-correct">
+                            <input type="radio" name="correctOption" ${opt.is_correct ? 'checked' : ''} 
+                                   onchange="setCorrectOption(${idx})">
+                            <span>Mark as correct answer</span>
+                        </label>
+                    </div>
+                `).join('');
+            }
+
+            editorDiv.innerHTML = `
+                <div class="form-group">
+                    <label>Question Type</label>
+                    <select onchange="changeQuestionType(this.value)">
+                        <option value="MCQ" ${q.question_type === 'MCQ' || q.question_type === 'Multiple Choice' ? 'selected' : ''}>Multiple Choice (MCQ)</option>
+                        <option value="Short Answer" ${q.question_type === 'Short Answer' ? 'selected' : ''}>Short Answer</option>
+                        <option value="Long Answer" ${q.question_type === 'Long Answer' ? 'selected' : ''}>Long Answer</option>
+                        <option value="True/False" ${q.question_type === 'True/False' ? 'selected' : ''}>True/False</option>
+                        <option value="Code" ${q.question_type === 'Code' ? 'selected' : ''}>Code Question</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Question Text</label>
+                    <textarea onchange="updateQuestion('question', this.value)">${q.question}</textarea>
+                </div>
+
+                ${optionsHTML ? `<div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 10px;">Options</label>
+                    ${optionsHTML}
+                    <button class="add-option-btn" onclick="addOption()">+ Add Option</button>
+                </div>` : ''}
+
+                <div class="inline-controls">
+                    <div class="form-group">
+                        <label>Difficulty Level</label>
+                        <div class="difficulty-selector">
+                            <button class="difficulty-btn easy ${q.difficulty === 'easy' ? 'active' : ''}" 
+                                    onclick="changeDifficulty('easy')">Easy</button>
+                            <button class="difficulty-btn medium ${q.difficulty === 'medium' ? 'active' : ''}" 
+                                    onclick="changeDifficulty('medium')">Medium</button>
+                            <button class="difficulty-btn hard ${q.difficulty === 'hard' ? 'active' : ''}" 
+                                    onclick="changeDifficulty('hard')">Hard</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Marks</label>
+                        <input type="number" value="${q.marks || 1}" min="1" max="10" 
+                               onchange="updateQuestion('marks', parseInt(this.value))">
+                    </div>
+                </div>
+
+                ${q.question_type === 'Short Answer' || q.question_type === 'Long Answer' || q.question_type === 'Code' ? `
+                    <div class="form-group">
+                        <label>Reference Answer (Optional)</label>
+                        <textarea placeholder="Leave empty if student should write the answer" onchange="updateQuestion('model_answer', this.value)">${q.model_answer || ''}</textarea>
+                    </div>
+                ` : ''}
+
+                <div class="editor-footer">
+                    <button class="btn btn-danger" onclick="deleteQuestion()">Delete Question</button>
+                    <button class="btn btn-success" onclick="saveQuestion()">Save Changes</button>
+                </div>
+            `;
+        }
+
+        function renderPreview() {
+            const previewDiv = document.getElementById('previewContent');
+            if (currentQuestionIndex === -1) return;
+
+            const q = questions[currentQuestionIndex];
+            let previewHTML = `<div class="preview-question">
+                <div class="preview-question-text">Q${currentQuestionIndex + 1}: ${q.question}</div>`;
+
+            if (q.question_type === 'MCQ' || q.question_type === 'Multiple Choice') {
+                (q.options || []).forEach((opt, idx) => {
+                    previewHTML += `
+                        <div class="preview-option">
+                            <span>${String.fromCharCode(65 + idx)})</span>
+                            <span>${opt.text}</span>
+                        </div>
+                    `;
+                });
+            } else if (q.question_type === 'Short Answer' || q.question_type === 'Long Answer' || q.question_type === 'Code') {
+                previewHTML += `
+                    <div class="preview-option" style="min-height: 56px; align-items: flex-start;">
+                        <span style="color: rgba(203, 213, 225, 0.78);">Student answer area (kept empty)</span>
+                    </div>
+                `;
+            }
+
+            previewHTML += `<div class="preview-meta">
+                <span>Type: ${q.question_type}</span>
+                <span>Difficulty: <strong>${q.difficulty}</strong></span>
+                <span>Marks: <strong>${q.marks || 1}</strong></span>
+            </div></div>`;
+
+            previewDiv.innerHTML = previewHTML;
+        }
+
+        function updateQuestion(field, value) {
+            if (currentQuestionIndex !== -1) {
+                questions[currentQuestionIndex][field] = value;
+            }
+        }
+
+        function changeDifficulty(level) {
+            if (currentQuestionIndex !== -1) {
+                questions[currentQuestionIndex].difficulty = level;
+                renderEditor();
+                renderPreview();
+            }
+        }
+
+        function updateOption(idx, text) {
+            if (currentQuestionIndex !== -1) {
+                if (!questions[currentQuestionIndex].options) {
+                    questions[currentQuestionIndex].options = [];
+                }
+                questions[currentQuestionIndex].options[idx].text = text;
+            }
+        }
+
+        function setCorrectOption(idx) {
+            if (currentQuestionIndex !== -1) {
+                (questions[currentQuestionIndex].options || []).forEach((opt, i) => {
+                    opt.is_correct = i === idx;
+                });
+                renderEditor();
+                renderPreview();
+            }
+        }
+
+        function removeOption(idx) {
+            if (currentQuestionIndex !== -1) {
+                questions[currentQuestionIndex].options.splice(idx, 1);
+                renderEditor();
+                renderPreview();
+            }
+        }
+
+        function addOption() {
+            if (currentQuestionIndex !== -1) {
+                if (!questions[currentQuestionIndex].options) {
+                    questions[currentQuestionIndex].options = [];
+                }
+                questions[currentQuestionIndex].options.push({ text: '', is_correct: false });
+                renderEditor();
+                renderPreview();
+            }
+        }
+
+        function changeQuestionType(type) {
+            if (currentQuestionIndex !== -1) {
+                questions[currentQuestionIndex].question_type = type;
+                if (type === 'MCQ' && !questions[currentQuestionIndex].options) {
+                    questions[currentQuestionIndex].options = [
+                        { text: '', is_correct: true },
+                        { text: '', is_correct: false },
+                        { text: '', is_correct: false },
+                        { text: '', is_correct: false }
+                    ];
+                }
+                renderEditor();
+                renderPreview();
+            }
+        }
+
+        function deleteQuestion(index) {
+            if (index === undefined) index = currentQuestionIndex;
+            if (!confirm('Delete this question? This cannot be undone.')) return;
+            questions.splice(index, 1);
+            if (currentQuestionIndex >= questions.length) {
+                currentQuestionIndex = questions.length - 1;
+            }
+            renderQuestionList();
+            if (currentQuestionIndex >= 0) {
+                renderEditor();
+                renderPreview();
+            } else {
+                document.getElementById('editorContent').innerHTML = `
+                    <div class="empty-state">
+                        <p>Select a question to edit</p>
+                    </div>
+                `;
+            }
+            updateStats();
+            if (typeof saveToLocalStorage === 'function') saveToLocalStorage();
+            if (typeof showToast === 'function') showToast('Question deleted', 'success');
+        }
+
+        function saveQuestion() {
+            updateStats();
+            // Show toast instead of alert
+            if (typeof showToast === 'function') {
+                showToast('Question saved successfully', 'success');
+            } else {
+                const toast = document.createElement('div');
+                toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#059669;color:#fff;padding:12px 20px;border-radius:10px;font-weight:700;font-size:0.9rem;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.2);animation:fadeIn 0.3s ease;';
+                toast.textContent = '✔ Question saved successfully';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 2500);
+            }
+        }
+
+        function updateStats() {
+            const total = questions.length;
+            const marks = questions.reduce((sum, q) => sum + (q.marks || 1), 0);
+            document.getElementById('totalQuestions').textContent = total;
+            document.getElementById('totalMarks').textContent = marks;
+            const shellQuestions = document.getElementById('workspaceQuestionCount');
+            const shellMarks = document.getElementById('workspaceMarksCount');
+            if (shellQuestions) shellQuestions.textContent = total;
+            if (shellMarks) shellMarks.textContent = marks;
+        }
+
+        function getEditorExamData() {
+            const raw = localStorage.getItem('examCreationData');
+            if (!raw) return {};
+            try {
+                const parsed = JSON.parse(raw);
+                return parsed && typeof parsed === 'object' ? parsed : {};
+            } catch (_) {
+                return {};
+            }
+        }
+
+        function persistEditorState() {
+            const totalMarks = questions.reduce((sum, q) => sum + (q.marks || 1), 0);
+            const existingExamData = getEditorExamData();
+            const mergedExamData = {
+                ...existingExamData,
+                totalMarks,
+                total_marks: totalMarks,
+                questionCount: questions.length,
+                totalQuestions: questions.length
+            };
+
+            localStorage.setItem('editedQuestions', JSON.stringify(questions));
+            sessionStorage.setItem('generatedQuestions', JSON.stringify(questions));
+            sessionStorage.setItem('examCreationData', JSON.stringify(mergedExamData));
+            return mergedExamData;
+        }
+
+        function buildPreviewUrl(options = {}) {
+            const examData = persistEditorState();
+            const params = new URLSearchParams();
+            const examId = String(examData.examId || examData.exam_id || '').trim();
+
+            if (examId) params.set('id', examId);
+            if (options.print) params.set('print', '1');
+            if (options.publish) params.set('publish', '1');
+
+            const query = params.toString();
+            return query ? `exam-preview.html?${query}` : 'exam-preview.html';
+        }
+
+        function navigateTeacherWorkspace(target, options = {}) {
+            if (window.TeacherShellNav && typeof window.TeacherShellNav.navigate === 'function') {
+                return window.TeacherShellNav.navigate(target, options);
+            }
+            if (options.replace) {
+                window.location.replace(target);
+                return target;
+            }
+            window.location.href = target;
+            return target;
+        }
+
+        function escapePrintHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function buildPrintableMarkup() {
+            const examData = persistEditorState();
+            const examTitle = escapePrintHtml(examData.title || examData.exam_title || 'Untitled Exam');
+            const examDuration = escapePrintHtml(examData.duration || examData.duration_minutes || 90);
+            const examSubject = escapePrintHtml(examData.subject || examData.courseName || examData.course_name || examData.courseCode || examData.course_code || 'Not specified');
+            const totalMarks = questions.reduce((sum, q) => sum + (q.marks || 1), 0);
+            const normalizePrintType = (value) =>
+                String(value || '')
+                    .trim()
+                    .toLowerCase()
+                    .replace(/[\/\s-]+/g, '_');
+
+            const getAnswerLineCount = (question) => {
+                const normalizedType = normalizePrintType(question.question_type || question.type || '');
+                const marks = Number(question.marks || 1);
+                if (normalizedType === 'short_answer' || normalizedType === 'shortanswer') {
+                    return Math.max(3, Math.min(5, Math.round(marks) + 1));
+                }
+                return Math.max(8, Math.min(12, Math.round(marks * 2) + 2));
+            };
+
+            const renderAnswerLines = (lineCount) => `
+                <div class="print-answer-lines">
+                    ${Array.from({ length: lineCount }).map(() => '<div class="print-answer-line"></div>').join('')}
+                </div>
+            `;
+
+            const groups = {
+                A: questions.filter((q) => ['mcq', 'multiple_choice', 'true_false', 'truefalse'].includes(normalizePrintType(q.question_type || q.type || ''))),
+                B: questions.filter((q) => ['short_answer', 'shortanswer'].includes(normalizePrintType(q.question_type || q.type || ''))),
+                C: questions.filter((q) => !['mcq', 'multiple_choice', 'true_false', 'truefalse', 'short_answer', 'shortanswer'].includes(normalizePrintType(q.question_type || q.type || '')))
+            };
+
+            const sectionConfigs = [
+                {
+                    key: 'A',
+                    title: 'Multiple Choice Questions',
+                    subtitle: '(Attempt all questions)',
+                    note: 'Objective questions. Marks are indicated with each question.',
+                    questions: groups.A,
+                    perPage: 8
+                },
+                {
+                    key: 'B',
+                    title: 'Short Answer Questions',
+                    subtitle: '(Answer in 2–3 sentences)',
+                    note: 'Write concise answers in the provided space.',
+                    questions: groups.B,
+                    perPage: 5
+                },
+                {
+                    key: 'C',
+                    title: 'Long Answer Questions',
+                    subtitle: '(Explain with examples)',
+                    note: 'Write detailed academic answers in the provided space.',
+                    questions: groups.C,
+                    perPage: 3
+                }
+            ].filter((section) => section.questions.length > 0);
+
+            let questionNumber = 1;
+            const pages = [];
+            sectionConfigs.forEach((section, sectionIndex) => {
+                for (let i = 0; i < section.questions.length; i += section.perPage) {
+                    const chunk = section.questions.slice(i, i + section.perPage);
+                    const questionsMarkup = chunk.map((q) => {
+                        const type = normalizePrintType(q.question_type || q.type || '');
+                        const questionText = escapePrintHtml(q.question || q.question_text || '');
+                        const marks = Number(q.marks || 1);
+                        let body = '';
+
+                        if ((type === 'mcq' || type === 'multiple_choice') && Array.isArray(q.options) && q.options.length) {
+                            body = `
+                                <div class="print-options">
+                                    ${q.options.map((opt, optIndex) => `
+                                        <div class="print-option">
+                                            <span class="print-option-label">${String.fromCharCode(65 + optIndex)})</span>
+                                            <span>${escapePrintHtml((opt && typeof opt === 'object') ? (opt.text || opt.value || '') : opt)}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `;
+                        } else if (type === 'true_false' || type === 'truefalse') {
+                            body = `
+                                <div class="print-options">
+                                    <div class="print-option"><span class="print-option-label">A)</span><span>True</span></div>
+                                    <div class="print-option"><span class="print-option-label">B)</span><span>False</span></div>
+                                </div>
+                            `;
+                        } else {
+                            body = `
+                                <div class="print-answer-label">Answer:</div>
+                                ${renderAnswerLines(getAnswerLineCount(q))}
+                            `;
+                        }
+
+                        const markup = `
+                            <section class="print-question">
+                                <div class="print-question-head">
+                                    <span class="print-question-number">Q${questionNumber}</span>
+                                    <span class="print-question-marks">${marks} Mark${marks === 1 ? '' : 's'}</span>
+                                </div>
+                                <div class="print-question-text">${questionText}</div>
+                                ${body}
+                            </section>
+                        `;
+                        questionNumber += 1;
+                        return markup;
+                    }).join('');
+
+                    pages.push({
+                        includeInstructions: sectionIndex === 0 && i === 0,
+                        sectionTitle: `Section ${section.key}: ${section.title}${i > 0 ? ' (Continued)' : ''}`,
+                        sectionSubtitle: section.subtitle,
+                        sectionNote: section.note,
+                        questionsMarkup
+                    });
+                }
+            });
+
+            const totalPages = Math.max(pages.length, 1);
+            const pagesHtml = pages.map((page, pageIndex) => `
+                <section class="print-page">
+                    <header class="print-header">
+                        <div class="print-system">SMART EXAM SYSTEM</div>
+                        <div class="print-session">End Semester Examination (ESE)</div>
+                        <div class="print-meta">
+                            <span><strong>Subject:</strong> ${examSubject}</span>
+                            <span><strong>Duration:</strong> ${examDuration} minutes</span>
+                            <span><strong>Total Marks:</strong> ${totalMarks}</span>
+                        </div>
+                    </header>
+                    ${page.includeInstructions ? `
+                        <section class="print-instructions">
+                            <div class="print-instructions-title">Instructions:</div>
+                            <ul>
+                                <li>Read all questions carefully.</li>
+                                <li>Attempt all questions.</li>
+                                <li>Write answers clearly.</li>
+                                <li>Use examples where required.</li>
+                            </ul>
+                        </section>
+                    ` : ''}
+                    <section class="print-section">
+                        <div class="print-section-title">${page.sectionTitle}</div>
+                        <div class="print-section-subtitle">${page.sectionSubtitle}</div>
+                        <div class="print-section-note">${page.sectionNote}</div>
+                        ${page.questionsMarkup}
+                    </section>
+                    <div class="print-page-spacer"></div>
+                    <footer class="print-footer">Page ${pageIndex + 1} of ${totalPages}</footer>
+                </section>
+            `).join('');
+
+            return `
+                <!DOCTYPE html>
+                <html lang="en">
+                <he` + `ad>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>${examTitle} - Print</title>
+                    <style>
+                        * { box-sizing: border-box; }
+                        body {
+                            margin: 0;
+                            padding: 24px;
+                            font-family: 'Times New Roman', Georgia, serif;
+                            color: #111827;
+                            background: #ffffff;
+                        }
+                        .print-page {
+                            min-height: 1120px;
+                            border: 1px solid #d9e2ec;
+                            padding: 32px 36px 40px;
+                            display: flex;
+                            flex-direction: column;
+                            page-break-after: always;
+                        }
+                        .print-page:last-child {
+                            page-break-after: auto;
+                        }
+                        .print-header {
+                            border-bottom: 2px solid #111827;
+                            padding-bottom: 18px;
+                            margin-bottom: 18px;
+                        }
+                        .print-system {
+                            text-align: center;
+                            font-family: Arial, sans-serif;
+                            font-size: 13px;
+                            font-weight: 800;
+                            letter-spacing: 0.18em;
+                            text-transform: uppercase;
+                            margin-bottom: 8px;
+                        }
+                        .print-session {
+                            text-align: center;
+                            font-size: 28px;
+                            font-weight: 700;
+                            margin-bottom: 14px;
+                        }
+                        .print-meta {
+                            display: flex;
+                            justify-content: space-between;
+                            gap: 18px;
+                            flex-wrap: wrap;
+                            font-size: 16px;
+                            line-height: 1.6;
+                        }
+                        .print-instructions {
+                            border: 1px solid #d9e2ec;
+                            padding: 14px 16px;
+                            margin-bottom: 18px;
+                        }
+                        .print-instructions-title {
+                            font-family: Arial, sans-serif;
+                            font-size: 15px;
+                            font-weight: 800;
+                            text-transform: uppercase;
+                            margin-bottom: 8px;
+                        }
+                        .print-instructions ul {
+                            margin: 0 0 0 20px;
+                            padding: 0;
+                            display: grid;
+                            gap: 4px;
+                            font-size: 15px;
+                            line-height: 1.6;
+                        }
+                        .print-section-title {
+                            font-family: Arial, sans-serif;
+                            font-size: 16px;
+                            font-weight: 800;
+                            margin-bottom: 4px;
+                        }
+                        .print-section-subtitle,
+                        .print-section-note {
+                            font-size: 15px;
+                            line-height: 1.5;
+                            margin-bottom: 4px;
+                        }
+                        .print-question {
+                            padding: 14px 0 18px;
+                            border-bottom: 1px solid #e2e8f0;
+                            page-break-inside: avoid;
+                        }
+                        .print-question-head {
+                            display: flex;
+                            justify-content: space-between;
+                            gap: 12px;
+                            margin-bottom: 8px;
+                            font-size: 13px;
+                            font-weight: 700;
+                            color: #1e293b;
+                        }
+                        .print-question-text {
+                            font-size: 16px;
+                            line-height: 1.65;
+                            margin-bottom: 12px;
+                        }
+                        .print-options {
+                            display: grid;
+                            gap: 6px;
+                        }
+                        .print-option {
+                            display: flex;
+                            gap: 8px;
+                            font-size: 15px;
+                            line-height: 1.55;
+                        }
+                        .print-option-label {
+                            font-weight: 700;
+                            min-width: 28px;
+                        }
+                        .print-answer-label {
+                            font-family: Arial, sans-serif;
+                            font-size: 14px;
+                            font-weight: 700;
+                            margin: 12px 0 8px;
+                        }
+                        .print-answer-lines {
+                            display: grid;
+                            gap: 10px;
+                        }
+                        .print-answer-line {
+                            min-height: 16px;
+                            border-bottom: 1px solid #94a3b8;
+                        }
+                        .print-page-spacer {
+                            flex: 1;
+                        }
+                        .print-footer {
+                            margin-top: 18px;
+                            padding-top: 10px;
+                            border-top: 1px solid #cbd5e1;
+                            text-align: center;
+                            font-family: Arial, sans-serif;
+                            font-size: 13px;
+                            color: #475569;
+                        }
+                        @media print {
+                            body { padding: 0; }
+                            .print-page { border: none; }
+                        }
+                    </style>
+                </he` + `ad>
+                <body>
+                    ${pagesHtml}
+                    <scr` + `ipt src="js/chatbot.js"></scr` + `ipt>
+</body>
+                </html>
+            `;
+        }
+
+        function previewPaper() {
+            if (!questions.length) {
+                alert('No questions available to preview yet.');
+                return;
+            }
+            navigateTeacherWorkspace(buildPreviewUrl());
+        }
+
+        function printPaperFromEditor() {
+            if (!questions.length) {
+                alert('No questions available to print yet.');
+                return;
+            }
+            const printWindow = window.open('', '_blank', 'width=1080,height=820');
+            if (!printWindow) {
+                alert('Please allow pop-ups for printing.');
+                return;
+            }
+            printWindow.document.open();
+            printWindow.document.write(buildPrintableMarkup());
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.onload = () => {
+                printWindow.print();
+            };
+        }
+
+        function publishExamFromEditor() {
+            if (!questions.length) {
+                alert('No questions available to publish yet.');
+                return;
+            }
+            if (!confirm('Publish this exam to the student dashboard?')) {
+                return;
+            }
+            navigateTeacherWorkspace(buildPreviewUrl({ publish: true }));
+        }
+
+        function saveAndContinue() {
+            previewPaper();
+        }
+
+        function backToExamCreation() {
+            if (confirm('Go back without saving changes?')) {
+                navigateTeacherWorkspace('create-exam.html');
+            }
+        }
+    </script>
+    <script src="js/ui-feedback.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

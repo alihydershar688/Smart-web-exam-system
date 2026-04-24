@@ -1,0 +1,478 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard | Smart Exam System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/ui-system.css?v=2">
+    <link rel="stylesheet" href="css/product-theme.css?v=2">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=2">
+    <link rel="stylesheet" href="css/teacher-shell.css?v=20260423-shellfix">
+    <style>
+/* â”€â”€ Teacher Shell â€” Green Theme Override â”€â”€ */
+html body.teacher-shell-page {
+    background-color: #F0F4FF !important;
+    background-image: none !important;
+}
+html body.teacher-shell-page .navbar {
+    background-color: #1E3A8A !important;
+    border-bottom: 1px solid rgba(59,130,246,0.25) !important;
+    backdrop-filter: none !important;
+}
+html body.teacher-shell-page .brand-mark {
+    background: linear-gradient(140deg, #1E3A8A, #3B82F6) !important;
+}
+html body.teacher-shell-page .logo { color: #FFFFFF !important; }
+html body.teacher-shell-page .brand-name { color: rgba(219,234,254,0.78) !important; }
+html body.teacher-shell-page .brand-page { color: #FFFFFF !important; }
+html body.teacher-shell-page .sidebar {
+    background: #1E3A8A !important;
+    border: none !important;
+    box-shadow: 2px 0 8px rgba(30,58,138,0.2) !important;
+}
+html body.teacher-shell-page .sidebar-link {
+    color: rgba(219,234,254,0.9) !important;
+    background: rgba(255,255,255,0.02) !important;
+    border-color: transparent !important;
+}
+html body.teacher-shell-page .sidebar-link:hover {
+    background: rgba(255,255,255,0.12) !important;
+    border-color: rgba(255,255,255,0.15) !important;
+    color: #FFFFFF !important;
+}
+html body.teacher-shell-page .sidebar-link.active {
+    background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.1)) !important;
+    border-color: rgba(255,255,255,0.2) !important;
+    color: #FFFFFF !important;
+}
+html body.teacher-shell-page .sidebar-link-icon { color: rgba(219,234,254,0.88) !important; }
+html body.teacher-shell-page .sidebar-link:hover .sidebar-link-icon,
+html body.teacher-shell-page .sidebar-link.active .sidebar-link-icon { color: #FFFFFF !important; }
+html body.teacher-shell-page .sidebar-link-title { color: inherit !important; }
+html body.teacher-shell-page .sidebar-footer { border-top-color: rgba(59,130,246,0.2) !important; }
+html body.teacher-shell-page .sidebar-footer-button {
+    background: #DC2626 !important;
+    border-color: #DC2626 !important;
+    color: #FFFFFF !important;
+}
+html body.teacher-shell-page .sidebar-footer-button:hover {
+    background: #B91C1C !important;
+    color: #FFFFFF !important;
+}
+html body.teacher-shell-page .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15) !important; }
+    </style>
+</head>
+<body class="teacher-shell-page">
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="header-brand-group">
+                <button class="shell-toggle" type="button" data-sidebar-toggle aria-label="Toggle sidebar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                        <path d="M4 7h16M4 12h16M4 17h16" />
+                    </svg>
+                </button>
+                <div class="brand">
+                    <span class="brand-mark">SE</span>
+                    <a href="profile.html" class="logo">Smart Exam System</a>
+                </div>
+            </div>
+            <div class="header-utility">
+                <a class="header-profile-trigger teacher-shell-header-profile" href="teacher-shell.html?page=profile.html" aria-label="Open profile" id="teacherShellProfileLink">
+                    <span class="header-profile-avatar teacher-shell-header-avatar" id="teacherShellHeaderAvatar">TE</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="app-shell">
+            <aside class="sidebar">
+                <nav class="sidebar-nav" id="teacherShellNav">
+                    <a href="teacher-shell.html?page=dashboard-teacher.html%3Fview%3Ddashboard" class="sidebar-link" data-page="dashboard-teacher.html?view=dashboard" data-nav="dashboard">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 11.5L12 4l9 7.5" />
+                                    <path d="M5.5 10.5V20h13V10.5" />
+                                    <path d="M9.5 20v-5h5v5" />
+                                </svg>
+                            </span>
+                            <span class="sidebar-link-copy">
+                                <span class="sidebar-link-title">Dashboard</span>
+                            </span>
+                        </span>
+                    </a>
+                    <a href="teacher-shell.html?page=create-exam.html" class="sidebar-link" data-page="create-exam.html" data-nav="create">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 5v14" />
+                                    <path d="M5 12h14" />
+                                    <rect x="4" y="4" width="16" height="16" rx="3" />
+                                </svg>
+                            </span>
+                            <span class="sidebar-link-copy">
+                            <span class="sidebar-link-title">Create Exam</span>
+                            </span>
+                        </span>
+                    </a>
+                    <a href="teacher-shell.html?page=dashboard-teacher.html%3Fview%3Dsubmissions" class="sidebar-link" data-page="dashboard-teacher.html?view=submissions" data-nav="submissions">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M7 4.5h10" />
+                                    <path d="M7 9h10" />
+                                    <path d="M7 13.5h6" />
+                                    <rect x="4" y="3" width="16" height="18" rx="3" />
+                                </svg>
+                            </span>
+                            <span class="sidebar-link-copy">
+                                <span class="sidebar-link-title">Submissions</span>
+                            </span>
+                        </span>
+                    </a>
+                    <a href="teacher-shell.html?page=dashboard-teacher.html%3Fview%3Dresults" class="sidebar-link" data-page="dashboard-teacher.html?view=results" data-nav="results">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M7 20h10" />
+                                    <path d="M9 17h6" />
+                                    <path d="M8 4h8v4a4 4 0 0 1-8 0V4Z" />
+                                    <path d="M8 6H5a2 2 0 0 0 2 3" />
+                                    <path d="M16 6h3a2 2 0 0 1-2 3" />
+                                </svg>
+                            </span>
+                            <span class="sidebar-link-copy">
+                                <span class="sidebar-link-title">Results</span>
+                            </span>
+                        </span>
+                    </a>
+                    <a href="teacher-shell.html?page=dashboard-teacher.html%3Fview%3Dstudents" class="sidebar-link" data-page="dashboard-teacher.html?view=students" data-nav="students">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 21v-1.5A3.5 3.5 0 0 0 12.5 16h-4A3.5 3.5 0 0 0 5 19.5V21" />
+                                    <circle cx="10.5" cy="8" r="3" />
+                                    <path d="M19 21v-1a3 3 0 0 0-2.1-2.86" />
+                                    <path d="M15.5 5.3a3 3 0 0 1 0 5.4" />
+                                </svg>
+                            </span>
+                            <span class="sidebar-link-copy">
+                                <span class="sidebar-link-title">Students</span>
+                            </span>
+                        </span>
+                    </a>
+                    <a href="teacher-shell.html?page=analytics.html" class="sidebar-link" data-page="analytics.html" data-nav="analytics">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 20h16" />
+                                    <path d="M7 16V10" />
+                                    <path d="M12 16V6" />
+                                    <path d="M17 16v-3" />
+                                </svg>
+                            </span>
+                            <span class="sidebar-link-copy">
+                                <span class="sidebar-link-title">Analytics</span>
+                            </span>
+                        </span>
+                    </a>
+                </nav>
+                <div class="sidebar-footer">
+                    <button class="sidebar-footer-button" type="button" id="teacherShellLogoutBtn">
+                        <span aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                                <path d="M16 17l5-5-5-5" />
+                                <path d="M21 12H9" />
+                            </svg>
+                        </span>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </aside>
+
+            <main class="content-column">
+                <div class="teacher-shell-stage">
+                    <iframe id="teacherShellFrame" name="teacherShellFrame" class="teacher-shell-frame" title="Teacher workspace content"></iframe>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/app-config.js"></script>
+    <script src="js/session-manager.js"></script>
+    <script src="js/user-profile.js"></script>
+    <script src="js/app-shell.js"></script>
+    <script>
+        (function () {
+            const SHELL_VIEW_VERSION = 'v' + Date.now();
+            const ALLOWED_PAGES = new Set([
+                'dashboard-teacher.html',
+                'create-exam.html',
+                'question-editor.html',
+                'exam-preview.html',
+                'exam-results.html',
+                'profile.html',
+                'analytics.html',
+                'question-bank.html',
+                'view-exam.html'
+            ]);
+            const DASHBOARD_VIEWS = new Set(['dashboard', 'submissions', 'results', 'students']);
+            const HASH_VIEW_MAP = new Map([
+                ['#recentexamssection', 'dashboard'],
+                ['#examssection', 'dashboard'],
+                ['#profilesection', 'dashboard'],
+                ['#pendingsection', 'submissions'],
+                ['#pendinggradingsection', 'submissions'],
+                ['#resultssection', 'results'],
+                ['#studentssection', 'students']
+            ]);
+
+            const frame = document.getElementById('teacherShellFrame');
+            const navLinks = Array.from(document.querySelectorAll('#teacherShellNav .sidebar-link'));
+            const profileHeaderLink = document.getElementById('teacherShellProfileLink');
+            const profileLinks = [profileHeaderLink].filter(Boolean);
+            let frameResizeObserver = null;
+
+            function normalizeDashboardTarget(url) {
+                const hash = String(url.hash || '').trim().toLowerCase();
+                const requestedView = String(url.searchParams.get('view') || '').trim().toLowerCase();
+                const nextView = HASH_VIEW_MAP.get(hash) || (DASHBOARD_VIEWS.has(requestedView) ? requestedView : 'dashboard');
+                return nextView === 'dashboard'
+                    ? 'dashboard-teacher.html?view=dashboard'
+                    : `dashboard-teacher.html?view=${encodeURIComponent(nextView)}`;
+            }
+
+            function sanitizeTarget(rawTarget) {
+                const fallback = 'dashboard-teacher.html?view=dashboard';
+                if (!rawTarget) return fallback;
+                try {
+                    const url = new URL(rawTarget, window.location.href);
+                    if (url.origin !== window.location.origin) return fallback;
+                    const file = (url.pathname.split('/').pop() || '').toLowerCase();
+                    if (!ALLOWED_PAGES.has(file)) return fallback;
+                    if (file === 'dashboard-teacher.html') {
+                        return normalizeDashboardTarget(url);
+                    }
+                    const clean = new URL(url.pathname.split('/').pop(), window.location.href);
+                    clean.search = url.search;
+                    clean.hash = url.hash;
+                    return `${clean.pathname.split('/').pop()}${clean.search}${clean.hash}`;
+                } catch (error) {
+                    return fallback;
+                }
+            }
+
+            function buildEmbeddedSrc(target) {
+                const url = new URL(sanitizeTarget(target), window.location.href);
+                url.searchParams.set('embed', '1');
+                url.searchParams.set('shellv', SHELL_VIEW_VERSION);
+                return `${url.pathname.split('/').pop()}${url.search}${url.hash}`;
+            }
+
+            function getTargetFromLocation() {
+                const params = new URLSearchParams(window.location.search || '');
+                return sanitizeTarget(params.get('page'));
+            }
+
+            function setActiveNav(target) {
+                const url = new URL(sanitizeTarget(target), window.location.href);
+                const file = (url.pathname.split('/').pop() || '').toLowerCase();
+                const hash = url.hash || '';
+                const view = (url.searchParams.get('view') || '').toLowerCase();
+                const mode = (url.searchParams.get('mode') || '').toLowerCase();
+                let activeKey = 'dashboard';
+
+                if (file === 'create-exam.html' || file === 'question-editor.html' || file === 'exam-preview.html' || file === 'question-bank.html' || file === 'view-exam.html') {
+                    activeKey = 'create';
+                } else if (file === 'exam-results.html' && mode === 'review') {
+                    activeKey = 'submissions';
+                } else if (file === 'exam-results.html') {
+                    activeKey = 'results';
+                } else if (file === 'analytics.html') {
+                    activeKey = 'analytics';
+                } else if (file === 'profile.html') {
+                    activeKey = 'profile';
+                } else if (file === 'dashboard-teacher.html' && view === 'submissions') {
+                    activeKey = 'submissions';
+                } else if (file === 'dashboard-teacher.html' && view === 'results') {
+                    activeKey = 'results';
+                } else if (file === 'dashboard-teacher.html' && view === 'students') {
+                    activeKey = 'students';
+                } else if (file === 'dashboard-teacher.html' && hash === '#pendingSection') {
+                    activeKey = 'submissions';
+                } else if (file === 'dashboard-teacher.html' && hash === '#studentsSection') {
+                    activeKey = 'students';
+                } else if (file === 'dashboard-teacher.html' && hash === '#resultsSection') {
+                    activeKey = 'results';
+                }
+
+                navLinks.forEach((link) => {
+                    link.classList.toggle('active', activeKey && link.dataset.nav === activeKey);
+                });
+                document.body.classList.toggle('teacher-shell-profile-view', activeKey === 'profile');
+            }
+
+            function updateHistory(target, replace) {
+                const nextUrl = `teacher-shell.html?page=${encodeURIComponent(sanitizeTarget(target))}`;
+                if (replace) {
+                    window.history.replaceState({ page: target }, '', nextUrl);
+                } else {
+                    window.history.pushState({ page: target }, '', nextUrl);
+                }
+            }
+
+            function resizeFrame() {
+                if (!frame || !frame.contentDocument) return;
+                const doc = frame.contentDocument;
+                const body = doc.body;
+                const html = doc.documentElement;
+                if (!body || !html) return;
+                const nextHeight = Math.max(
+                    body.scrollHeight,
+                    body.offsetHeight,
+                    html.clientHeight,
+                    html.scrollHeight,
+                    html.offsetHeight
+                );
+                const rawMin = body.dataset.shellMinHeight || html.dataset.shellMinHeight || '720';
+                const minHeight = Number.isFinite(Number(rawMin)) ? Number(rawMin) : 720;
+                frame.style.height = `${Math.max(nextHeight, minHeight)}px`;
+            }
+
+            function bindFrameResizeObserver() {
+                if (!frame || !frame.contentDocument) return;
+                if (frameResizeObserver) {
+                    frameResizeObserver.disconnect();
+                }
+                const body = frame.contentDocument.body;
+                if (!body || !window.ResizeObserver) {
+                    resizeFrame();
+                    return;
+                }
+                frameResizeObserver = new window.ResizeObserver(() => resizeFrame());
+                frameResizeObserver.observe(body);
+                resizeFrame();
+            }
+
+            function syncHeaderIdentity() {
+                const profile = window.UserProfile ? window.UserProfile.getStoredProfile() : null;
+                const displayName = (profile && profile.displayName) || localStorage.getItem('userName') || 'Teacher Panel';
+                const roleLabel = 'Teacher';
+                const initials = (profile && profile.initials)
+                    || String(displayName)
+                        .split(/\s+/)
+                        .filter(Boolean)
+                        .slice(0, 2)
+                        .map((part) => part[0].toUpperCase())
+                        .join('')
+                    || 'TE';
+
+                if (window.UserProfile && window.UserProfile.renderAvatar) {
+                    window.UserProfile.renderAvatar('teacherShellHeaderAvatar', {
+                        name: displayName,
+                        initials,
+                        photoUrl: profile?.profile_photo_url || ''
+                    });
+                } else {
+                    document.getElementById('teacherShellHeaderAvatar').textContent = initials;
+                }
+                profileLinks.forEach((link) => {
+                    link.setAttribute('href', 'teacher-shell.html?page=profile.html');
+                });
+            }
+
+            function navigate(target, options) {
+                const nextTarget = sanitizeTarget(target);
+                const frameSrc = buildEmbeddedSrc(nextTarget);
+                setActiveNav(nextTarget);
+                if (!options || !options.skipHistory) {
+                    updateHistory(nextTarget, !!(options && options.replaceHistory));
+                }
+                if (frame.getAttribute('src') !== frameSrc) {
+                    frame.setAttribute('src', frameSrc);
+                }
+            }
+
+            window.TeacherShellHost = {
+                navigate(target, options) {
+                    navigate(target, options || {});
+                },
+                sanitizeTarget
+            };
+
+            function handleFrameLoad() {
+                try {
+                    const frameUrl = new URL(frame.contentWindow.location.href);
+                    const file = frameUrl.pathname.split('/').pop() || 'dashboard-teacher.html';
+                    frameUrl.searchParams.delete('embed');
+                    const target = `${file}${frameUrl.search}${frameUrl.hash}`;
+                    setActiveNav(target);
+                    updateHistory(target, true);
+                    if (frame.contentDocument && frame.contentDocument.title) {
+                        document.title = `${frame.contentDocument.title.split('|')[0].trim()} | Teacher Dashboard`;
+                    }
+                    bindFrameResizeObserver();
+                } catch (error) {
+                    resizeFrame();
+                }
+            }
+
+            function initShellNavigation() {
+                navLinks.forEach((link) => {
+                    link.addEventListener('click', function (event) {
+                        event.preventDefault();
+                        navigate(link.dataset.page || link.getAttribute('href'), { replaceHistory: false });
+                    });
+                });
+
+                profileLinks.forEach((link) => {
+                    link.addEventListener('click', function (event) {
+                        event.preventDefault();
+                        navigate('profile.html', { replaceHistory: false });
+                    });
+                });
+
+                window.addEventListener('popstate', function () {
+                    navigate(getTargetFromLocation(), { skipHistory: true });
+                });
+
+                frame.addEventListener('load', handleFrameLoad);
+            }
+
+            function logout() {
+                if (window.SessionManager) {
+                    window.SessionManager.logout('manual');
+                    return;
+                }
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = 'login.html';
+            }
+
+            document.getElementById('teacherShellLogoutBtn').addEventListener('click', logout);
+
+            if (window.SessionManager && !window.SessionManager.init({ loginUrl: 'login.html', requireAuth: true })) {
+                return;
+            }
+
+            if ((localStorage.getItem('userRole') || '').toLowerCase() !== 'teacher') {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            syncHeaderIdentity();
+            initShellNavigation();
+
+            if (window.AppShell) {
+                window.AppShell.init();
+            }
+
+            navigate(getTargetFromLocation(), { replaceHistory: true });
+        })();
+    </script>
+    <script src="js/chatbot.js"></script>
+</body>
+</html>

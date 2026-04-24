@@ -1,0 +1,1811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%234f46e5'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='28' fill='white' font-family='Arial' font-weight='bold'%3ESE%3C/text%3E%3C/svg%3E">
+    <title>Exam Preview | Smart Exam System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="js/app-config.js"></script>
+    <script src="js/session-manager.js"></script>
+    <script src="js/mobile-nav.js"></script>
+    <script src="js/user-profile.js"></script>
+    <script src="js/teacher-shell.js"></script>
+    <script src="js/app-shell.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --ink: #1E3A8A;
+            --muted: #6B7280;
+            --brand: #1E3A8A;
+            --brand-strong: #1e40af;
+            --accent: #38bdf8;
+            --surface: #FFFFFF;
+            --surface-alt: rgba(14, 11, 36, 0.82);
+            --surface-soft: rgba(15, 23, 42, 0.66);
+            --border: rgba(59,130,246,0.2);
+            --shadow: 0 12px 30px rgba(8, 17, 38, 0.28);
+            --focus: rgba(96, 165, 250, 0.28);
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            min-height: 100vh;
+            padding: 0;
+            color: #1E3A8A;
+            background-attachment: fixed;
+        }
+
+        .navbar {
+            background: rgba(240,244,255,0.95);
+            backdrop-filter: blur(14px);
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(30,58,138,0.08);
+            margin-bottom: 30px;
+            border-radius: 16px;
+            border: 1px solid #DBEAFE;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            animation: slideDown 0.55s ease;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(140deg, #1d4ed8, #1e40af);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-name {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(191, 219, 254, 0.8);
+        }
+
+        .brand-page {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1E3A8A;
+        }
+
+        .navbar-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #1E3A8A;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e40af;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(30, 58, 138, 0.32);
+        }
+
+        .btn-secondary {
+            background: rgba(148, 163, 184, 0.28);
+            color: #1E3A8A;
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #3B82F6, #1e40af);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #1e40af, #1d4ed8);
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff5252;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #F0F4FF;
+            border: 1px solid #DBEAFE;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(30,58,138,0.08);
+            animation: fadeUp 0.6s ease;
+        }
+
+        .preview-wrapper {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 320px;
+            gap: 22px;
+        }
+
+        .paper-preview {
+            background: #FFFFFF;
+            border-radius: 14px;
+            padding: 40px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            min-height: 500px;
+            font-family: 'Manrope', sans-serif;
+            backdrop-filter: blur(8px);
+            transition: border-color 0.25s ease, transform 0.25s ease;
+        }
+
+        .paper-preview:hover {
+            border-color: rgba(110, 231, 183, 0.52);
+            transform: translateY(-2px);
+        }
+
+        .paper-header {
+            text-align: center;
+            border-bottom: 2px solid rgba(103, 232, 249, 0.42);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .paper-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1E3A8A;
+            margin-bottom: 10px;
+        }
+
+        .paper-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #6B7280;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+
+        .paper-meta-item {
+            display: flex;
+            gap: 5px;
+        }
+
+        .paper-meta-label {
+            font-weight: 600;
+            color: #1F2937;
+        }
+
+        .question-preview {
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+
+        .question-number {
+            font-weight: 700;
+            color: #1E3A8A;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .question-text {
+            font-size: 15px;
+            color: #1E3A8A;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .question-options {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .option {
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            background: #F0F4FF;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #1E3A8A;
+            border: 1px solid #DBEAFE;
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .option:hover {
+            border-color: #3B82F6;
+            transform: translateX(2px);
+        }
+
+        .question-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #6B7280;
+            padding-top: 8px;
+            margin-top: 8px;
+            border-top: 1px solid var(--border);
+        }
+
+        .badge {
+            background: rgba(16, 185, 129, 0.2);
+            color: #a7f3d0;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        .difficulty-easy {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+        }
+
+        .difficulty-medium {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fcd34d;
+        }
+
+        .difficulty-hard {
+            background: rgba(248, 113, 113, 0.2);
+            color: #fca5a5;
+        }
+
+        .settings-panel {
+            background: #FFFFFF;
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+            backdrop-filter: blur(8px);
+            max-height: calc(100vh - 44px);
+            overflow: auto;
+        }
+
+        .settings-title {
+            font-weight: 700;
+            color: #1E3A8A;
+            margin-bottom: 22px;
+            font-size: 18px;
+            letter-spacing: -0.02em;
+        }
+        .settings-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 16px;
+            background: #F8FAFF;
+            color: #1E3A8A;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+        .settings-input:focus {
+            outline: none;
+            border-color: #6ee7b7;
+            box-shadow: 0 0 0 3px var(--focus);
+            background: #F8FAFF;
+        }
+
+        .setting-group {
+            margin-bottom: 22px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .setting-group:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-weight: 600;
+            color: #1E3A8A;
+            font-size: 13px;
+            margin-bottom: 10px;
+            display: block;
+            letter-spacing: 0.01em;
+        }
+
+        .setting-value {
+            font-size: 24px;
+            color: var(--brand);
+            font-weight: 700;
+        }
+
+        .setting-unit {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #6B7280;
+        }
+
+        .difficulty-distribution {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .difficulty-bar {
+            flex: 1;
+            padding: 10px 8px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+        }
+
+        .difficulty-bar.easy {
+            background: #10b981;
+        }
+
+        .difficulty-bar.medium {
+            background: #f59e0b;
+        }
+
+        .difficulty-bar.hard {
+            background: #ef4444;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .btn-block {
+            width: 100%;
+            padding: 14px 16px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            letter-spacing: 0.01em;
+        }
+
+        .btn-edit-questions {
+            background: linear-gradient(135deg, #0f766e, #14b8a6);
+            color: white;
+            box-shadow: 0 10px 22px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-edit-questions:hover {
+            background: linear-gradient(135deg, #065f46, #0f766e);
+            transform: translateY(-1px);
+        }
+
+        .btn-publish {
+            background: linear-gradient(135deg, #059669, #34d399);
+            color: white;
+            box-shadow: 0 10px 24px rgba(52, 211, 153, 0.22);
+        }
+
+        .btn-publish:hover {
+            background: linear-gradient(135deg, #047857, #10b981);
+            transform: translateY(-1px);
+        }
+
+        .btn-back {
+            background: #F8FAFF;
+            color: #1F2937;
+            border: 1px solid var(--border);
+        }
+
+        .btn-back:hover {
+            background: #F8FAFF;
+            transform: translateY(-1px);
+        }
+
+        .stats-box {
+            background: #EFF6FF;
+            padding: 16px 14px;
+            border-radius: 14px;
+            text-align: center;
+            margin-bottom: 10px;
+            border: 1px solid #BFDBFE;
+            box-shadow: 0 1px 4px rgba(30,58,138,0.06);
+        }
+
+        .stats-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1E3A8A;
+        }
+
+        .stats-label {
+            font-size: 12px;
+            color: #6B7280;
+            margin-top: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .print-button {
+            background: linear-gradient(135deg, #0f766e, #14b8a6);
+            color: white;
+            padding: 13px 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            margin-top: 12px;
+            width: 100%;
+            box-shadow: 0 10px 22px rgba(20, 184, 166, 0.2);
+        }
+
+        .print-button:hover {
+            background: linear-gradient(135deg, #065f46, #0f766e);
+            transform: translateY(-1px);
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .navbar, .settings-panel {
+                display: none;
+            }
+
+            .preview-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .paper-preview {
+                box-shadow: none;
+                padding: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
+            .container {
+                padding: 14px;
+            }
+
+            .preview-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .paper-preview {
+                padding: 20px;
+            }
+
+            .paper-title {
+                font-size: 22px;
+            }
+
+            .settings-panel {
+                position: static;
+                top: auto;
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+    
+        /* Workflow spacing cleanup */
+        .workspace-content .container {
+            padding-top: 8px !important;
+        }
+
+        .preview-wrapper {
+            margin-top: 0 !important;
+        }
+
+        .paper-preview,
+        .settings-panel {
+            margin-top: 0 !important;
+        }
+</style>
+    <style>
+        .paper-preview.academic-paper-preview {
+            background: #ffffff;
+            color: #111827;
+            border: 1px solid #d1d9e6;
+            padding: 24px;
+            font-family: 'Source Serif 4', Georgia, serif;
+            box-shadow: 0 18px 34px rgba(15, 23, 42, 0.14);
+        }
+
+        .academic-paper-page {
+            background: #ffffff;
+            color: #111827;
+            border: 1px solid #d9e2ec;
+            padding: 34px 38px 42px;
+            min-height: 1120px;
+            display: flex;
+            flex-direction: column;
+            page-break-after: always;
+        }
+
+        .academic-paper-page:last-child {
+            page-break-after: auto;
+        }
+
+        .academic-paper-header {
+            border-bottom: 2px solid #111827;
+            padding-bottom: 18px;
+            margin-bottom: 20px;
+        }
+
+        .academic-system {
+            text-align: center;
+            font-family: 'Manrope', sans-serif;
+            font-size: 0.92rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 0.55rem;
+        }
+
+        .academic-session {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 1rem;
+        }
+
+        .academic-subject-line {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .academic-subject-line strong {
+            font-weight: 700;
+        }
+
+        .academic-instructions {
+            border: 1px solid #d9e2ec;
+            padding: 16px 18px;
+            margin-bottom: 20px;
+            background: #fbfdff;
+        }
+
+        .academic-instructions-title {
+            font-family: 'Manrope', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.65rem;
+        }
+
+        .academic-instructions ul {
+            margin-left: 1.15rem;
+            display: grid;
+            gap: 0.42rem;
+            font-size: 0.97rem;
+            line-height: 1.6;
+        }
+
+        .academic-section {
+            margin-bottom: 24px;
+        }
+
+        .academic-section-header {
+            border-top: 1px solid #cbd5e1;
+            border-bottom: 1px solid #cbd5e1;
+            padding: 10px 0;
+            margin-bottom: 16px;
+        }
+
+        .academic-section-title {
+            font-family: 'Manrope', sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 0.3rem;
+        }
+
+        .academic-section-subtitle,
+        .academic-section-note {
+            font-size: 0.95rem;
+            color: #334155;
+            line-height: 1.5;
+        }
+
+        .academic-question {
+            padding: 14px 0 18px;
+            border-bottom: 1px solid #e2e8f0;
+            page-break-inside: avoid;
+        }
+
+        .academic-question:last-child {
+            border-bottom: none;
+        }
+
+        .academic-question-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 0.65rem;
+            font-family: 'Manrope', sans-serif;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .academic-question-number {
+            font-size: 1rem;
+            font-weight: 800;
+        }
+
+        .academic-question-marks {
+            font-size: 0.96rem;
+            white-space: nowrap;
+        }
+
+        .academic-question-text {
+            font-size: 1rem;
+            line-height: 1.68;
+            color: #111827;
+            margin-bottom: 0.8rem;
+        }
+
+        .academic-options {
+            display: grid;
+            gap: 0.42rem;
+            margin-left: 0.2rem;
+            font-size: 0.98rem;
+            line-height: 1.6;
+        }
+
+        .academic-option {
+            display: flex;
+            gap: 0.55rem;
+        }
+
+        .academic-option-label {
+            font-weight: 700;
+            min-width: 28px;
+        }
+
+        .academic-answer-label {
+            font-family: 'Manrope', sans-serif;
+            font-size: 0.94rem;
+            font-weight: 700;
+            margin: 0.85rem 0 0.55rem;
+        }
+
+        .academic-answer-lines {
+            display: grid;
+            gap: 10px;
+            margin-top: 0.35rem;
+        }
+
+        .academic-answer-line {
+            border-bottom: 1px solid #94a3b8;
+            min-height: 16px;
+        }
+
+        .academic-page-spacer {
+            flex: 1;
+        }
+
+        .academic-page-footer {
+            margin-top: 20px;
+            padding-top: 12px;
+            border-top: 1px solid #cbd5e1;
+            text-align: center;
+            font-family: 'Manrope', sans-serif;
+            font-size: 0.84rem;
+            color: #475569;
+        }
+
+        @media print {
+            body {
+                background: #ffffff !important;
+            }
+
+            .workspace-topbar,
+            .workspace-sidebar,
+            .settings-panel,
+            .workspace-shell::before,
+            .workspace-shell::after {
+                display: none !important;
+            }
+
+            .workspace-shell,
+            .workspace-content,
+            .container,
+            .preview-wrapper {
+                display: block !important;
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                background: transparent !important;
+            }
+
+            .paper-preview.academic-paper-preview {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+            }
+
+            .academic-paper-page {
+                min-height: auto;
+                border: none;
+                padding: 16mm 14mm 18mm;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="css/ui-system.css?v=1776845866">
+    <link rel="stylesheet" href="css/product-theme.css?v=1776841996">
+    <link rel="stylesheet" href="css/workspace-shell.css?v=1776845866">
+</head>
+<body class="workspace-theme sidebar-simple">
+    <script>
+        (function() {
+            const params = new URLSearchParams(window.location.search || '');
+            const isEmbedded = params.get('embed') === '1' || window.top !== window;
+            if (isEmbedded) {
+                window.__TEACHER_SHELL_EMBEDDED__ = true;
+                document.body.classList.add('embedded-shell');
+                document.body.dataset.shellMinHeight = '0';
+            }
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const userRole = localStorage.getItem('userRole');
+            if (!isLoggedIn || userRole !== 'teacher') {
+                window.location.href = 'login.html';
+            }
+        })();
+    </script>
+        <div class="workspace-topbar-content">
+            <div class="header-brand-group">
+                <button class="shell-toggle" type="button" data-sidebar-toggle aria-label="Toggle sidebar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                        <path d="M4 7h16M4 12h16M4 17h16" />
+                    </svg>
+                </button>
+                <a href="dashboard-teacher.html" class="workspace-logo">
+                    <span class="workspace-brand-mark">SE</span>
+                    <span class="workspace-brand-copy">
+                        <span class="workspace-brand-name">Smart Exam System</span>
+                        <span class="workspace-brand-page">Preview & Publish</span>
+                    </span>
+                </a>
+            </div>
+            <div class="header-utility workspace-topbar-actions">
+                <a class="workspace-profile-trigger" href="profile.html" aria-label="Open profile">
+                    <span class="workspace-profile-avatar" id="workspaceHeaderAvatar">PV</span>
+                </a>
+                <button class="btn btn-secondary" onclick="goBackToEditor()">Edit Questions</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="workspace-shell">
+        <aside class="workspace-sidebar">
+            <div class="workspace-sidebar-head">
+                <div class="workspace-sidebar-title">Teacher Workflow</div>
+                <div class="workspace-sidebar-profile">
+                    <div class="workspace-sidebar-avatar" id="workspaceSidebarAvatar">PV</div>
+                    <div class="workspace-sidebar-profile-copy">
+                        <span class="workspace-sidebar-profile-name" id="workspaceSidebarName">Exam Preview</span>
+                        <span class="workspace-sidebar-profile-meta" id="workspaceSidebarMeta">teacher@example.com</span>
+                    </div>
+                </div>
+            </div>
+            <nav class="workspace-sidebar-nav" aria-label="Exam Preview Navigation">
+                <a href="dashboard-teacher.html" class="workspace-sidebar-link">
+                    <span class="workspace-sidebar-link-main">
+                        <span class="workspace-sidebar-link-icon">DB</span>
+                        <span class="workspace-sidebar-link-copy">
+                            <span class="workspace-sidebar-link-title">Dashboard</span>
+                            <span class="workspace-sidebar-link-desc">Overview and teaching metrics</span>
+                        </span>
+                    </span>
+                    <span>Home</span>
+                </a>
+                <a href="create-exam.html" class="workspace-sidebar-link">
+                    <span class="workspace-sidebar-link-main">
+                        <span class="workspace-sidebar-link-icon">CE</span>
+                        <span class="workspace-sidebar-link-copy">
+                            <span class="workspace-sidebar-link-title">Create Exam</span>
+                            <span class="workspace-sidebar-link-desc">Update setup and material choices</span>
+                        </span>
+                    </span>
+                    <span>Setup</span>
+                </a>
+                <a href="question-editor.html" class="workspace-sidebar-link">
+                    <span class="workspace-sidebar-link-main">
+                        <span class="workspace-sidebar-link-icon">QE</span>
+                        <span class="workspace-sidebar-link-copy">
+                            <span class="workspace-sidebar-link-title">Question Editor</span>
+                            <span class="workspace-sidebar-link-desc">Refine wording, options, and marks</span>
+                        </span>
+                    </span>
+                    <span>Edit</span>
+                </a>
+                <a href="exam-preview.html" class="workspace-sidebar-link active">
+                    <span class="workspace-sidebar-link-main">
+                        <span class="workspace-sidebar-link-icon">PV</span>
+                        <span class="workspace-sidebar-link-copy">
+                            <span class="workspace-sidebar-link-title">Preview & Publish</span>
+                            <span class="workspace-sidebar-link-desc">Approve the final exam sheet</span>
+                        </span>
+                    </span>
+                    <span>Current</span>
+                </a>
+                <a href="question-bank.html" class="workspace-sidebar-link">
+                    <span class="workspace-sidebar-link-main">
+                        <span class="workspace-sidebar-link-icon">QB</span>
+                        <span class="workspace-sidebar-link-copy">
+                            <span class="workspace-sidebar-link-title">Question Bank</span>
+                            <span class="workspace-sidebar-link-desc">Open reusable saved questions</span>
+                        </span>
+                    </span>
+                    <span>Bank</span>
+                </a>
+                <a href="analytics.html" class="workspace-sidebar-link">
+                    <span class="workspace-sidebar-link-main">
+                        <span class="workspace-sidebar-link-icon">AN</span>
+                        <span class="workspace-sidebar-link-copy">
+                            <span class="workspace-sidebar-link-title">Analytics</span>
+                            <span class="workspace-sidebar-link-desc">Performance and grading insights</span>
+                        </span>
+                    </span>
+                    <span>Live</span>
+                </a>
+            </nav>
+            <div class="workspace-sidebar-footer">
+                <a class="workspace-sidebar-footer-link" href="profile.html">
+                    <span>PF</span>
+                    <span>Profile</span>
+                </a>
+                <button class="workspace-sidebar-footer-button" type="button" onclick="logout()">
+                    <span>LO</span>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="workspace-content">
+    <div class="container">
+        <div class="preview-wrapper">
+            <!-- Paper Preview -->
+            <div class="paper-preview" id="paperPreview">
+                <div class="paper-header">
+                    <div class="paper-title" id="examTitle">Untitled Exam</div>
+                    <div class="paper-meta">
+                        <div class="paper-meta-item">
+                            <span class="paper-meta-label">Duration:</span>
+                            <span id="examDuration">90</span> minutes
+                        </div>
+                        <div class="paper-meta-item">
+                            <span class="paper-meta-label">Total Marks:</span>
+                            <span id="examMarks">0</span>
+                        </div>
+                        <div class="paper-meta-item">
+                            <span class="paper-meta-label">Questions:</span>
+                            <span id="examQuestions">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="questionsContainer"></div>
+            </div>
+
+            <!-- Settings Panel -->
+            <div class="settings-panel">
+                <div class="settings-title">Exam Settings</div>
+
+                <div class="setting-group">
+                    <label class="setting-label">Exam Duration</label>
+                    <div class="setting-value">
+                        <input type="number" id="durationInput" class="settings-input" value="90" min="5" max="480" 
+                               onchange="updateDuration(this.value)">
+                        <span class="setting-unit">minutes</span>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label class="setting-label">Exam Title</label>
+                    <input type="text" id="titleInput" class="settings-input" value="Untitled Exam" 
+                           onchange="updateTitle(this.value)" style="font-size: 13px;">
+                </div>
+
+                <div class="setting-group">
+                    <label class="setting-label">Paper Structure</label>
+                    <div class="setting-unit" id="paperStructureSummary">Section details will appear here.</div>
+                </div>
+
+                <div class="stats-box">
+                    <div class="stats-value" id="totalMarksDisplay">0</div>
+                    <div class="stats-label">Total Marks</div>
+                </div>
+
+                <div class="stats-box">
+                    <div class="stats-value" id="totalQuestionsDisplay">0</div>
+                    <div class="stats-label">Total Questions</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+        </main>
+    </div>
+
+    <script src="js/supabase.min.js"></script>
+    <script>
+        let questions = [];
+        let examData = {};
+        let isPublishing = false;
+        const PREVIEW_PARAMS = new URLSearchParams(window.location.search || '');
+        const PREVIEW_EXAM_ID = String(PREVIEW_PARAMS.get('id') || '').trim();
+        const PREVIEW_AUTO_PRINT = PREVIEW_PARAMS.get('print') === '1';
+        const PREVIEW_AUTO_PUBLISH = PREVIEW_PARAMS.get('publish') === '1';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!window.__TEACHER_SHELL_EMBEDDED__ && window.SessionManager) {
+                const ok = window.SessionManager.init({ loginUrl: 'login.html', requireAuth: true });
+                if (!ok) return;
+            }
+            if (window.AppShell) window.AppShell.init();
+            initPreviewShell();
+            await loadExamData();
+            renderPreview();
+            if (PREVIEW_AUTO_PRINT && questions.length > 0) {
+                setTimeout(() => window.print(), 280);
+            }
+
+            const publishBtn = document.getElementById('publishExamBtn');
+            if (publishBtn) {
+                publishBtn.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    publishExamSafe();
+                });
+            }
+
+            const previewStatus = String(examData?.status || '').trim().toLowerCase();
+            if (
+                PREVIEW_AUTO_PUBLISH
+                && questions.length > 0
+                && previewStatus !== 'published'
+                && previewStatus !== 'active'
+                && previewStatus !== 'archived'
+            ) {
+                setTimeout(() => publishExamSafe(), 320);
+            }
+        });
+
+        function initPreviewShell() {
+            const profile = window.UserProfile ? window.UserProfile.getStoredProfile() : null;
+            const displayName = profile?.displayName
+                || (localStorage.getItem('userName') || '').trim()
+                || [localStorage.getItem('userFirstName'), localStorage.getItem('userLastName')].filter(Boolean).join(' ').trim()
+                || 'Teacher';
+            const initials = profile?.initials || displayName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0].toUpperCase()).join('') || 'PV';
+            const sidebarMeta = window.UserProfile
+                ? window.UserProfile.getProfileMeta(profile, 'Teacher')
+                : (profile?.email || 'Teacher');
+            document.getElementById('workspaceSidebarName').textContent = displayName;
+            document.getElementById('workspaceSidebarMeta').textContent = sidebarMeta;
+            document.getElementById('workspaceSidebarAvatar').textContent = initials;
+            const headerAvatar = document.getElementById('workspaceHeaderAvatar');
+            if (headerAvatar) headerAvatar.textContent = initials;
+        }
+
+        function getPreviewBackendBase() {
+            if (window.AppConfig && typeof window.AppConfig.getBackendBase === 'function') {
+                return window.AppConfig.getBackendBase();
+            }
+            const backendHost = window.location.hostname === 'localhost' ? '127.0.0.1' : window.location.hostname;
+            return `${window.location.protocol}//${backendHost}:5000/api`;
+        }
+
+        async function buildPreviewBackendHeaders(headers = {}) {
+            return window.AppConfig.buildAuthHeaders(null, headers);
+        }
+
+        function normalizeQuestionType(rawType) {
+            return (rawType || '')
+                .toString()
+                .trim()
+                .toLowerCase()
+                .replace(/[\/\s-]+/g, '_');
+        }
+
+        function toEditorQuestionType(rawType) {
+            const normalized = normalizeQuestionType(rawType);
+            if (normalized === 'mcq' || normalized === 'multiple_choice') return 'MCQ';
+            if (normalized === 'short_answer' || normalized === 'shortanswer') return 'Short Answer';
+            if (normalized === 'long_answer' || normalized === 'longanswer' || normalized === 'essay') return 'Long Answer';
+            if (normalized === 'true_false' || normalized === 'truefalse') return 'True/False';
+            if (normalized === 'code' || normalized === 'coding') return 'Code';
+            return rawType || 'MCQ';
+        }
+
+        function parseMaybeJson(value, fallback = null) {
+            if (value === undefined || value === null || value === '') return fallback;
+            if (typeof value === 'object') return value;
+            try {
+                return JSON.parse(value);
+            } catch (_) {
+                return fallback;
+            }
+        }
+
+        function normalizePreviewQuestion(rawQuestion, index = 0) {
+            const questionId = rawQuestion?.question_id || rawQuestion?.id || `preview-question-${index + 1}`;
+            const questionType = toEditorQuestionType(rawQuestion?.question_type || rawQuestion?.type || 'MCQ');
+            const normalizedType = normalizeQuestionType(questionType);
+            let options = parseMaybeJson(rawQuestion?.options, rawQuestion?.options);
+
+            if (normalizedType === 'mcq' && options && !Array.isArray(options) && typeof options === 'object') {
+                const correctKey = String(rawQuestion?.correct_answer || '').trim().toUpperCase();
+                options = Object.entries(options).map(([key, value]) => ({
+                    key,
+                    text: (value ?? '').toString(),
+                    is_correct: correctKey === String(key || '').trim().toUpperCase()
+                }));
+            }
+
+            return {
+                ...rawQuestion,
+                id: questionId,
+                question_id: questionId,
+                question: rawQuestion?.question || rawQuestion?.question_text || '',
+                question_text: rawQuestion?.question_text || rawQuestion?.question || '',
+                question_type: questionType,
+                difficulty: rawQuestion?.difficulty || 'medium',
+                marks: Number(rawQuestion?.marks || rawQuestion?.points || 1),
+                options: options || null,
+                correct_answer: rawQuestion?.correct_answer || null,
+                model_answer: rawQuestion?.model_answer || '',
+                topic: rawQuestion?.topic || examData.subject || 'General'
+            };
+        }
+
+        function escapePaperHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function getPreviewSubject() {
+            return examData.subject || examData.courseName || examData.course_name || examData.courseCode || examData.course_code || 'Not specified';
+        }
+
+        function getSectionDefinitions() {
+            const sectionA = [];
+            const sectionB = [];
+            const sectionC = [];
+
+            questions.forEach((question) => {
+                const normalizedType = normalizeQuestionType(question.question_type || question.type || '');
+                if (normalizedType === 'mcq' || normalizedType === 'true_false' || normalizedType === 'multiple_choice') {
+                    sectionA.push(question);
+                } else if (normalizedType === 'short_answer' || normalizedType === 'shortanswer') {
+                    sectionB.push(question);
+                } else {
+                    sectionC.push(question);
+                }
+            });
+
+            const buildMarksNote = (items, fallback) => {
+                if (!items.length) return fallback;
+                const uniqueMarks = [...new Set(items.map((item) => Number(item.marks || 0)))];
+                if (uniqueMarks.length === 1) {
+                    const marks = uniqueMarks[0];
+                    return `Each question = ${marks} Mark${marks === 1 ? '' : 's'}`;
+                }
+                return 'Marks are indicated with each question';
+            };
+
+            return [
+                {
+                    key: 'A',
+                    title: 'Multiple Choice Questions',
+                    subtitle: '(Attempt all questions)',
+                    note: buildMarksNote(sectionA, 'Attempt all objective questions'),
+                    questions: sectionA,
+                    perPage: 8
+                },
+                {
+                    key: 'B',
+                    title: 'Short Answer Questions',
+                    subtitle: '(Answer in 2–3 sentences)',
+                    note: buildMarksNote(sectionB, 'Write concise and clear answers'),
+                    questions: sectionB,
+                    perPage: 5
+                },
+                {
+                    key: 'C',
+                    title: 'Long Answer Questions',
+                    subtitle: '(Explain with examples)',
+                    note: buildMarksNote(sectionC, 'Write detailed academic answers'),
+                    questions: sectionC,
+                    perPage: 3
+                }
+            ].filter((section) => section.questions.length > 0);
+        }
+
+        function getAnswerLineCount(question) {
+            const normalizedType = normalizeQuestionType(question.question_type || question.type || '');
+            const marks = Number(question.marks || 1);
+            if (normalizedType === 'short_answer' || normalizedType === 'shortanswer') {
+                return Math.max(3, Math.min(5, Math.round(marks) + 1));
+            }
+            return Math.max(8, Math.min(12, Math.round(marks * 2) + 2));
+        }
+
+        function renderAnswerLines(lineCount) {
+            return `
+                <div class="academic-answer-lines">
+                    ${Array.from({ length: lineCount }).map(() => '<div class="academic-answer-line"></div>').join('')}
+                </div>
+            `;
+        }
+
+        function renderAcademicQuestion(question, questionNumber) {
+            const normalizedType = normalizeQuestionType(question.question_type || question.type || '');
+            const questionText = escapePaperHtml(question.question || question.question_text || '');
+            const marks = Number(question.marks || 1);
+            let body = '';
+
+            if (normalizedType === 'mcq' || normalizedType === 'multiple_choice') {
+                let optionEntries = [];
+                if (Array.isArray(question.options)) {
+                    optionEntries = question.options.map((option, index) => [
+                        String.fromCharCode(65 + index),
+                        (option && typeof option === 'object') ? (option.text || option.value || '') : option
+                    ]);
+                } else if (question.options && typeof question.options === 'object') {
+                    const keys = ['A', 'B', 'C', 'D', 'E', 'F'];
+                    optionEntries = keys
+                        .filter((key) => question.options[key] !== undefined && question.options[key] !== null)
+                        .map((key) => [key, question.options[key]]);
+                }
+
+                body = `
+                    <div class="academic-options">
+                        ${optionEntries.map(([label, text]) => `
+                            <div class="academic-option">
+                                <span class="academic-option-label">${label})</span>
+                                <span>${escapePaperHtml((text && typeof text === 'object') ? (text.text || text.value || '') : text)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (normalizedType === 'true_false' || normalizedType === 'truefalse') {
+                body = `
+                    <div class="academic-options">
+                        <div class="academic-option"><span class="academic-option-label">A)</span><span>True</span></div>
+                        <div class="academic-option"><span class="academic-option-label">B)</span><span>False</span></div>
+                    </div>
+                `;
+            } else {
+                body = `
+                    <div class="academic-answer-label">Answer:</div>
+                    ${renderAnswerLines(getAnswerLineCount(question))}
+                `;
+            }
+
+            return `
+                <article class="academic-question">
+                    <div class="academic-question-head">
+                        <span class="academic-question-number">Q${questionNumber}</span>
+                        <span class="academic-question-marks">${marks} Mark${marks === 1 ? '' : 's'}</span>
+                    </div>
+                    <div class="academic-question-text">${questionText}</div>
+                    ${body}
+                </article>
+            `;
+        }
+
+        function buildAcademicPagesMarkup() {
+            const title = escapePaperHtml(examData.title || examData.exam_title || 'Untitled Exam');
+            const subject = escapePaperHtml(getPreviewSubject());
+            const duration = escapePaperHtml(examData.duration || examData.duration_minutes || 90);
+            const totalMarks = questions.reduce((sum, question) => sum + Number(question.marks || 1), 0);
+            const sections = getSectionDefinitions();
+            const pages = [];
+            let questionNumber = 1;
+
+            sections.forEach((section, sectionIndex) => {
+                const chunks = [];
+                for (let i = 0; i < section.questions.length; i += section.perPage) {
+                    chunks.push(section.questions.slice(i, i + section.perPage));
+                }
+
+                chunks.forEach((chunk, chunkIndex) => {
+                    const sectionHeader = `
+                        <div class="academic-section-header">
+                            <div class="academic-section-title">Section ${section.key}: ${section.title}${chunkIndex > 0 ? ' (Continued)' : ''}</div>
+                            <div class="academic-section-subtitle">${section.subtitle}</div>
+                            <div class="academic-section-note">${section.note}</div>
+                        </div>
+                    `;
+
+                    const chunkQuestions = chunk.map((question) => {
+                        const markup = renderAcademicQuestion(question, questionNumber);
+                        questionNumber += 1;
+                        return markup;
+                    }).join('');
+
+                    pages.push({
+                        includeInstructions: sectionIndex === 0 && chunkIndex === 0,
+                        sectionHeader,
+                        questionsHtml: chunkQuestions
+                    });
+                });
+            });
+
+            const totalPages = Math.max(pages.length, 1);
+            return pages.map((page, pageIndex) => `
+                <section class="academic-paper-page">
+                    <header class="academic-paper-header">
+                        <div class="academic-system">Smart Exam System</div>
+                        <div class="academic-session">End Semester Examination (ESE)</div>
+                        <div class="academic-subject-line">
+                            <span><strong>Subject:</strong> <span${pageIndex === 0 ? ' id="examTitle"' : ''}>${subject}</span></span>
+                            <span><strong>Duration:</strong> <span${pageIndex === 0 ? ' id="examDuration"' : ''}>${duration}</span> minutes</span>
+                            <span><strong>Total Marks:</strong> <span${pageIndex === 0 ? ' id="examMarks"' : ''}>${totalMarks}</span></span>
+                        </div>
+                    </header>
+                    ${page.includeInstructions ? `
+                        <section class="academic-instructions">
+                            <div class="academic-instructions-title">Instructions</div>
+                            <ul>
+                                <li>Read all questions carefully.</li>
+                                <li>Attempt all questions.</li>
+                                <li>Write answers clearly.</li>
+                                <li>Use examples where required.</li>
+                            </ul>
+                        </section>
+                    ` : ''}
+                    <section class="academic-section">
+                        ${page.sectionHeader}
+                        ${page.questionsHtml}
+                    </section>
+                    <div class="academic-page-spacer"></div>
+                    <footer class="academic-page-footer">Page ${pageIndex + 1} of ${totalPages}</footer>
+                </section>
+            `).join('');
+        }
+
+        function updatePreviewFormState() {
+            const title = examData.title || 'Untitled Exam';
+            const duration = Number(examData.duration || 90);
+            document.getElementById('titleInput').value = title;
+            document.getElementById('durationInput').value = duration;
+            const examTitleEl = document.getElementById('examTitle');
+            const examDurationEl = document.getElementById('examDuration');
+            if (examTitleEl) examTitleEl.textContent = getPreviewSubject();
+            if (examDurationEl) examDurationEl.textContent = duration;
+            updatePublishButtonState();
+        }
+
+        function persistPreviewDraftState() {
+            const creationState = {
+                ...examData,
+                title: examData.title || examData.exam_title || 'Untitled Exam',
+                duration: Number(examData.duration || 90),
+                examId: examData.examId || examData.exam_id || PREVIEW_EXAM_ID || null
+            };
+            localStorage.setItem('editedQuestions', JSON.stringify(questions));
+            localStorage.setItem('examCreationData', JSON.stringify(creationState));
+        }
+
+        function updatePublishButtonState() {
+            const publishBtn = document.getElementById('publishExamBtn');
+            if (!publishBtn) return;
+
+            const status = normalizeQuestionType(examData.status || 'draft');
+            if (status === 'published' || status === 'active') {
+                publishBtn.disabled = true;
+                publishBtn.textContent = 'Already Published';
+                publishBtn.style.opacity = '0.72';
+                publishBtn.style.cursor = 'not-allowed';
+                publishBtn.title = 'This exam is already visible on the student dashboard.';
+                return;
+            }
+
+            if (status === 'archived') {
+                publishBtn.disabled = true;
+                publishBtn.textContent = 'Archived';
+                publishBtn.style.opacity = '0.72';
+                publishBtn.style.cursor = 'not-allowed';
+                publishBtn.title = 'Archived exams cannot be published from this screen.';
+                return;
+            }
+
+            publishBtn.disabled = false;
+            publishBtn.textContent = 'Publish Exam';
+            publishBtn.style.opacity = '';
+            publishBtn.style.cursor = '';
+            publishBtn.title = 'Publish this exam to the student dashboard';
+        }
+
+        async function loadExamFromBackend(examId) {
+            const apiBase = getPreviewBackendBase();
+            const [examResult, questionsResult] = await Promise.all([
+                fetchJsonWithRetry(`${apiBase}/exams/${encodeURIComponent(examId)}`, { cache: 'no-store' }, 3),
+                fetchJsonWithRetry(`${apiBase}/exam-questions/${encodeURIComponent(examId)}`, { cache: 'no-store' }, 3)
+            ]);
+
+            const exam = examResult?.data?.exam || examResult?.data?.data || examResult?.data || null;
+            const rawQuestions = Array.isArray(questionsResult?.data?.questions) ? questionsResult.data.questions : [];
+
+            if (!exam) {
+                throw new Error('Exam details could not be loaded.');
+            }
+
+            examData = {
+                ...examData,
+                ...exam,
+                exam_id: exam.exam_id || exam.id || examId,
+                examId: exam.exam_id || exam.id || examId,
+                title: exam.exam_title || exam.title || 'Untitled Exam',
+                duration: Number(exam.duration_minutes || exam.duration || 90),
+                totalMarks: Number(exam.total_marks || 0),
+                courseId: exam.course_id || exam.courseId || null,
+                courseCode: exam.course_code || exam.courseCode || '',
+                courseName: exam.course_name || exam.courseName || exam.subject || 'Course',
+                subject: exam.subject || exam.course_name || exam.course_code || 'General',
+                status: exam.status || 'draft'
+            };
+
+            questions = rawQuestions.map((question, index) => normalizePreviewQuestion(question, index));
+            persistPreviewDraftState();
+        }
+
+        async function loadExamData() {
+            const editedQuestions = localStorage.getItem('editedQuestions');
+            const creationData = localStorage.getItem('examCreationData');
+
+            questions = editedQuestions ? JSON.parse(editedQuestions) : [];
+            examData = creationData ? JSON.parse(creationData) : {};
+
+            if (PREVIEW_EXAM_ID) {
+                try {
+                    await loadExamFromBackend(PREVIEW_EXAM_ID);
+                } catch (error) {
+                    console.warn('Remote preview load failed, falling back to local session/localStorage:', error);
+                    const localQuestions = parseMaybeJson(localStorage.getItem(`exam_questions_${PREVIEW_EXAM_ID}`), []);
+                    if ((!questions || !questions.length) && Array.isArray(localQuestions) && localQuestions.length > 0) {
+                        questions = localQuestions.map((question, index) => normalizePreviewQuestion(question, index));
+                    }
+
+                    if (!examData || !Object.keys(examData).length) {
+                        const localExams = parseMaybeJson(localStorage.getItem('exams'), []);
+                        const localExam = Array.isArray(localExams)
+                            ? localExams.find((item) => String(item?.exam_id || item?.id || '').trim() === PREVIEW_EXAM_ID)
+                            : null;
+                        if (localExam) {
+                            examData = {
+                                ...localExam,
+                                exam_id: localExam.exam_id || localExam.id || PREVIEW_EXAM_ID,
+                                examId: localExam.exam_id || localExam.id || PREVIEW_EXAM_ID,
+                                title: localExam.exam_title || localExam.title || 'Untitled Exam',
+                                duration: Number(localExam.duration_minutes || localExam.duration || 90),
+                                totalMarks: Number(localExam.total_marks || 0),
+                                courseId: localExam.course_id || localExam.courseId || null,
+                                courseCode: localExam.course_code || localExam.courseCode || '',
+                                courseName: localExam.course_name || localExam.courseName || localExam.subject || 'Course',
+                                subject: localExam.subject || localExam.course_name || localExam.course_code || 'General',
+                                status: localExam.status || 'draft'
+                            };
+                        }
+                    }
+                }
+            }
+
+            questions = (questions || []).map((question, index) => normalizePreviewQuestion(question, index));
+
+            // DEBUG: type+options diagnostic — open DevTools Console to inspect
+            console.log('TYPE+OPTIONS CHECK', questions.map(q => ({
+                id: q.id,
+                type: q.question_type,
+                norm: normalizeQuestionType(q.question_type || q.type || ''),
+                hasOptions: !!q.options,
+                optionsType: Array.isArray(q.options) ? 'array' : typeof q.options,
+                marks: q.marks,
+                text: (q.question || q.question_text || '').slice(0, 60)
+            })));
+
+            updatePreviewFormState();
+            persistPreviewDraftState();
+        }
+
+        function renderPreview() {
+            const paperPreview = document.getElementById('paperPreview');
+            paperPreview.classList.add('academic-paper-preview');
+            paperPreview.innerHTML = buildAcademicPagesMarkup() || '<p style="text-align: center; color: #64748b;">No questions loaded</p>';
+            updateStats();
+        }
+
+        function updateStats() {
+            const totalQuestions = questions.length;
+            const totalMarks = questions.reduce((sum, q) => sum + (q.marks || 1), 0);
+            const sections = getSectionDefinitions();
+
+            const examQuestionsEl = document.getElementById('examQuestions');
+            const examMarksEl = document.getElementById('examMarks');
+            if (examQuestionsEl) examQuestionsEl.textContent = totalQuestions;
+            if (examMarksEl) examMarksEl.textContent = totalMarks;
+            document.getElementById('totalQuestionsDisplay').textContent = totalQuestions;
+            document.getElementById('totalMarksDisplay').textContent = totalMarks;
+            const shellQuestions = document.getElementById('workspacePreviewCount');
+            const shellMarks = document.getElementById('workspacePreviewMarks');
+            if (shellQuestions) shellQuestions.textContent = totalQuestions;
+            if (shellMarks) shellMarks.textContent = totalMarks;
+            const structureEl = document.getElementById('paperStructureSummary');
+            if (structureEl) {
+                structureEl.textContent = sections
+                    .map((section) => `Section ${section.key}: ${section.questions.length}`)
+                    .join(' | ') || 'No questions loaded';
+            }
+        }
+
+        function updateDuration(value) {
+            examData.duration = parseInt(value);
+            persistPreviewDraftState();
+            renderPreview();
+        }
+
+        function updateTitle(value) {
+            examData.title = value;
+            persistPreviewDraftState();
+            renderPreview();
+        }
+
+        function printPaper() {
+            window.print();
+        }
+
+        function navigateTeacherWorkspace(target, options = {}) {
+            if (window.TeacherShellNav && typeof window.TeacherShellNav.navigate === 'function') {
+                return window.TeacherShellNav.navigate(target, options);
+            }
+            if (options.replace) {
+                window.location.replace(target);
+                return target;
+            }
+            window.location.href = target;
+            return target;
+        }
+
+        function goBackToEditor() {
+            localStorage.setItem('editedQuestions', JSON.stringify(questions));
+            navigateTeacherWorkspace('question-editor.html');
+        }
+
+        function goBackToCreation() {
+            if (confirm('Go back to exam creation? Any changes will be lost.')) {
+                navigateTeacherWorkspace('create-exam.html');
+            }
+        }
+
+        async function fetchJsonWithRetry(url, options = {}, retries = 3) {
+            let lastError = null;
+            for (let attempt = 1; attempt <= retries; attempt++) {
+                try {
+                    const headers = await buildPreviewBackendHeaders(options.headers);
+                    const res = await fetch(url, {
+                        ...options,
+                        headers
+                    });
+                    const text = await res.text();
+                    let data = null;
+                    try { data = text ? JSON.parse(text) : null; } catch (_) { data = null; }
+                    if (res.ok) {
+                        return { ok: true, status: res.status, data, text };
+                    }
+                    const msg = (data && (data.error || data.message)) || text || `HTTP ${res.status}`;
+                    lastError = new Error(msg);
+                } catch (err) {
+                    lastError = err;
+                }
+
+                const transient = /winerror 10035|timeout|network|temporarily unavailable|connection/i.test(
+                    (lastError && lastError.message) || ''
+                );
+                if (!transient || attempt === retries) break;
+                await new Promise((resolve) => setTimeout(resolve, 350 * attempt));
+            }
+            throw lastError || new Error('Request failed');
+        }
+
+        async function publishExamSafe() {
+            if (isPublishing) return;
+
+            const publishBtn = document.querySelector('.btn-block.btn-publish');
+            const originalPublishText = publishBtn ? publishBtn.textContent : 'Publish Exam';
+            isPublishing = true;
+
+            if (publishBtn) {
+                publishBtn.disabled = true;
+                publishBtn.style.opacity = '0.7';
+                publishBtn.style.cursor = 'not-allowed';
+                publishBtn.textContent = 'Publishing...';
+            }
+
+            try {
+                const title = document.getElementById('titleInput').value;
+                const duration = document.getElementById('durationInput').value;
+
+                if (!title.trim()) {
+                    alert('Please enter an exam title');
+                    return;
+                }
+
+                if (questions.length === 0) {
+                    alert('Please add questions before publishing');
+                    return;
+                }
+
+                const expectedTotal = Number(examData?.requestedTotal || 0);
+                if (expectedTotal > 0 && questions.length !== expectedTotal) {
+                    alert(`Question count mismatch: expected ${expectedTotal}, current ${questions.length}. Please regenerate/fix before publishing.`);
+                    return;
+                }
+
+                const preparedQuestions = questions.map((q) => {
+                    let correctAnswer = q.correct_answer || null;
+                    if (!correctAnswer && Array.isArray(q.options)) {
+                        const idx = q.options.findIndex((opt) => opt && opt.is_correct === true);
+                        if (idx >= 0) {
+                            correctAnswer = String.fromCharCode(65 + idx);
+                        }
+                    }
+                    const normalizedType = normalizeQuestionType(q.question_type || q.type || '');
+
+                    return {
+                        ...q,
+                        question_text: q.question_text || q.question || '',
+                        question_type: normalizedType || '',
+                        correct_answer: correctAnswer
+                    };
+                });
+
+                const examPayload = {
+                    title: title,
+                    duration: parseInt(duration, 10),
+                    questions: preparedQuestions,
+                    totalMarks: preparedQuestions.reduce((sum, q) => sum + (q.marks || 1), 0),
+                    createdAt: new Date().toISOString(),
+                    teacher_id: localStorage.getItem('userId') || localStorage.getItem('teacherId'),
+                    status: 'published',
+                    course_id: examData.courseId || null
+                };
+
+                const examId = examData.examId || examData.exam_id || null;
+                const backends = Array.from(new Set([
+                    'http://127.0.0.1:5000/api',
+                    'http://localhost:5000/api',
+                    `http://${window.location.hostname}:5000/api`
+                ]));
+
+                let lastError = null;
+                for (const backend of backends) {
+                    try {
+                        if (examId) {
+                            const syncRes = await fetchJsonWithRetry(`${backend}/exams/${encodeURIComponent(examId)}/questions`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    questions: preparedQuestions
+                                })
+                            }, 3);
+
+                            const syncData = syncRes.data || {};
+                            if ((syncData.questions_saved || 0) !== preparedQuestions.length) {
+                                lastError = new Error(`Only ${syncData.questions_saved || 0}/${preparedQuestions.length} questions saved`);
+                                continue;
+                            }
+
+                            const updateRes = await fetchJsonWithRetry(`${backend}/exams/${encodeURIComponent(examId)}`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    status: 'published',
+                                    title: examPayload.title,
+                                    duration: examPayload.duration,
+                                    total_marks: examPayload.totalMarks,
+                                    course_id: examPayload.course_id || examData.courseId || null
+                                })
+                            }, 3);
+
+                            const data = updateRes.data || {};
+                            const publishedExamId = data.exam_id || examId;
+                            if (publishedExamId) {
+                                localStorage.setItem(`exam_questions_${publishedExamId}`, JSON.stringify(preparedQuestions));
+                            }
+
+                            upsertPublishedExam(publishedExamId, examPayload);
+                            alert('Exam published successfully!');
+                            sessionStorage.clear();
+                            navigateTeacherWorkspace('dashboard-teacher.html?view=dashboard');
+                            return;
+                        }
+
+                        const createRes = await fetchJsonWithRetry(`${backend}/exams/create`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(examPayload)
+                        }, 3);
+
+                        const data = createRes.data || {};
+                        if (data.success) {
+                            const publishedExamId = data.exam_id || examData.examId || examData.exam_id;
+                            if (publishedExamId) {
+                                localStorage.setItem(`exam_questions_${publishedExamId}`, JSON.stringify(preparedQuestions));
+                            }
+
+                            upsertPublishedExam(publishedExamId, examPayload);
+                            alert('Exam published successfully!');
+                            sessionStorage.clear();
+                            navigateTeacherWorkspace('dashboard-teacher.html?view=dashboard');
+                            return;
+                        }
+
+                        lastError = new Error(data.error || 'Failed to publish exam');
+                    } catch (err) {
+                        lastError = err;
+                    }
+                }
+
+                console.error('Publish failed:', lastError);
+                alert('Publish failed: ' + (lastError?.message || 'Network error'));
+            } finally {
+                isPublishing = false;
+                if (publishBtn) {
+                    publishBtn.disabled = false;
+                    publishBtn.style.opacity = '';
+                    publishBtn.style.cursor = '';
+                    publishBtn.textContent = originalPublishText;
+                }
+            }
+        }
+        window.publishExamSafe = publishExamSafe;
+        function upsertPublishedExam(examId, payload) {
+            if (!examId) return;
+            const record = {
+                exam_id: examId,
+                exam_title: payload.title,
+                teacher_id: localStorage.getItem('userId'),
+                status: 'published',
+                scheduled_at: payload.createdAt,
+                duration_minutes: payload.duration,
+                total_marks: payload.totalMarks,
+                difficulty: 'medium',
+                course_id: examData.courseId || null,
+                course_code: examData.courseCode || 'N/A',
+                course_name: examData.courseName || 'Course'
+            };
+
+            const existing = JSON.parse(localStorage.getItem('exams') || '[]');
+            const filtered = existing.filter(item => (item.exam_id || item.id) !== examId);
+            filtered.unshift(record);
+            localStorage.setItem('exams', JSON.stringify(filtered));
+        }
+
+        function openStudentDashboard() {
+            window.location.href = 'dashboard-student.html';
+        }
+
+        function openTakeExam() {
+            const examId = examData.examId || examData.exam_id;
+            if (!examId) {
+                alert('Exam ID not found. Please publish or regenerate the exam first.');
+                return;
+            }
+            window.location.href = `take-exam.html?id=${examId}`;
+        }
+
+        function logout() {
+            if (window.SessionManager) {
+                window.SessionManager.logout('manual');
+                return;
+            }
+            [
+                'isLoggedIn', 'userRole', 'userEmail', 'userId', 'userName',
+                'userFirstName', 'userLastName', 'studentId', 'teacherId',
+                'adminId', 'authLoginAt', 'authLastActivityAt', 'authLogoutAt'
+            ].forEach((key) => {
+                localStorage.removeItem(key);
+                sessionStorage.removeItem(key);
+            });
+            window.location.href = 'login.html';
+        }
+    </script>
+    <script src="js/ui-feedback.js"></script>
+    <script src="js/chatbot.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

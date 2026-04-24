@@ -1,0 +1,2229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%234f46e5'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='28' fill='white' font-family='Arial' font-weight='bold'%3ESE%3C/text%3E%3C/svg%3E">
+    <title>Create Exam | Smart Exam System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="js/supabase.min.js"></script>
+    <script src="js/app-config.js"></script>
+    <script src="js/session-manager.js"></script>
+    <script src="js/mobile-nav.js"></script>
+    <script src="js/user-profile.js"></script>
+    <script src="js/teacher-shell.js"></script>
+    <script src="js/app-shell.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-main: #F0F4FF;
+            --bg-panel: #FFFFFF;
+            --bg-subtle: #F0F4FF;
+            --text-main: #1E3A8A;
+            --text-muted: #3B82F6;
+            --line: #BFDBFE;
+            --brand: #1E3A8A;
+            --brand-strong: #1e40af;
+            --success: #22c55e;
+            --warn: #f59e0b;
+            --danger: #ef4444;
+            --shadow-soft: 0 4px 16px rgba(30,58,138,0.08);
+        }
+
+        body {
+            font-family: 'Manrope', 'IBM Plex Sans', 'Segoe UI', sans-serif;
+            color: var(--text-main);
+            background: #F0F4FF;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: grid; gap: 0.14rem; margin-bottom: 0;
+            justify-items: center; text-align: center;
+            background: #1E3A8A;
+            border-radius: 14px 14px 0 0;
+            padding: 20px 28px;
+        }
+        .page-title { font-size: 1.35rem; font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em; }
+        .page-subtitle { color: #BFDBFE; font-size: 0.85rem; }
+
+        /* Step Indicator */
+        .steps {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            align-items: start;
+            gap: 0.5rem;
+            max-width: none;
+            margin: 0 0 1.25rem;
+            padding: 14px 28px;
+            border: none;
+            border-bottom: 1px solid #BFDBFE;
+            border-radius: 0;
+            background: #EFF6FF;
+        }
+        .steps::before {
+            content: "";
+            position: absolute;
+            left: 20%; right: 20%; top: 50%;
+            height: 2px;
+            background: #BFDBFE;
+        }
+        .step {
+            position: relative; z-index: 1;
+            display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+            color: #6B7280; font-weight: 600; font-size: 0.72rem; text-align: center;
+        }
+        .step p { font-size: 0.72rem; line-height: 1.2; max-width: 90px; }
+        .step.active { color: #1E3A8A; }
+        .step.done   { color: #1e40af; }
+
+        .step-circle {
+            width: 34px; height: 34px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid #BFDBFE;
+            background: #FFFFFF;
+            color: #6B7280;
+            font-weight: 800; font-size: 0.72rem;
+            box-shadow: none;
+            transition: all 0.25s;
+        }
+        .step.active .step-circle {
+            border-color: #1E3A8A;
+            background: #1E3A8A;
+            color: #fff;
+            box-shadow: 0 0 0 4px rgba(30,58,138,0.15), 0 4px 12px rgba(59,130,246,0.4);
+        }
+        .step.done .step-circle {
+            border-color: #1e40af;
+            background: #1e40af;
+            color: #EFF6FF;
+        }
+
+        /* Cards */
+        .card {
+            background: #FFFFFF;
+            border-radius: 0 0 14px 14px;
+            padding: 1.5rem 1.6rem;
+            box-shadow: 0 4px 16px rgba(30,58,138,0.08);
+            border: 0.5px solid #BFDBFE;
+            border-top: none;
+            margin-bottom: 1rem;
+        }
+        .card h2 {
+            font-size: 1rem; font-weight: 800; margin-bottom: 1.25rem;
+            color: #1E3A8A;
+            display: flex; align-items: center; gap: 0.6rem;
+            padding-bottom: 0.85rem;
+            border-bottom: 1.5px solid #DBEAFE;
+            letter-spacing: -0.01em;
+        }
+        .card h2::before {
+            content: attr(data-step);
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 30px; height: 30px; border-radius: 50%;
+            background: #1E3A8A;
+            color: #fff; font-size: 0.72rem; font-weight: 900; flex-shrink: 0;
+        }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 1.1rem; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+        label {
+            display: block; margin-bottom: 0.45rem;
+            font-weight: 600; color: #1e40af; font-size: 0.82rem;
+        }
+
+        .form-control {
+            width: 100%; min-height: 44px; padding: 0.72rem 1rem;
+            border-radius: 8px;
+            border: 1.5px solid #BFDBFE;
+            font-size: 0.9rem; font-family: 'Manrope', sans-serif;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+            background: #F8FAFF;
+            color: #1F2937;
+        }
+        .form-control::placeholder { color: #93C5FD; }
+        .form-control:hover { border-color: #3B82F6; background: #FFFFFF; }
+        .form-control:focus {
+            outline: none; border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+            background: #FFFFFF;
+        }
+        .form-control[type="checkbox"], .form-control[type="radio"] { width: auto; min-height: auto; padding: 0; cursor: pointer; outline: none; }
+        .form-control[type="checkbox"]:focus, .form-control[type="radio"]:focus { outline: none; box-shadow: none; }
+        textarea.form-control { min-height: 80px; resize: vertical; line-height: 1.6; }
+        select.form-control option { background: #FFFFFF; color: #1E3A8A; }
+        .form-control.is-derived { background: #F0F4FF; color: #3B82F6; border-style: dashed; font-weight: 700; }
+
+        small { display: block; margin-top: 0.35rem; color: #6B7280; font-size: 0.78rem; line-height: 1.4; }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+            padding: 0.72rem 1.4rem; border: none; border-radius: 10px;
+            cursor: pointer; font-weight: 700; font-size: 0.9rem;
+            font-family: 'Manrope', sans-serif; transition: all 0.22s ease;
+        }
+        .btn:hover:not(:disabled) { transform: translateY(-2px); }
+        .btn:active:not(:disabled) { transform: translateY(0); }
+        .btn-primary {
+            background: #1E3A8A; color: #fff;
+            box-shadow: 0 4px 14px rgba(30,58,138,0.3);
+        }
+        .btn-primary:hover:not(:disabled) { background: #1e40af; box-shadow: 0 6px 18px rgba(59,130,246,0.4); }
+        .btn-primary:disabled { background: rgba(100,116,139,0.4); color: #64748b; cursor: not-allowed; box-shadow: none; transform: none; }
+        .btn-secondary {
+            background: #FFFFFF; color: #1E3A8A;
+            border: 1.5px solid #3B82F6;
+        }
+        .btn-secondary:hover:not(:disabled) { background: #EFF6FF; }
+
+        /* Upload Section */
+        .upload-section {
+            text-align: center;
+            background: rgba(59,130,246,0.05);
+            border: 2px dashed rgba(59,130,246,0.3);
+            padding: 1.75rem 1.5rem; border-radius: 14px; margin-bottom: 1.25rem;
+        }
+        .upload-section:hover { border-color: rgba(59,130,246,0.5); background: rgba(59,130,246,0.08); }
+        .upload-section p { margin-top: 0.85rem; color: #6B7280; font-size: 0.88rem; }
+
+        /* Question Cards */
+        .question-card {
+            border: 1px solid #BFDBFE; border-radius: 12px;
+            padding: 1.1rem 1.2rem; margin-bottom: 0.85rem;
+            background: #F8FAFC;
+        }
+        .question-card:hover { border-color: #3B82F6; }
+        .question-number {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: linear-gradient(135deg, #3B82F6, #1e40af);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 0.8rem; margin-right: 0.85rem; flex-shrink: 0;
+        }
+        .question-text { font-weight: 600; margin-bottom: 0.65rem; color: #1E3A8A; line-height: 1.55; }
+        .question-meta { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.65rem; }
+        .meta-item {
+            background: #F0F4FF; border: 1px solid #BFDBFE; border-radius: 999px;
+            padding: 0.28rem 0.7rem; font-size: 0.78rem;
+            display: flex; align-items: center; gap: 0.3rem;
+        }
+        .meta-label { font-weight: 600; color: #6B7280; }
+        .meta-value { color: #1E3A8A; font-weight: 700; }
+        .options-section { background: #F0F4FF; border: 1px solid #BFDBFE; border-radius: 10px; padding: 0.85rem 1rem; }
+        .option-item {
+            padding: 0.55rem 0.75rem; margin: 0.4rem 0;
+            background: #F0F4FF; border-radius: 8px;
+            border-left: 3px solid #BFDBFE;
+            font-size: 0.88rem; color: #1E3A8A;
+        }
+        .option-item.correct { border-left-color: #3B82F6; background: rgba(59,130,246,0.08); color: #1e40af; }
+        .option-key { font-weight: 800; color: #1E3A8A; margin-right: 0.6rem; }
+
+        /* Success Header */
+        .success-header {
+            background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2);
+            color: #1E3A8A; padding: 1.25rem 1.4rem; border-radius: 12px 12px 0 0; margin-bottom: 0;
+        }
+        .success-header h2 { margin: 0; font-size: 1.1rem; color: #1E3A8A; border: none; padding: 0; }
+        .success-header h2::before { display: none; }
+        .success-header p { margin-top: 0.3rem; color: #6B7280; font-size: 0.88rem; }
+        .questions-container { background: #F0F4FF; padding: 1.25rem; border-radius: 0 0 12px 12px; border: 1px solid #BFDBFE; border-top: none; }
+
+        /* Alerts */
+        .alert { padding: 0.9rem 1.1rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.88rem; line-height: 1.55; }
+        .alert-error { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.28); color: #991B1B; }
+        .alert-info { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); color: #1E3A8A; }
+
+        /* Spinner */
+        .spinner { width: 44px; height: 44px; border: 3px solid rgba(59,130,246,0.2); border-top: 3px solid #3B82F6; border-radius: 50%; margin: 0 auto; animation: spin 0.9s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Checkbox row */
+        .checkbox-row {
+            display: flex; align-items: center; gap: 0.65rem;
+            padding: 0.75rem 1rem; border-radius: 10px;
+            border: 1px solid #BFDBFE; background: #F8FAFF;
+            cursor: pointer; transition: border-color 0.2s, background 0.2s;
+        }
+        .checkbox-row:hover { border-color: #3B82F6; background: #EFF6FF; }
+        .checkbox-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: #3B82F6; cursor: pointer; flex-shrink: 0; }
+        .checkbox-row label { margin: 0; font-size: 0.9rem; color: #1F2937; cursor: pointer; font-weight: 600; }
+
+        /* Generation Progress */
+        #generationProgress { text-align: center; padding: 2rem; background: #F0F4FF; border-radius: 14px; border: 1px solid #BFDBFE; margin-top: 1rem; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+            .steps { grid-template-columns: 1fr !important; max-width: none !important; gap: 0.5rem !important; }
+            .steps::before { display: none; }
+            .step { flex-direction: row; justify-content: flex-start; text-align: left; }
+            .step p { max-width: none; }
+        }
+
+        .create-exam-page .workspace-shell { min-height: auto; }
+        .create-exam-page .card { margin-bottom: 0.85rem; }
+        .create-exam-page .card:last-of-type { margin-bottom: 0; }
+    </style>
+    <link rel="stylesheet" href="css/ui-system.css?v=2">
+    <link rel="stylesheet" href="css/product-theme.css?v=2">
+    <link rel="stylesheet" href="css/workspace-shell.css?v=2">
+    <style>
+/* ---------------------------------------------------
+   CREATE EXAM — CONTENT AREA REDESIGN
+   Targets exact class names from the HTML.
+   Shell (navbar/sidebar) is untouched.
+   --------------------------------------------------- */
+
+/* 1 — Content area background */
+html body.create-exam-page,
+html body.create-exam-page.workspace-theme {
+    background: #F8FAFF !important;
+    background-image: none !important;
+}
+html body.create-exam-page .workspace-content,
+html body.create-exam-page .container {
+    background: transparent !important;
+}
+
+/* 2 — Page title */
+html body.create-exam-page .page-header {
+    background: #1E3A8A !important;
+    border-radius: 14px 14px 0 0 !important;
+    padding: 20px 28px !important;
+    margin-bottom: 0 !important;
+}
+html body.create-exam-page .page-title {
+    color: #FFFFFF !important;
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+}
+
+/* 3 — Stepper bar */
+html body.create-exam-page .steps {
+    background: #EFF6FF !important;
+    border: none !important;
+    border-bottom: 1px solid #BFDBFE !important;
+    border-radius: 0 !important;
+    padding: 14px 28px !important;
+    margin-bottom: 0 !important;
+    max-width: none !important;
+}
+html body.create-exam-page .steps::before {
+    background: #BFDBFE !important;
+    height: 2px !important;
+    top: 50% !important;
+    left: 20% !important;
+    right: 20% !important;
+}
+
+/* Inactive step circle */
+html body.create-exam-page .step-circle {
+    background: #FFFFFF !important;
+    border: 2px solid #BFDBFE !important;
+    color: #6B7280 !important;
+    box-shadow: none !important;
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+}
+
+/* Active step circle */
+html body.create-exam-page .step.active .step-circle {
+    background: #1E3A8A !important;
+    border-color: #1E3A8A !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 0 4px rgba(59,130,246,0.2), 0 4px 12px rgba(59,130,246,0.4) !important;
+}
+
+/* Done step circle */
+html body.create-exam-page .step.done .step-circle {
+    background: #1e40af !important;
+    border-color: #1E3A8A !important;
+    color: #EFF6FF !important;
+    box-shadow: none !important;
+}
+
+/* Step label text */
+html body.create-exam-page .step p {
+    color: #6B7280 !important;
+}
+html body.create-exam-page .step.active p {
+    color: #1E3A8A !important;
+    font-weight: 600 !important;
+}
+html body.create-exam-page .step.active {
+    color: #1E3A8A !important;
+}
+html body.create-exam-page .step {
+    color: #6B7280 !important;
+}
+
+/* 4 — Form card */
+html body.create-exam-page .card {
+    background: #FFFFFF !important;
+    border: 0.5px solid #BFDBFE !important;
+    border-top: none !important;
+    border-radius: 0 0 14px 14px !important;
+    box-shadow: 0 4px 16px rgba(30,58,138,0.08) !important;
+}
+
+/* 5 — Card section heading h2 */
+html body.create-exam-page .card h2 {
+    color: #1E3A8A !important;
+    border-bottom-color: #EFF6FF !important;
+    font-size: 16px !important;
+}
+html body.create-exam-page .card h2::before {
+    background: #1E3A8A !important;
+    color: #FFFFFF !important;
+    border-radius: 50% !important;
+    width: 30px !important;
+    height: 30px !important;
+}
+
+/* 6 — Labels */
+html body.create-exam-page label {
+    color: #1e40af !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+}
+
+/* 7 — Inputs, selects, textareas */
+html body.create-exam-page .form-control {
+    background: #F8FAFF !important;
+    border: 1.5px solid #BFDBFE !important;
+    color: #1E3A8A !important;
+    border-radius: 8px !important;
+}
+html body.create-exam-page .form-control::placeholder {
+    color: #93C5FD !important;
+}
+html body.create-exam-page .form-control:focus {
+    border-color: #3B82F6 !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15) !important;
+}
+html body.create-exam-page select.form-control option {
+    background: #FFFFFF !important;
+    color: #1E3A8A !important;
+}
+
+/* 8 — Primary button (Next / Generate) */
+html body.create-exam-page .btn.btn-primary,
+html body.create-exam-page button.btn-primary {
+    background: #1E3A8A !important;
+    background-image: none !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 12px rgba(59,130,246,0.3) !important;
+}
+html body.create-exam-page .btn.btn-primary:hover:not(:disabled),
+html body.create-exam-page button.btn-primary:hover:not(:disabled) {
+    background: #1e40af !important;
+    box-shadow: 0 6px 18px rgba(59,130,246,0.4) !important;
+}
+
+/* Back button */
+html body.create-exam-page .btn.btn-secondary,
+html body.create-exam-page button.btn-secondary {
+    background: #FFFFFF !important;
+    color: #1E3A8A !important;
+    border: 1.5px solid #3B82F6 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+}
+html body.create-exam-page .btn.btn-secondary:hover:not(:disabled),
+html body.create-exam-page button.btn-secondary:hover:not(:disabled) {
+    background: #EFF6FF !important;
+}
+
+/* Generate button */
+html body.create-exam-page #generateBtn {
+    background: #1E3A8A !important;
+    background-image: none !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 6px 18px rgba(59,130,246,0.35) !important;
+}
+html body.create-exam-page #generateBtn:hover:not(:disabled) {
+    background: #1e40af !important;
+}
+
+/* Upload section */
+html body.create-exam-page .upload-section {
+    background: rgba(59,130,246,0.05) !important;
+    border-color: rgba(59,130,246,0.3) !important;
+}
+
+/* Checkbox accent */
+html body.create-exam-page .checkbox-row input[type="checkbox"] {
+    accent-color: #3B82F6 !important;
+}
+html body.create-exam-page .checkbox-row {
+    background: #F0F4FF !important;
+    border-color: #BFDBFE !important;
+}
+html body.create-exam-page .checkbox-row label {
+    color: #1E3A8A !important;
+}
+
+/* Spinner */
+html body.create-exam-page .spinner {
+    border-top-color: #3B82F6 !important;
+}
+
+/* Small helper text */
+html body.create-exam-page small {
+    color: #6B7280 !important;
+}
+
+/* Logout Button Redesign */
+.workspace-sidebar-footer-button.btn-logout {
+    background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 1.25rem !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    cursor: pointer !important;
+    position: relative !important;
+    overflow: hidden !important;
+    width: 100% !important;
+    min-height: auto !important;
+}
+.workspace-sidebar-footer-button.btn-logout:hover {
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important;
+    box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-2px) !important;
+}
+.workspace-sidebar-footer-button.btn-logout:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+.workspace-sidebar-footer-button.btn-logout span {
+    transition: transform 0.3s ease !important;
+}
+.workspace-sidebar-footer-button.btn-logout:hover span:first-child {
+    transform: translateX(2px) !important;
+}
+    </style>
+</head>
+<body class="workspace-theme sidebar-simple create-exam-page" style="background:#F0F4FF;">
+    <script>
+        (function() {
+            const params = new URLSearchParams(window.location.search || '');
+            const isEmbedded = params.get('embed') === '1' || window.top !== window;
+            if (isEmbedded) {
+                window.__TEACHER_SHELL_EMBEDDED__ = true;
+                document.body.classList.add('embedded-shell');
+                document.body.dataset.shellMinHeight = '0';
+            }
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const userRole = localStorage.getItem('userRole');
+            if (!isLoggedIn || userRole !== 'teacher') {
+                window.location.href = 'login.html';
+            }
+            if (!window.__TEACHER_SHELL_EMBEDDED__ && window.SessionManager && !window.SessionManager.init({ loginUrl: 'login.html' })) {
+                return;
+            }
+        })();
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.AppShell) {
+                window.AppShell.init()
+            }
+            // Clear any stale exam data from previous sessions
+            localStorage.removeItem('generatedQuestions');
+            localStorage.removeItem('examCreationData');
+            localStorage.removeItem('editedQuestions');
+            // Force blue theme
+            function applyTheme() {
+                if (typeof updateStepStyles === 'function') updateStepStyles();
+                document.body.style.setProperty('background', '#F0F4FF', 'important');
+            }
+            applyTheme();
+            requestAnimationFrame(applyTheme);
+            setTimeout(applyTheme, 200);
+        })
+    </script>
+
+    <nav class="workspace-topbar">
+        <div class="workspace-topbar-content">
+            <div class="header-brand-group">
+                <button class="shell-toggle" type="button" data-sidebar-toggle aria-label="Toggle sidebar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                        <path d="M4 7h16M4 12h16M4 17h16" />
+                    </svg>
+                </button>
+                <a href="dashboard-teacher.html" class="workspace-logo">
+                    <span class="workspace-brand-mark">SE</span>
+                    <span class="workspace-brand-copy">
+                        <span class="workspace-brand-name">Smart Exam System</span>
+                        <span class="workspace-brand-page">Create Exam</span>
+                    </span>
+                </a>
+            </div>
+            <div class="header-utility workspace-topbar-actions">
+                <a class="workspace-profile-trigger" href="profile.html" aria-label="Open profile">
+                    <span class="workspace-profile-avatar" id="workspaceHeaderAvatar">TE</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="workspace-shell">
+        <aside class="workspace-sidebar">
+            <div class="workspace-sidebar-head">
+                <div class="workspace-sidebar-title">Teacher Workflow</div>
+                <div class="workspace-sidebar-profile">
+                    <div class="workspace-sidebar-avatar" id="workspaceSidebarAvatar">TE</div>
+                    <div class="workspace-sidebar-profile-copy">
+                        <span class="workspace-sidebar-profile-name" id="workspaceSidebarName">Teacher Workspace</span>
+                        <span class="workspace-sidebar-profile-meta" id="workspaceSidebarMeta">teacher@example.com</span>
+                    </div>
+                </div>
+            </div>
+            <nav class="workspace-sidebar-nav" aria-label="Create Exam Navigation">
+                <a href="dashboard-teacher.html" class="workspace-sidebar-link">
+                    <span class="workspace-sidebar-link-main">
+                        <span class="workspace-sidebar-link-icon">DB</span>
+                        <span class="workspace-sidebar-link-copy">
+                            <span class="workspace-sidebar-link-title">Dashboard</span>
+                            <span class="workspace-sidebar-link-desc">Overview and teaching metrics</span>
+                        </span>
+                    </span>
+                    <span>Home</span>
+                </a>
+                <a href="dashboard-teacher.html#recentExamsSection" class="workspace-sidebar-link">
+                    <span class="workspace-sidebar-link-main">
+                        <span class="workspace-sidebar-link-icon">EX</span>
+                        <span class="workspace-sidebar-link-copy">
+                            <span class="workspace-sidebar-link-title">Exams</span>
+                            <span class="workspace-sidebar-link-desc">Published, draft, and archived</span>
+                        </span>
+                    </span>
+                    <span>List</span>
+                </a>
+                <a href="create-exam.html" class="workspace-sidebar-link active">
+                    <span class="workspace-sidebar-link-main">
+                        <span class="workspace-sidebar-link-icon">CE</span>
+                        <span class="workspace-sidebar-link-copy">
+                            <span class="workspace-sidebar-link-title">Create Exam</span>
+                            <span class="workspace-sidebar-link-desc">Build a new paper from material</span>
+                        </span>
+                    </span>
+                    <span>Current</span>
+                </a>
+                <a href="question-editor.html" class="workspace-sidebar-link">
+                    <span class="workspace-sidebar-link-main">
+                        <span class="workspace-sidebar-link-icon">QE</span>
+                        <span class="workspace-sidebar-link-copy">
+                            <span class="workspace-sidebar-link-title">Question Editor</span>
+                            <span class="workspace-sidebar-link-desc">Refine generated questions</span>
+                        </span>
+                    </span>
+                    <span>Edit</span>
+                </a>
+                <a href="exam-preview.html" class="workspace-sidebar-link">
+                    <span class="workspace-sidebar-link-main">
+                        <span class="workspace-sidebar-link-icon">PV</span>
+                        <span class="workspace-sidebar-link-copy">
+                            <span class="workspace-sidebar-link-title">Preview & Publish</span>
+                            <span class="workspace-sidebar-link-desc">Finalize paper and release it</span>
+                        </span>
+                    </span>
+                    <span>Final</span>
+                </a>
+                <a href="question-bank.html" class="workspace-sidebar-link">
+                    <span class="workspace-sidebar-link-main">
+                        <span class="workspace-sidebar-link-icon">QB</span>
+                        <span class="workspace-sidebar-link-copy">
+                            <span class="workspace-sidebar-link-title">Question Bank</span>
+                            <span class="workspace-sidebar-link-desc">Reusable stored questions</span>
+                        </span>
+                    </span>
+                    <span>Bank</span>
+                </a>
+                <a href="analytics.html" class="workspace-sidebar-link">
+                    <span class="workspace-sidebar-link-main">
+                        <span class="workspace-sidebar-link-icon">AN</span>
+                        <span class="workspace-sidebar-link-copy">
+                            <span class="workspace-sidebar-link-title">Analytics</span>
+                            <span class="workspace-sidebar-link-desc">Performance and grading insights</span>
+                        </span>
+                    </span>
+                    <span>Live</span>
+                </a>
+            </nav>
+            <div class="workspace-sidebar-footer">
+                <a class="workspace-sidebar-footer-link" href="profile.html">
+                    <span>PF</span>
+                    <span>Profile</span>
+                </a>
+                <button class="workspace-sidebar-footer-button btn-logout" type="button" onclick="logout()">
+                    <span>LO</span>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="workspace-content">
+    <div class="container">
+        <div class="page-header" style="background:#1E3A8A;border-radius:14px 14px 0 0;padding:20px 28px;margin-bottom:0;text-align:center;">
+            <h1 class="page-title">Create New Exam</h1>
+        </div>
+
+        <!-- Connection Status Alert -->
+        <div id="connectionStatus" style="display: none;"></div>
+
+        <div class="steps" style="background:#EFF6FF;border:none;border-bottom:1px solid #BFDBFE;border-radius:0;">
+            <div class="step active" id="step1-indicator">
+                <div class="step-circle" id="circle1" style="background:#1E3A8A;border:2px solid #1E3A8A;color:#fff;box-shadow:0 0 0 4px rgba(30,58,138,0.2);">1</div>
+                <p>Basic Info</p>
+            </div>
+            <div class="step" id="step2-indicator">
+                <div class="step-circle" id="circle2" style="background:#FFFFFF;border:2px solid #BFDBFE;color:#6B7280;">2</div>
+                <p>Generate Questions</p>
+            </div>
+            <div class="step" id="step3-indicator">
+                <div class="step-circle" id="circle3" style="background:#FFFFFF;border:2px solid #BFDBFE;color:#6B7280;">3</div>
+                <p>Review & Publish</p>
+            </div>
+        </div>
+
+        <div class="card" id="step1">
+            <h2 data-step="1">Basic Exam Information</h2>
+
+            <div class="form-group">
+                <label>Exam Title *</label>
+                <input type="text" id="examTitle" class="form-control" placeholder="e.g., Data Structures Midterm" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" style="flex: 2;">
+                    <label>Courses *</label>
+                    <select id="courseSelect" class="form-control" onchange="updateSubjectFromCourse()">
+                        <option value="">Loading courses...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Difficulty Level</label>
+                    <select id="difficulty" class="form-control">
+                        <option value="">-- Select Difficulty --</option>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Exam Start Time</label>
+                    <input type="datetime-local" id="examDate" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Exam End Time</label>
+                    <input type="datetime-local" id="examEndTime" class="form-control">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Total Marks *</label>
+                    <input type="number" id="totalMarks" class="form-control" min="10" max="500" placeholder="e.g., 100" autocomplete="off" required>
+                </div>
+                <div class="form-group">
+                    <label>Pass Mark *</label>
+                    <input type="number" id="passMark" class="form-control" min="0" max="500" placeholder="e.g., 50" autocomplete="off" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Duration (minutes) *</label>
+                <input type="number" id="duration" class="form-control" min="15" max="300" placeholder="e.g., 90" autocomplete="off" required>
+            </div>
+
+            <div class="form-group">
+                <label>Instructions</label>
+                <textarea id="instructions" class="form-control" rows="3" placeholder="Enter exam instructions for students..."></textarea>
+            </div>
+
+            <button onclick="goToStep2()" class="btn btn-primary" style="width: 100%; padding: 11px 14px;">
+                Next: Upload Materials
+            </button>
+        </div>
+
+        <div class="card" id="step2" style="display: none;">
+            <h2 data-step="2">Upload Materials & Generate Questions</h2>
+
+            <div class="upload-section">
+                <input type="file" id="fileUpload" accept=".pdf,.docx,.doc,.ppt,.pptx" multiple style="display: none;" onchange="handleFileSelect(event)">
+                <button onclick="document.getElementById('fileUpload').click()" class="btn btn-primary" style="padding: 11px 20px;">
+                    Choose Files (PDF, DOC, DOCX, PPT, PPTX)
+                </button>
+                <p style="margin-top: 1rem; color: rgba(203, 213, 225, 0.86);">Upload one or more course materials (10+ pages recommended for better quality)</p>
+                <div id="fileInfo" style="margin-top: 1rem;"></div>
+                <div id="fileWarnings" style="margin-top: 0.75rem;"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Number of Questions</label>
+                <input type="number" id="numQuestions" class="form-control" min="1" max="50" placeholder="Auto-calculated from counts">
+                <small style="color: rgba(203, 213, 225, 0.86);">Auto-calculated from MCQ + Short + Long counts.</small>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>MCQ Questions Count</label>
+                    <input type="number" id="mcqCount" class="form-control" min="0" max="50" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label>Short Questions Count</label>
+                    <input type="number" id="shortCount" class="form-control" min="0" max="50" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Long Questions Count</label>
+                <input type="number" id="longCount" class="form-control" min="0" max="50" autocomplete="off">
+                <small style="color: rgba(203, 213, 225, 0.86);">Total questions will be the sum of MCQ + Short + Long</small>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>MCQs Marks</label>
+                    <input type="number" id="mcqMarks" class="form-control" min="1" max="20" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label>Short Question Marks</label>
+                    <input type="number" id="shortMarks" class="form-control" min="1" max="50" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Long Question Marks</label>
+                <input type="number" id="longMarks" class="form-control" min="1" max="100" autocomplete="off">
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: center; gap: 0.6rem;">
+                <input type="checkbox" id="useHighQuality" checked>
+                <label for="useHighQuality" style="margin: 0; font-size: 0.95rem;">
+                    Use high-quality Qwen generation (slower)
+                </label>
+            </div>
+
+            <button onclick="generateQuestions()" id="generateBtn" class="btn btn-primary" style="width: 100%; padding: 15px; font-size: 1.1rem;" disabled>
+                Generate Questions Automatically
+            </button>
+
+            <div id="generationProgress" style="display: none; margin-top: 0.5rem; text-align: center; padding: 2rem; background: #F8FAFC; border-radius: 12px; border: 1px solid #BFDBFE;">
+                <div class="spinner"></div>
+                <p style="margin-top: 1.5rem; color: #dbeafe; font-size: 1.1rem; font-weight: 600;" id="progressText">Generating questions...</p>
+                <p style="margin-top: 0.5rem; color: rgba(203, 213, 225, 0.86); font-size: 0.9rem;">This may take 1-2 minutes. Please wait...</p>
+            </div>
+
+            <div id="generatedQuestions" style="display: none; margin-top: 2rem;">
+                <div class="success-header">
+                    <h2>Questions Generated Successfully</h2>
+                    <p>Review the auto-generated questions below</p>
+                </div>
+                <div class="questions-container" id="questionsList"></div>
+
+                <div style="margin-top: 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <button onclick="goToStep1()" class="btn btn-secondary" style="padding: 12px;">
+                        Back
+                    </button>
+                    <button onclick="goToStep3()" class="btn btn-primary" style="padding: 12px;">
+                        Next: Review
+                    </button>
+                </div>
+            </div>
+
+            <button onclick="goToStep1()" class="btn btn-secondary" style="width: 100%; padding: 15px; margin-top: 1rem; display: none;" id="backBtn2">
+                Back
+            </button>
+        </div>
+
+        <div class="card" id="step3" style="display: none;">
+            <h2>Step 3: Review & Publish Exam</h2>
+
+            <div style="background: #F8FAFC; border: 1px solid #BFDBFE; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem; color: #f8fafc;">Exam Summary</h3>
+                <div id="examSummary"></div>
+            </div>
+
+            <div id="finalQuestionsList" style="margin-bottom: 2rem;"></div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <button onclick="goToStep2FromStep3()" class="btn btn-secondary" style="padding: 15px;">
+                    Back
+                </button>
+                <button onclick="publishExam()" id="publishBtn" class="btn btn-primary" style="padding: 15px;">
+                    Publish Exam
+                </button>
+            </div>
+        </div>
+    </div>
+        </main>
+    </div>
+
+    <script>
+        // ========================================
+        // CONFIGURATION
+        // ========================================
+        const { SUPABASE_URL, SUPABASE_ANON_KEY, getBackendBase } = window.AppConfig;
+        const AI_BACKEND_URL = getBackendBase();
+        const MAX_UPLOAD_FILES = 10;
+        const MAX_TOTAL_UPLOAD_BYTES = 50 * 1024 * 1024; // Keep aligned with backend MAX_CONTENT_LENGTH
+
+        const supabaseClient = (window.supabase && window.supabase.createClient)
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            : null;
+
+        async function buildBackendHeaders(headers = {}) {
+            return window.AppConfig.buildAuthHeaders(supabaseClient, headers);
+        }
+
+        let selectedFiles = [];
+        let generatedQuestions = [];
+
+        // ========================================
+        // BACKEND CONNECTION TEST
+        // ========================================
+        async function testBackendConnection() {
+            const statusDiv = document.getElementById('connectionStatus');
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'alert alert-info';
+            statusDiv.innerHTML = 'Testing backend connection...';
+
+            try {
+                console.log('Testing backend at:', AI_BACKEND_URL);
+                
+                const response = await fetch(`${AI_BACKEND_URL}/health`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+
+                const data = await response.json();
+                console.log('Backend response:', data);
+
+                statusDiv.className = 'alert alert-info';
+                statusDiv.innerHTML = `
+                    <strong>Backend Connected!</strong><br>
+                    Status: ${data.status}<br>
+                    Message: ${data.message}<br>
+                    <small>Models: ${Object.keys(data.models || {}).join(', ')}</small>
+                `;
+
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+
+            } catch (error) {
+                console.error('Backend connection failed:', error);
+                
+                statusDiv.className = 'alert alert-error';
+                statusDiv.innerHTML = `
+                    <strong>Backend Connection Failed!</strong><br>
+                    Error: ${error.message}<br>
+                    <br>
+                    <strong>Troubleshooting:</strong><br>
+                    1. Check if backend is running: <code>python app.py</code><br>
+                    2. Verify URL: <a href="${AI_BACKEND_URL}/health" target="_blank">${AI_BACKEND_URL}/health</a><br>
+                    3. Check firewall/antivirus settings<br>
+                    4. Try in incognito mode (disables extensions)
+                `;
+            }
+        }
+
+        // ========================================
+        // INITIALIZATION
+        // ========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const userRole = localStorage.getItem('userRole');
+            if (!isLoggedIn || userRole !== 'teacher') {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            let userId = localStorage.getItem('userId');
+            if (!userId || !isValidUuid(userId)) {
+                userId = crypto.randomUUID();
+                localStorage.setItem('userId', userId);
+            }
+
+            loadCourses().catch(() => {});
+            resetCreateExamFormState();
+            initializeQuestionCountSync();
+            initializeMarksBreakdownSync();
+            initializeExamDateAutoClose();
+            initCreateExamShell();
+            updateCreateExamShell();
+        });
+
+
+        function initCreateExamShell() {
+            const profile = window.UserProfile ? window.UserProfile.getStoredProfile() : null;
+            const displayName = profile?.displayName || 'Teacher';
+            const initials = profile?.initials || 'TE';
+            const sidebarMeta = window.UserProfile
+                ? window.UserProfile.getProfileMeta(profile, 'Teacher')
+                : (profile?.email || 'Teacher');
+            const sideNameEl = document.getElementById('workspaceSidebarName');
+            const sideMetaEl = document.getElementById('workspaceSidebarMeta');
+            const avatarEl = document.getElementById('workspaceSidebarAvatar');
+            const headerAvatarEl = document.getElementById('workspaceHeaderAvatar');
+            if (sideNameEl) sideNameEl.textContent = displayName;
+            if (sideMetaEl) sideMetaEl.textContent = sidebarMeta;
+            if (avatarEl) avatarEl.textContent = initials;
+            if (headerAvatarEl) headerAvatarEl.textContent = initials;
+        }
+
+        function updateCreateExamShell() {
+            const stepEl = document.getElementById('workspaceStepValue');
+            const generatedEl = document.getElementById('workspaceGeneratedValue');
+            if (stepEl) {
+                let label = 'Basic Info';
+                if (document.getElementById('step3').style.display === 'block') {
+                    label = 'Review';
+                } else if (document.getElementById('step2').style.display === 'block') {
+                    label = 'Generation';
+                }
+                stepEl.textContent = label;
+            }
+            if (generatedEl) {
+                generatedEl.textContent = String((generatedQuestions || []).length || 0);
+            }
+        }
+        function resetCreateExamFormState() {
+            // Keep user auth data, but clear transient generation state from previous attempts.
+            window.currentExamId = null;
+            selectedFiles = [];
+            generatedQuestions = [];
+            sessionStorage.removeItem('generatedQuestions');
+            sessionStorage.removeItem('examCreationData');
+
+            const idsToClear = [
+                'duration', 'totalMarks', 'passMark',
+                'numQuestions', 'mcqCount', 'shortCount', 'longCount',
+                'mcqMarks', 'shortMarks', 'longMarks'
+            ];
+            idsToClear.forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+
+            const fileEl = document.getElementById('fileUpload');
+            if (fileEl) fileEl.value = '';
+            const fileInfoEl = document.getElementById('fileInfo');
+            if (fileInfoEl) fileInfoEl.innerHTML = '';
+            const fileWarningsEl = document.getElementById('fileWarnings');
+            if (fileWarningsEl) fileWarningsEl.innerHTML = '';
+        }
+
+        function initializeExamDateAutoClose() {
+            const examDateEl = document.getElementById('examDate');
+            if (!examDateEl) return;
+
+            const closePicker = () => {
+                const value = (examDateEl.value || '').trim();
+                const hasFullDateTime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value);
+                if (!hasFullDateTime) return;
+                // Blurring closes the native date-time picker once date+time are complete.
+                setTimeout(() => examDateEl.blur(), 0);
+            };
+
+            examDateEl.addEventListener('change', closePicker);
+        }
+
+        function initializeQuestionCountSync() {
+            const totalEl = document.getElementById('numQuestions');
+            const mcqEl = document.getElementById('mcqCount');
+            const shortEl = document.getElementById('shortCount');
+            const longEl = document.getElementById('longCount');
+
+            if (!totalEl || !mcqEl || !shortEl || !longEl) return;
+
+            // Prevent conflicting inputs: total is derived from breakdown.
+            totalEl.readOnly = true;
+            totalEl.classList.add('is-derived');
+            totalEl.style.cursor = 'not-allowed';
+            totalEl.title = 'Auto-calculated from MCQ + Short + Long';
+
+            const recalc = () => {
+                const mcq = parseInt(mcqEl.value, 10) || 0;
+                const short = parseInt(shortEl.value, 10) || 0;
+                const long = parseInt(longEl.value, 10) || 0;
+                const total = mcq + short + long;
+                totalEl.value = total > 0 ? total : '';
+            };
+
+            ['input', 'change'].forEach(evt => {
+                mcqEl.addEventListener(evt, recalc);
+                shortEl.addEventListener(evt, recalc);
+                longEl.addEventListener(evt, recalc);
+            });
+
+            recalc();
+        }
+
+        function initializeMarksBreakdownSync() {
+            const breakdownEl = document.getElementById('marksBreakdown');
+            const totalMarksEl = document.getElementById('totalMarks');
+            const mcqCountEl = document.getElementById('mcqCount');
+            const shortCountEl = document.getElementById('shortCount');
+            const longCountEl = document.getElementById('longCount');
+            const mcqMarksEl = document.getElementById('mcqMarks');
+            const shortMarksEl = document.getElementById('shortMarks');
+            const longMarksEl = document.getElementById('longMarks');
+
+            if (!breakdownEl || !totalMarksEl || !mcqCountEl || !shortCountEl || !longCountEl || !mcqMarksEl || !shortMarksEl || !longMarksEl) return;
+
+            breakdownEl.classList.add('is-derived');
+
+            const recalc = () => {
+                const mcqCount = parseInt(mcqCountEl.value, 10) || 0;
+                const shortCount = parseInt(shortCountEl.value, 10) || 0;
+                const longCount = parseInt(longCountEl.value, 10) || 0;
+                const mcqMarks = parseInt(mcqMarksEl.value, 10) || 0;
+                const shortMarks = parseInt(shortMarksEl.value, 10) || 0;
+                const longMarks = parseInt(longMarksEl.value, 10) || 0;
+
+                const mcqTotal = mcqCount * mcqMarks;
+                const shortTotal = shortCount * shortMarks;
+                const longTotal = longCount * longMarks;
+                const combined = mcqTotal + shortTotal + longTotal;
+                const configuredTotal = parseInt(totalMarksEl.value, 10) || 0;
+
+                let summary = `MCQ ${mcqCount} x ${mcqMarks} = ${mcqTotal} | Short ${shortCount} x ${shortMarks} = ${shortTotal} | Long ${longCount} x ${longMarks} = ${longTotal} | Combined = ${combined}`;
+                if (configuredTotal > 0) {
+                    summary += configuredTotal === combined
+                        ? ` | Matches Total Marks (${configuredTotal})`
+                        : ` | Configured Total Marks = ${configuredTotal}`;
+                }
+
+                breakdownEl.textContent = combined > 0 ? summary : 'Auto-calculated from question counts x marks per question.';
+            };
+
+            ['input', 'change'].forEach(evt => {
+                mcqCountEl.addEventListener(evt, recalc);
+                shortCountEl.addEventListener(evt, recalc);
+                longCountEl.addEventListener(evt, recalc);
+                mcqMarksEl.addEventListener(evt, recalc);
+                shortMarksEl.addEventListener(evt, recalc);
+                longMarksEl.addEventListener(evt, recalc);
+                totalMarksEl.addEventListener(evt, recalc);
+            });
+
+            recalc();
+        }
+
+        const isValidUuid = (value) =>
+            typeof value === 'string' &&
+            /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(value);
+
+        const toEditorQuestionType = (rawType) => {
+            const t = (rawType || '').toString().trim().toLowerCase().replace(/\s+/g, '_').replace('-', '_');
+            if (t === 'mcq' || t === 'multiple_choice') return 'MCQ';
+            if (t === 'short_answer' || t === 'shortanswer') return 'Short Answer';
+            if (t === 'long_answer' || t === 'longanswer' || t === 'essay') return 'Long Answer';
+            if (t === 'true_false' || t === 'truefalse') return 'True/False';
+            if (t === 'code' || t === 'coding') return 'Code';
+            return rawType || 'MCQ';
+        };
+
+        function setCourseOptions(courses = [], placeholder = 'Select a course...') {
+            const select = document.getElementById('courseSelect');
+            if (!select) return;
+
+            select.innerHTML = '';
+            const placeholderOption = document.createElement('option');
+            placeholderOption.value = '';
+            placeholderOption.textContent = placeholder;
+            select.appendChild(placeholderOption);
+
+            // Add assigned courses only
+            courses.forEach((course) => {
+                const option = document.createElement('option');
+                const courseId = String(course.id || course.course_id || '').trim();
+                const code = String(course.course_code || '').trim();
+                const name = String(course.course_name || course.name || 'Course').trim();
+                option.value = courseId;
+                option.dataset.courseCode = code || courseId;
+                option.dataset.subject = course.subject || course.course_name || course.course_code || 'General';
+                option.dataset.type = 'course';
+                option.textContent = code && name ? `${code} - ${name}` : (code || name || 'Course');
+                select.appendChild(option);
+            });
+
+            select.disabled = false;
+        }
+
+        async function loadCourses() {
+            const select = document.getElementById('courseSelect');
+            if (!select) return;
+
+            select.disabled = true;
+            setCourseOptions([], 'Loading assigned courses...');
+
+            try {
+                const headers = await buildBackendHeaders();
+                const response = await fetch(`${AI_BACKEND_URL}/teacher/courses`, {
+                    method: 'GET',
+                    headers
+                });
+                const result = await response.json().catch(() => ({}));
+                console.log('?? Teacher courses API response:', {status: response.status, ok: response.ok, result});
+                const courses = Array.isArray(result.courses) ? result.courses : [];
+
+                if (response.ok && result.success && courses.length > 0) {
+                    setCourseOptions(courses, 'Select a course...');
+                    return;
+                }
+            } catch (error) {
+                console.log('Backend courses failed, trying direct fallback:', error);
+            }
+
+            if (!supabaseClient) {
+                setCourseOptions([], 'No assigned courses found');
+                return;
+            }
+
+            try {
+                const userId = String(localStorage.getItem('userId') || '').trim();
+                const teacherId = String(localStorage.getItem('teacherId') || '').trim();
+                const teacherIds = [userId, teacherId].filter(Boolean);
+                const uuidIds = teacherIds.filter((value) => isValidUuid(value));
+                let data = [];
+                let error = null;
+
+                if (uuidIds.length) {
+                    let resp = await supabaseClient
+                        .from('courses')
+                        .select('id, course_code, course_name, subject')
+                        .in('teacher_id', uuidIds);
+                    if (resp?.error && String(resp.error.message || '').toLowerCase().includes('subject')) {
+                        resp = await supabaseClient
+                            .from('courses')
+                            .select('id, course_code, course_name')
+                            .in('teacher_id', uuidIds);
+                    }
+                    data = resp?.data || [];
+                    error = resp?.error || null;
+                }
+
+                if ((!data || data.length === 0) && teacherIds.some((value) => !isValidUuid(value))) {
+                    try {
+                        const rawIds = teacherIds.filter((value) => !isValidUuid(value));
+                        let resp = await supabaseClient
+                            .from('courses')
+                            .select('id, course_code, course_name, subject')
+                            .in('teacher_id', rawIds);
+                        if (resp?.error && String(resp.error.message || '').toLowerCase().includes('subject')) {
+                            resp = await supabaseClient
+                                .from('courses')
+                                .select('id, course_code, course_name')
+                                .in('teacher_id', rawIds);
+                        }
+                        data = resp?.data || [];
+                        error = resp?.error || null;
+                    } catch (rawError) {
+                        error = rawError;
+                    }
+                }
+
+                if (error) {
+                    throw error;
+                }
+
+                if (Array.isArray(data) && data.length > 0) {
+                    setCourseOptions(data, 'Select a course...');
+                    return;
+                }
+            } catch (error) {
+                console.log('Supabase courses failed:', error);
+            }
+
+            setCourseOptions([], 'No assigned courses found');
+        }
+
+        // ========================================
+        // FILE HANDLING
+        // ========================================
+        function handleFileSelect(event) {
+            const files = Array.from(event.target.files || []);
+            selectedFiles = files.filter(Boolean);
+
+            if (selectedFiles.length > MAX_UPLOAD_FILES) {
+                alert(`Please select at most ${MAX_UPLOAD_FILES} files.`);
+                selectedFiles = selectedFiles.slice(0, MAX_UPLOAD_FILES);
+            }
+
+            if (!selectedFiles.length) {
+                document.getElementById('fileInfo').innerHTML = '';
+                document.getElementById('fileWarnings').innerHTML = '';
+                document.getElementById('generateBtn').disabled = true;
+                return;
+            }
+
+            const listHtml = selectedFiles.map((file) => {
+                const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                return `<li>${file.name} (${sizeMB} MB)</li>`;
+            }).join('');
+
+            const totalBytes = selectedFiles.reduce((sum, f) => sum + (f.size || 0), 0);
+            const totalMB = (totalBytes / 1024 / 1024).toFixed(2);
+            if (totalBytes > MAX_TOTAL_UPLOAD_BYTES) {
+                document.getElementById('fileInfo').innerHTML = `
+                    <div style="background: #FEF2F2; border: 1px solid #FECACA; padding: 1rem; border-radius: 8px; color: #991B1B;">
+                        <strong>Total upload too large:</strong> ${totalMB} MB<br>
+                        Max allowed is ${(MAX_TOTAL_UPLOAD_BYTES / 1024 / 1024).toFixed(0)} MB.
+                    </div>
+                `;
+                document.getElementById('fileWarnings').innerHTML = '';
+                document.getElementById('generateBtn').disabled = true;
+                return;
+            }
+            const sizeWarning = totalBytes < 50000
+                ? '<div style="color: #D97706; margin-top: 0.5rem; font-weight: 600;">? Small upload detected. Larger source material improves question quality.</div>'
+                : '';
+
+            document.getElementById('fileInfo').innerHTML = `
+                <div style="background: #EFF6FF; border: 1px solid #BFDBFE; padding: 1rem; border-radius: 8px; color: #1E3A8A;">
+                    <strong>${selectedFiles.length} file(s) selected</strong> (total ${totalMB} MB)
+                    <ul style="margin: 0.75rem 0 0 1.2rem; color: #1e40af;">${listHtml}</ul>
+                    ${sizeWarning}
+                </div>
+            `;
+            document.getElementById('fileWarnings').innerHTML = '';
+            document.getElementById('generateBtn').disabled = false;
+        }
+
+        // ========================================
+        // QUESTION GENERATION
+        // ========================================
+        async function generateQuestions() {
+            if (!validateExamBasics({ requireFile: true })) {
+                return;
+            }
+
+            const mcqRaw = document.getElementById('mcqCount').value.trim();
+            const shortRaw = document.getElementById('shortCount').value.trim();
+            const longRaw = document.getElementById('longCount').value.trim();
+
+            if (mcqRaw === '' || shortRaw === '' || longRaw === '') {
+                alert('Please enter MCQ, Short, and Long question counts (use 0 where needed).');
+                return;
+            }
+
+            const mcqCount = parseInt(mcqRaw, 10) || 0;
+            const shortCount = parseInt(shortRaw, 10) || 0;
+            const longCount = parseInt(longRaw, 10) || 0;
+            const totalRequested = mcqCount + shortCount + longCount;
+
+            if (totalRequested <= 0) {
+                alert('Please set the number of questions or set counts for MCQ/Short/Long.');
+                return;
+            }
+
+            document.getElementById('numQuestions').value = totalRequested;
+
+            const mcqMarksRaw = document.getElementById('mcqMarks').value.trim();
+            const shortMarksRaw = document.getElementById('shortMarks').value.trim();
+            const longMarksRaw = document.getElementById('longMarks').value.trim();
+            const mcqMarks = parseInt(mcqMarksRaw, 10) || 0;
+            const shortMarks = parseInt(shortMarksRaw, 10) || 0;
+            const longMarks = parseInt(longMarksRaw, 10) || 0;
+
+            if (mcqCount > 0 && (mcqMarksRaw === '' || mcqMarks <= 0)) {
+                alert('Please set MCQ marks (at least 1).');
+                document.getElementById('mcqMarks').focus();
+                return;
+            }
+
+            if (shortCount > 0 && (shortMarksRaw === '' || shortMarks <= 0)) {
+                alert('Please set short answer marks (at least 1).');
+                document.getElementById('shortMarks').focus();
+                return;
+            }
+
+            if (longCount > 0 && (longMarksRaw === '' || longMarks <= 0)) {
+                alert('Please set long answer marks (at least 1).');
+                document.getElementById('longMarks').focus();
+                return;
+            }
+
+            document.getElementById('generateBtn').disabled = true;
+            document.getElementById('generationProgress').style.display = 'block';
+            document.getElementById('generatedQuestions').style.display = 'none';
+
+            const progressText = document.getElementById('progressText');
+            progressText.textContent = 'Starting question generation...';
+            progressText.style.color = '#0f5e8c';
+
+            let keepAliveTimer = null;
+            try {
+                if (window.SessionManager && typeof window.SessionManager.touch === 'function') {
+                    window.SessionManager.touch();
+                    keepAliveTimer = setInterval(() => {
+                        window.SessionManager.touch();
+                    }, 20000);
+                }
+                // Get user ID
+                let userId = localStorage.getItem('userId');
+                if (!isValidUuid(userId)) {
+                    userId = crypto.randomUUID();
+                    localStorage.setItem('userId', userId);
+                }
+
+                // Get course or subject info
+                const courseSelectEl = document.getElementById('courseSelect');
+                const courseIdValue = courseSelectEl.value;
+                const selectedOption = courseSelectEl.options[courseSelectEl.selectedIndex];
+                const selectedType = selectedOption?.dataset?.type;
+                
+                let courseId = null;
+                let subject = 'general';
+                
+                // Handle subject selection (format: "subject:database")
+                if (selectedType === 'subject' || (courseIdValue && courseIdValue.startsWith('subject:'))) {
+                    subject = selectedOption?.dataset?.subject || courseIdValue.replace('subject:', '');
+                    courseId = null;
+                } 
+                // Handle course selection
+                else if (isValidUuid(courseIdValue)) {
+                    courseId = courseIdValue;
+                    subject = selectedOption?.dataset?.subject || 'general';
+                } 
+                // Fallback
+                else {
+                    courseId = null;
+                    subject = 'general';
+                }
+
+                console.log('Exam creation started');
+                console.log('User ID:', userId);
+                console.log('Course ID:', courseId);
+                console.log('Subject:', subject);
+
+                progressText.textContent = 'Creating or reusing draft exam...';
+
+                let examId = window.currentExamId;
+                if (!isValidUuid(examId)) {
+                    const examHeaders = await buildBackendHeaders({ 'Content-Type': 'application/json' });
+                    const examRes = await fetch(`${AI_BACKEND_URL}/exams`, {
+                        method: 'POST',
+                        mode: 'cors',
+                        headers: examHeaders,
+                        body: JSON.stringify({
+                            course_id: courseId,
+                            title: document.getElementById('examTitle').value,
+                            subject: subject,
+                            duration: parseInt(document.getElementById('duration').value, 10),
+                            total_marks: parseInt(document.getElementById('totalMarks').value, 10),
+                            exam_start_time: (() => { const v = document.getElementById('examDate')?.value; return v ? (v.length === 16 ? v + ':00' : v) : null; })(),
+                            exam_end_time: (() => { const v = document.getElementById('examEndTime')?.value; return v ? (v.length === 16 ? v + ':00' : v) : null; })()
+                        })
+                    });
+
+                    if (!examRes.ok) {
+                        const errText = await examRes.text();
+                        throw new Error(`Failed to create exam: ${errText}`);
+                    }
+
+                    const examData = await examRes.json();
+                    examId = examData.exam_id;
+                    window.currentExamId = examId;
+                    console.log('Exam created:', examId);
+                } else {
+                    console.log('Reusing existing draft exam:', examId);
+                }
+
+                // Keep the same draft updated with latest form values.
+                try {
+                    const draftHeaders = await buildBackendHeaders({ 'Content-Type': 'application/json' });
+                    await fetch(`${AI_BACKEND_URL}/exams/${encodeURIComponent(examId)}`, {
+                        method: 'PUT',
+                        headers: draftHeaders,
+                        body: JSON.stringify({
+                            course_id: courseId,
+                            title: document.getElementById('examTitle').value,
+                            status: 'draft',
+                            scheduled_at: document.getElementById('examDate').value,
+                            exam_start_time: document.getElementById('examDate').value || null,
+                            exam_end_time: document.getElementById('examEndTime')?.value || null,
+                                                        duration: parseInt(document.getElementById('duration').value, 10),
+                            total_marks: parseInt(document.getElementById('totalMarks').value, 10),
+                            exam_start_time: document.getElementById('examDate')?.value || null,
+                            exam_end_time: document.getElementById('examEndTime')?.value || null
+                        })
+                    });
+                } catch (e) {
+                    console.log('Draft metadata sync skipped:', e.message);
+                }
+
+                upsertExamToLocalStorage(examId, { status: 'draft' });
+
+                progressText.textContent = 'Uploading file and generating questions...';
+
+                // Step-by-step progress with clear stages
+                const _genStart = Date.now();
+                const _steps = [
+                    { at: 0,  text: 'Step 1/4 - Extracting text from uploaded material...' },
+                    { at: 8,  text: 'Step 2/4 - Detecting subject and key topics...' },
+                    { at: 20, text: 'Step 3/4 - AI generating questions (MCQ then Short then Long)...' },
+                    { at: 60, text: 'Step 4/4 - Saving questions to exam...' },
+                ];
+                let _stepIdx = 0;
+                const _progressTimer = setInterval(() => {
+                    const elapsed = Math.round((Date.now() - _genStart) / 1000);
+                    const mins = Math.floor(elapsed / 60);
+                    const secs = elapsed % 60;
+                    const timeStr = mins > 0 ? mins + 'm ' + secs + 's' : secs + 's';
+                    while (_stepIdx < _steps.length - 1 && elapsed >= _steps[_stepIdx + 1].at) _stepIdx++;
+                    progressText.innerHTML = '<strong>' + _steps[_stepIdx].text + '</strong><br>'
+                        + '<small style="color:#94a3b8;font-size:0.82rem;">Time elapsed: ' + timeStr + ' - please wait, this typically takes 1-3 minutes.</small>';
+                }, 1000);
+
+                // Prepare form data
+                const formData = new FormData();
+                selectedFiles.forEach((file) => formData.append('files', file));
+                formData.append('num_questions', document.getElementById('numQuestions').value);
+                formData.append('mcq_count', mcqCount);
+                formData.append('short_count', shortCount);
+                formData.append('long_count', longCount);
+                formData.append('mcq_marks', mcqMarks);
+                formData.append('short_marks', shortMarks);
+                formData.append('long_marks', longMarks);
+                formData.append('difficulty', document.getElementById('difficulty').value);
+                formData.append('subject', subject);
+                formData.append('exam_id', examId);
+                formData.append('use_ollama', document.getElementById('useHighQuality')?.checked ? 'true' : 'false');
+
+                console.log('Sending to:', `${AI_BACKEND_URL}/generate-questions`);
+                console.log('Files:', selectedFiles.map(f => ({ name: f.name, type: f.type, size: f.size })));
+
+                //  FIX: Use AbortController with extended timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 900000); // 15 minutes timeout (7B model ~60s per question on CPU)
+
+                let response;
+                try {
+                    const generationHeaders = await buildBackendHeaders();
+                    response = await fetch(`${AI_BACKEND_URL}/generate-questions`, {
+                        method: 'POST',
+                        mode: 'cors',
+                        headers: generationHeaders,
+                        body: formData,
+                        signal: controller.signal  //  ADD THIS
+                    });
+                    
+                    clearTimeout(timeoutId); // Clear timeout on success
+                    clearInterval(_progressTimer);
+                    
+                } catch (fetchError) {
+                    clearTimeout(timeoutId);
+                    clearInterval(_progressTimer);
+                    
+                    if (fetchError.name === 'AbortError') {
+                        throw new Error('Request timed out. The file might be too large or the server is busy. Please try again.');
+                    }
+                    
+                    console.error('Fetch error details:', {
+                        name: fetchError.name,
+                        message: fetchError.message,
+                        stack: fetchError.stack
+                    });
+                    throw new Error(`Connection failed: ${fetchError.message}. Make sure the backend server is running.`);
+                }
+
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Backend error:', errorText);
+                    throw new Error(`Failed to generate questions: ${errorText}`);
+                }
+
+                const result = await response.json();
+                console.log('Full response:', result);
+                const fileInfo = result.file_info || {};
+                const failedFiles = Array.isArray(fileInfo.failed_files) ? fileInfo.failed_files : [];
+                const warningsEl = document.getElementById('fileWarnings');
+                if (failedFiles.length > 0) {
+                    warningsEl.innerHTML = `
+                        <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(251, 191, 36, 0.5); padding: 0.9rem; border-radius: 8px; color: #fde68a;">
+                            <strong>Some files were skipped:</strong>
+                            <ul style="margin: 0.5rem 0 0 1.2rem;">
+                                ${failedFiles.map(name => `<li>${name}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                } else {
+                    warningsEl.innerHTML = '';
+                }
+                
+                const generatedCount = Number(result.questions_count || result.count || 0);
+                const savedCount = Number(result.questions_saved_count || 0);
+                const returnedExamId = result.exam_id || window.currentExamId;
+
+                console.log('Generated count:', generatedCount, 'Saved count:', savedCount);
+
+                // Normalize for editor
+                let sourceQuestions = result.questions || [];
+
+                if ((sourceQuestions.length === 0 || sourceQuestions.length !== totalRequested) && returnedExamId) {
+                    const maxAttempts = 6;
+                    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                        try {
+                            const questionHeaders = await buildBackendHeaders();
+                            const qRes = await fetch(`${AI_BACKEND_URL}/exam-questions/${returnedExamId}`, { headers: questionHeaders });
+                            const qData = await qRes.json();
+                            if (qData?.questions?.length) {
+                                sourceQuestions = qData.questions;
+                                break;
+                            }
+                        } catch (e) {
+                            console.log(`Saved-question fetch attempt ${attempt} failed:`, e.message);
+                        }
+                        await new Promise((resolve) => setTimeout(resolve, 800));
+                    }
+                }
+
+                const finalCount = (sourceQuestions && sourceQuestions.length) || savedCount || generatedCount || 0;
+                if (finalCount !== totalRequested) {
+                    throw new Error(`Expected ${totalRequested} questions but got ${finalCount}. Please regenerate. (generated=${generatedCount}, saved=${savedCount})`);
+                }
+
+                // Final fallback: if count is known but list is still empty, fetch once more.
+                if ((!sourceQuestions || sourceQuestions.length === 0) && returnedExamId) {
+                    const questionHeaders = await buildBackendHeaders();
+                    const qRes = await fetch(`${AI_BACKEND_URL}/exam-questions/${returnedExamId}`, { headers: questionHeaders });
+                    const qData = await qRes.json();
+                    if (qData?.questions?.length) {
+                        sourceQuestions = qData.questions;
+                    }
+                }
+
+                progressText.textContent = `Successfully generated ${finalCount} questions!`;
+                progressText.style.color = '#10b981';
+
+                generatedQuestions = sourceQuestions || [];
+                updateCreateExamShell();
+                if (generatedQuestions.length > 0) {
+                    displayGeneratedQuestions(generatedQuestions);
+                    document.getElementById('generatedQuestions').style.display = 'block';
+                }
+
+                const normalizedQuestions = (sourceQuestions || []).map((q) => {
+                    const optionEntries = q.options && typeof q.options === 'object'
+                        ? Object.entries(q.options)
+                        : [];
+
+                    return {
+                        question: q.question_text || q.question || 'Untitled question',
+                        question_type: toEditorQuestionType(q.question_type || 'MCQ'),
+                        difficulty: q.difficulty || 'medium',
+                        marks: q.marks || 1,
+                        options: optionEntries.map(([key, text]) => ({
+                            text,
+                            is_correct: (q.correct_answer || '').toString().toLowerCase() === key.toString().toLowerCase()
+                        })),
+                        model_answer: q.model_answer || ''
+                    };
+                });
+
+                localStorage.setItem('generatedQuestions', JSON.stringify(normalizedQuestions));
+                localStorage.setItem('examCreationData', JSON.stringify({
+                    title: document.getElementById('examTitle').value,
+                    duration: parseInt(document.getElementById('duration').value, 10),
+                    totalMarks: parseInt(document.getElementById('totalMarks').value, 10),
+                    passMark: parseInt(document.getElementById('passMark').value, 10),
+                    scheduledAt: document.getElementById('examDate').value,
+                    instructions: document.getElementById('instructions').value,
+                    marksPerType: {
+                        mcq: mcqMarks,
+                        short: shortMarks,
+                        long: longMarks
+                    },
+                    requestedCounts: {
+                        mcq: mcqCount,
+                        short: shortCount,
+                        long: longCount
+                    },
+                    requestedTotal: totalRequested,
+                    examId: returnedExamId
+                }));
+
+                setTimeout(() => {
+                    alert(`Success! Generated ${finalCount} questions.\n\nOpening editor...`);
+                    
+                    // Ensure session data is synced to sessionStorage before redirecting
+                    if (localStorage.getItem('isLoggedIn')) {
+                        sessionStorage.setItem('isLoggedIn', localStorage.getItem('isLoggedIn'));
+                    }
+                    if (localStorage.getItem('userRole')) {
+                        sessionStorage.setItem('userRole', localStorage.getItem('userRole'));
+                    }
+                    if (localStorage.getItem('userId')) {
+                        sessionStorage.setItem('userId', localStorage.getItem('userId'));
+                    }
+                    if (localStorage.getItem('userName')) {
+                        sessionStorage.setItem('userName', localStorage.getItem('userName'));
+                    }
+                    
+                    // Reset scroll position before redirect
+                    window.scrollTo(0, 0);
+                    
+                    if (window.TeacherShellNav && typeof window.TeacherShellNav.navigate === 'function') {
+                        window.TeacherShellNav.navigate('question-editor.html');
+                    } else {
+                        window.location.href = 'question-editor.html';
+                    }
+                }, 800);
+
+            } catch (error) {
+                console.error('Generation error:', error);
+
+                progressText.innerHTML = `Error: ${error.message}`;
+                progressText.style.color = '#ef4444';
+                document.getElementById('generationProgress').style.display = 'block';
+                document.getElementById('generateBtn').disabled = false;
+
+                alert('Error: ' + error.message);
+            } finally {
+                if (keepAliveTimer) {
+                    clearInterval(keepAliveTimer);
+                }
+            }
+        }
+
+        // ========================================
+        // DISPLAY QUESTIONS
+        // ========================================
+        function displayGeneratedQuestions(questions) {
+            const container = document.getElementById('questionsList');
+            container.innerHTML = '';
+
+            if (!questions || questions.length === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-error">
+                        No questions were generated. Please try again with a different file or settings.
+                    </div>
+                `;
+                return;
+            }
+
+            questions.forEach((q, index) => {
+                let optionsHTML = '';
+                
+                // Display options for MCQ and True/False
+                if (q.options && typeof q.options === 'object') {
+                    optionsHTML = `
+                        <div class="options-section">
+                            <div style="font-weight: 600; margin-bottom: 0.8rem; color: #e2e8f0;">Options:</div>
+                            ${Object.entries(q.options).map(([key, val]) => {
+                                const isCorrect = q.correct_answer && q.correct_answer.toLowerCase() === key.toLowerCase();
+                                return `
+                                    <div class="option-item ${isCorrect ? 'correct' : ''}">
+                                        <span class="option-key">${key.toUpperCase()})</span>
+                                        <span>${val}</span>
+                                        ${isCorrect ? '<span style="float: right; color: #6ee7b7; font-weight: bold;"> Correct</span>' : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.innerHTML = `
+                    <div style="display: flex; align-items: start;">
+                        <div class="question-number">${index + 1}</div>
+                        <div style="flex: 1;">
+                            <div class="question-text">${q.question_text || 'No question text'}</div>
+                            <div class="question-meta">
+                                <div class="meta-item">
+                                    <span class="meta-label">Type:</span>
+                                    <span class="meta-value">${q.question_type || 'unknown'}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Difficulty:</span>
+                                    <span class="meta-value">${q.difficulty || 'medium'}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Marks:</span>
+                                    <span class="meta-value">${q.marks || 1}</span>
+                                </div>
+                                ${q.ai_generated ? '<div class="meta-item"><span class="meta-label"> Auto Generated</span></div>' : ''}
+                            </div>
+                            ${optionsHTML}
+                            ${q.explanation ? `
+                                <div style="margin-top: 1rem; padding: 0.8rem; background: rgba(56, 189, 248, 0.15); border-left: 3px solid #38bdf8; border-radius: 4px;">
+                                    <strong style="color: #bae6fd;">Explanation:</strong>
+                                    <p style="margin: 0.5rem 0 0 0; color: #e0f2fe;">${q.explanation}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ========================================
+        // NAVIGATION + VALIDATION
+        // ========================================
+        function updateStepStyles() {
+            const GREEN = '#1E3A8A', DARK_GREEN = '#1e40af', WHITE = '#FFFFFF', BORDER = '#BFDBFE', MUTED = '#6B7280';
+            const steps = [
+                { id: 'step1-indicator', circleId: 'circle1' },
+                { id: 'step2-indicator', circleId: 'circle2' },
+                { id: 'step3-indicator', circleId: 'circle3' }
+            ];
+            steps.forEach(function(s) {
+                const el = document.getElementById(s.id);
+                const circle = document.getElementById(s.circleId) || (el && el.querySelector('.step-circle'));
+                if (!circle) return;
+                const cs = circle.style;
+                if (el && el.classList.contains('active')) {
+                    cs.setProperty('background', GREEN, 'important');
+                    cs.setProperty('border', '2px solid ' + DARK_GREEN, 'important');
+                    cs.setProperty('color', WHITE, 'important');
+                    cs.setProperty('box-shadow', '0 0 0 4px rgba(30,58,138,0.2),0 4px 12px rgba(59,130,246,0.4)', 'important');
+                } else if (el && el.classList.contains('done')) {
+                    cs.setProperty('background', '#1e40af', 'important');
+                    cs.setProperty('border', '2px solid #1e40af', 'important');
+                    cs.setProperty('color', '#EFF6FF', 'important');
+                    cs.setProperty('box-shadow', 'none', 'important');
+                } else {
+                    cs.setProperty('background', WHITE, 'important');
+                    cs.setProperty('border', '2px solid ' + BORDER, 'important');
+                    cs.setProperty('color', MUTED, 'important');
+                    cs.setProperty('box-shadow', 'none', 'important');
+                }
+            });
+            // Force steps bar background
+            const stepsBar = document.querySelector('.steps');
+            if (stepsBar) {
+                stepsBar.style.setProperty('background', '#EFF6FF', 'important');
+                stepsBar.style.setProperty('border-radius', '12px', 'important');
+                stepsBar.style.setProperty('border', '1px solid #BFDBFE', 'important');
+            }
+            // Force body background
+            document.body.style.setProperty('background', '#F0F4FF', 'important');
+            // Force card badge
+            document.querySelectorAll('.card h2::before').forEach(function(el) {
+                el.style && el.style.setProperty('background', 'linear-gradient(135deg,#3B82F6,#1e40af)', 'important');
+            });
+        }
+
+        function goToStep2() {
+            if (!validateExamBasics()) {
+                return;
+            }
+
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+            document.getElementById('step1-indicator').classList.remove('active');
+            document.getElementById('step2-indicator').classList.add('active');
+            updateStepStyles();
+            updateCreateExamShell();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        function goToStep1() {
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step1').style.display = 'block';
+            document.getElementById('step2-indicator').classList.remove('active');
+            document.getElementById('step1-indicator').classList.add('active');
+            updateStepStyles();
+            updateCreateExamShell();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goToStep3() {
+            if (!generatedQuestions || generatedQuestions.length === 0) {
+                alert('No questions to review. Please generate questions first.');
+                return;
+            }
+
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step3').style.display = 'block';
+            document.getElementById('step2-indicator').classList.remove('active');
+            document.getElementById('step3-indicator').classList.add('active');
+            updateStepStyles();
+
+            const examDateValue = document.getElementById('examDate').value;
+            const mcqMarks = document.getElementById('mcqMarks').value;
+            const shortMarks = document.getElementById('shortMarks').value;
+            const longMarks = document.getElementById('longMarks').value;
+
+            document.getElementById('examSummary').innerHTML = `
+                <p style="margin: 0.5rem 0;"><strong>Title:</strong> ${document.getElementById('examTitle').value}</p>
+                <p style="margin: 0.5rem 0;"><strong>Date:</strong> ${examDateValue ? new Date(examDateValue).toLocaleString() : 'Not set'}</p>
+                <p style="margin: 0.5rem 0;"><strong>Duration:</strong> ${document.getElementById('duration').value} minutes</p>
+                <p style="margin: 0.5rem 0;"><strong>Total Marks:</strong> ${document.getElementById('totalMarks').value}</p>
+                <p style="margin: 0.5rem 0;"><strong>Pass Mark:</strong> ${document.getElementById('passMark').value}</p>
+                <p style="margin: 0.5rem 0;"><strong>Questions:</strong> ${generatedQuestions.length}</p>
+                <p style="margin: 0.5rem 0;"><strong>Marks per Type:</strong> MCQ ${mcqMarks}, Short ${shortMarks}, Long ${longMarks}</p>
+                <p style="margin: 0.5rem 0;"><strong>Difficulty:</strong> ${document.getElementById('difficulty').value}</p>
+            `;
+
+            document.getElementById('finalQuestionsList').innerHTML = document.getElementById('questionsList').innerHTML;
+            updateCreateExamShell();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goToStep2FromStep3() {
+            document.getElementById('step3').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+            document.getElementById('step3-indicator').classList.remove('active');
+            document.getElementById('step2-indicator').classList.add('active');
+            updateCreateExamShell();
+            document.getElementById('generatedQuestions').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function updateSubjectFromCourse() {
+            const courseSelectEl = document.getElementById('courseSelect');
+            const courseIdValue = courseSelectEl.value;
+            const selectedOption = courseSelectEl.options[courseSelectEl.selectedIndex];
+            const selectedType = selectedOption?.dataset?.type;
+            
+            let subject = 'general';
+            
+            // Handle subject selection
+            if (selectedType === 'subject' || (courseIdValue && courseIdValue.startsWith('subject:'))) {
+                subject = selectedOption?.dataset?.subject || courseIdValue.replace('subject:', '');
+            } 
+            // Handle course selection
+            else if (selectedOption?.dataset?.subject) {
+                subject = selectedOption.dataset.subject;
+            }
+            
+            if (subject) {
+                window.currentSubject = subject;
+                console.log('Subject updated to:', subject);
+            }
+        }
+
+        function validateExamBasics(options = {}) {
+            const { requireFile = false } = options;
+            const titleEl = document.getElementById('examTitle');
+            const courseEl = document.getElementById('courseSelect');
+            const dateEl = document.getElementById('examDate');
+            const durationEl = document.getElementById('duration');
+            const totalMarksEl = document.getElementById('totalMarks');
+            const passMarkEl = document.getElementById('passMark');
+
+            if (!titleEl.value.trim()) {
+                alert('Please enter an Exam Title');
+                titleEl.focus();
+                return false;
+            }
+
+            if (!courseEl.value) {
+                alert('Please select a course or subject');
+                courseEl.focus();
+                return false;
+            }
+
+            if (!dateEl.value) {
+                alert('Please select an exam date');
+                dateEl.focus();
+                return false;
+            }
+
+            if (!durationEl.value.trim()) {
+                alert('Please enter exam duration');
+                durationEl.focus();
+                return false;
+            }
+
+            if (!totalMarksEl.value.trim()) {
+                alert('Please enter total marks');
+                totalMarksEl.focus();
+                return false;
+            }
+
+            if (!passMarkEl.value.trim()) {
+                alert('Please enter pass mark');
+                passMarkEl.focus();
+                return false;
+            }
+
+            const scheduled = new Date(dateEl.value);
+            if (Number.isNaN(scheduled.getTime()) || scheduled <= new Date()) {
+                alert('Exam date must be in the future');
+                dateEl.focus();
+                return false;
+            }
+
+            const duration = parseInt(durationEl.value, 10) || 0;
+            if (duration < 15 || duration > 300) {
+                alert('Duration must be between 15 and 300 minutes');
+                durationEl.focus();
+                return false;
+            }
+
+            const totalMarks = parseInt(totalMarksEl.value, 10) || 0;
+            if (totalMarks < 10 || totalMarks > 500) {
+                alert('Total marks must be between 10 and 500');
+                totalMarksEl.focus();
+                return false;
+            }
+
+            const passMark = parseInt(passMarkEl.value, 10) || 0;
+            if (passMark < 0 || passMark > totalMarks) {
+                alert('Pass mark must be between 0 and total marks');
+                passMarkEl.focus();
+                return false;
+            }
+
+            if (requireFile && (!selectedFiles || selectedFiles.length === 0)) {
+                alert('Please upload at least one file first');
+                return false;
+            }
+
+            if (requireFile && selectedFiles.length > MAX_UPLOAD_FILES) {
+                alert(`You can upload up to ${MAX_UPLOAD_FILES} files.`);
+                return false;
+            }
+
+            if (requireFile) {
+                const totalBytes = selectedFiles.reduce((sum, f) => sum + (f.size || 0), 0);
+                if (totalBytes > MAX_TOTAL_UPLOAD_BYTES) {
+                    alert(`Total upload exceeds ${(MAX_TOTAL_UPLOAD_BYTES / 1024 / 1024).toFixed(0)} MB limit.`);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+
+        // ========================================
+        // PUBLISH EXAM
+        // ========================================
+        async function publishExam() {
+            const publishBtn = document.getElementById('publishBtn');
+            try {
+                if (!validateExamBasics()) {
+                    return;
+                }
+
+                const examId = window.currentExamId;
+                if (!examId) {
+                    throw new Error('No exam ID found. Please generate questions first.');
+                }
+
+                const confirmMessage = [
+                    'Confirm Publish Exam',
+                    '',
+                    `Title: ${document.getElementById('examTitle').value}`,
+                    `Questions: ${generatedQuestions.length}`,
+                    `Total Marks: ${parseInt(document.getElementById('totalMarks').value, 10)}`,
+                    `Date: ${document.getElementById('examDate').value || 'Not set'}`,
+                    '',
+                    'Publish this exam now?'
+                ].join('\n');
+                if (!confirm(confirmMessage)) {
+                    return;
+                }
+
+                console.log('Publishing exam:', examId)
+
+                if (publishBtn) {
+                    publishBtn.disabled = true;
+                    publishBtn.textContent = 'Publishing...';
+                }
+
+                // Extract courseId, handling both course and subject selections
+                const courseSelectEl = document.getElementById('courseSelect');
+                const courseIdValue = courseSelectEl?.value;
+                let courseId = null;
+                if (courseIdValue && !courseIdValue.startsWith('subject:')) {
+                    courseId = isValidUuid(courseIdValue) ? courseIdValue : null;
+                }
+
+                const publishHeaders = await buildBackendHeaders({ 'Content-Type': 'application/json' });
+                // Update exam status and details via backend API
+                const updateResponse = await fetch(`${AI_BACKEND_URL}/exams/${examId}`, {
+                    method: 'PUT',
+                    headers: publishHeaders,
+                    body: JSON.stringify({
+                        status: 'published',
+                        scheduled_at: document.getElementById('examDate').value,
+                        exam_start_time: document.getElementById('examDate').value || null,
+                        exam_end_time: document.getElementById('examEndTime')?.value || null,
+                                                instructions: document.getElementById('instructions').value,
+                        duration: parseInt(document.getElementById('duration').value, 10),
+                        total_marks: parseInt(document.getElementById('totalMarks').value, 10),
+                        course_id: courseId
+                    })
+                });
+
+                if (!updateResponse.ok) {
+                    const error = await updateResponse.json();
+                    throw new Error('Failed to publish exam: ' + (error.error || 'Unknown error'));
+                }
+
+                console.log('Exam published on backend')
+                
+                // Save to localStorage with published status
+                upsertExamToLocalStorage(examId, { status: 'published' });
+                
+                console.log('Exam saved to localStorage with published status')
+
+                alert('Exam published successfully!\n\nRedirecting to dashboard...');
+                
+                setTimeout(() => {
+                    console.log('Redirecting to dashboard...')
+                    if (window.TeacherShellNav && typeof window.TeacherShellNav.navigate === 'function') {
+                        window.TeacherShellNav.navigate('dashboard-teacher.html?view=dashboard');
+                    } else {
+                        window.location.href = 'dashboard-teacher.html?view=dashboard';
+                    }
+                }, 1500);
+
+            } catch (error) {
+                console.error('Publish error:', error);
+                alert('Error publishing exam:\n\n' + error.message);
+                
+                if (publishBtn) {
+                    publishBtn.disabled = false;
+                    publishBtn.textContent = 'Publish Exam';
+                }
+            }
+        }
+
+        function upsertExamToLocalStorage(examId, overrides = {}) {
+            console.log('Saving exam to localStorage:', examId, overrides)
+            
+            const courseSelectEl = document.getElementById('courseSelect');
+            const selectedOption = courseSelectEl.options[courseSelectEl.selectedIndex];
+            const courseIdValue = courseSelectEl.value || null;
+            const courseCode = selectedOption?.dataset?.courseCode || courseIdValue || 'N/A';
+            const courseName = selectedOption?.textContent?.split(' - ').slice(1).join(' - ') || 'Course';
+
+            const examRecord = {
+                exam_id: examId,
+                exam_title: document.getElementById('examTitle').value,
+                teacher_id: localStorage.getItem('userId'),
+                status: 'draft',
+                scheduled_at: document.getElementById('examDate').value,
+                duration_minutes: parseInt(document.getElementById('duration').value, 10),
+                total_marks: parseInt(document.getElementById('totalMarks').value, 10),
+                pass_mark: parseInt(document.getElementById('passMark').value, 10),
+                marks_per_type: {
+                    mcq: parseInt(document.getElementById('mcqMarks').value, 10) || 0,
+                    short: parseInt(document.getElementById('shortMarks').value, 10) || 0,
+                    long: parseInt(document.getElementById('longMarks').value, 10) || 0
+                },
+                difficulty: document.getElementById('difficulty').value || 'medium',
+                course_id: courseIdValue,
+                course_code: courseCode,
+                course_name: courseName,
+                ...overrides
+            };
+
+            const existing = JSON.parse(localStorage.getItem('exams') || '[]');
+            const isPublishing = overrides && overrides.status === 'published';
+            const currentTeacherId = localStorage.getItem('userId');
+            const currentTitle = document.getElementById('examTitle').value;
+
+            const filtered = existing.filter(item => {
+                const itemId = item.exam_id || item.id;
+                if (itemId === examId) return false;
+
+                // When publishing, remove stale draft duplicates for same teacher/title.
+                if (isPublishing) {
+                    const itemTitle = item.exam_title || item.title || '';
+                    const itemTeacher = item.teacher_id || item.user_id || '';
+                    const itemStatus = (item.status || '').toLowerCase();
+                    if (
+                        itemStatus === 'draft' &&
+                        itemTeacher === currentTeacherId &&
+                        itemTitle.trim().toLowerCase() === currentTitle.trim().toLowerCase()
+                    ) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+            const updated = [examRecord, ...filtered];
+            
+            localStorage.setItem('exams', JSON.stringify(updated));
+            
+            console.log('Exam saved to localStorage. Total exams:', updated.length)
+            console.log('Updated exams array:', updated)
+        }
+
+        // ========================================
+        // LOGOUT
+        // ========================================
+        function clearAuthSession() {
+            const keys = [
+                'isLoggedIn',
+                'userRole',
+                'userEmail',
+                'userId',
+                'userName',
+                'userFirstName',
+                'userLastName',
+                'studentId',
+                'teacherId',
+                'authLoginAt',
+                'authLastActivityAt',
+                'authLogoutAt'
+            ];
+            keys.forEach(key => localStorage.removeItem(key));
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                if (window.SessionManager) {
+                    window.SessionManager.logout('manual');
+                    return;
+                }
+                clearAuthSession();
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+    <script src="js/ui-feedback.js"></script>
+    <script src="js/chatbot.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+

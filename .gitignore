@@ -1,0 +1,54 @@
+# ── Environment & Secrets ────────────────────────────────────
+.env
+.env.*
+backend/.env
+*.env
+
+# ── Python ───────────────────────────────────────────────────
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+
+# ── Uploaded files (large, user-generated) ───────────────────
+backend/uploads/
+uploads/
+
+# ── AI Models (large binary files) ───────────────────────────
+models/
+checkpoints/
+
+# ── Datasets (large training data) ───────────────────────────
+datasets/
+
+# ── Logs & PIDs ──────────────────────────────────────────────
+logs/
+*.log
+*.pid
+
+# ── IDE & OS ─────────────────────────────────────────────────
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Browser profiles (test artifacts) ────────────────────────
+edge-headless-profile/
+frontend/_renders/
+notebooks/
+
+# ── Temp files ───────────────────────────────────────────────
+tmp/
+hf_dl/
+hf_space/
+*.tmp
+*.bak

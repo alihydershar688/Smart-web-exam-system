@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%234f46e5'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='28' fill='white' font-family='Arial' font-weight='bold'%3ESE%3C/text%3E%3C/svg%3E">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Profile | Smart Exam System</title>
+    <script src="js/teacher-shell.js"></script>
+    <link rel="stylesheet" href="css/ui-system.css?v=1776841996">
+    <link rel="stylesheet" href="css/product-theme.css?v=1776841996">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=blue4">
+    <style>
+        * { box-sizing: border-box; }
+        
+        body.profile-page {
+            background: linear-gradient(135deg, #F0F4FF 0%, #EFF6FF 100%);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, #1E3A8A 0%, #2563EB 100%);
+            box-shadow: 0 2px 12px rgba(30, 58, 138, 0.15);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .profile-page .navbar-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .profile-page .header-brand-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .profile-page .brand,
+        .profile-page .brand-copy,
+        .profile-page .brand-page,
+        .profile-page .brand-name {
+            text-decoration: none !important;
+            color: #FFFFFF !important;
+        }
+
+        .profile-page .brand-name {
+            font-weight: 800 !important;
+            font-size: 0.95rem;
+        }
+
+        .profile-page .brand-page {
+            font-size: 0.75rem !important;
+            opacity: 0.85;
+        }
+
+        .profile-page .container {
+            padding: 2rem 1rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .profile-page .content-column {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .profile-page-header {
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-page-header h1 {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #1E3A8A;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .profile-page-header p {
+            color: #6B7280;
+            font-size: 0.95rem;
+            margin: 0.5rem 0 0 0;
+        }
+
+        /* Back button removed */
+        #profileBackBtn {
+            background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFF 100%) !important;
+            border: 1.5px solid #DBEAFE !important;
+            color: #2563EB !important;
+            font-weight: 800 !important;
+            border-radius: 10px !important;
+            transition: all 0.3s ease;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 0.5rem !important;
+            padding: 0.65rem 1.2rem !important;
+            font-size: 0.9rem !important;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12) !important;
+        }
+
+        #profileBackBtn:hover {
+            background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%) !important;
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.2) !important;
+            transform: translateY(-2px);
+        }
+
+        #profileBackBtn:active {
+            transform: translateY(0);
+        }
+
+        /* Form Card Styling */
+        .profile-form-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .profile-form-card:hover {
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Form Section Headers */
+        .form-section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #E5E7EB;
+        }
+
+        .form-section-header::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%);
+            border-radius: 2px;
+        }
+
+        .form-section-header h2 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #1E3A8A;
+            margin: 0;
+        }
+
+        /* Photo Editor */
+        .profile-photo-editor {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #EFF6FF 0%, #F0F4FF 100%);
+            border: 2px solid #DBEAFE;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .profile-photo-editor:hover {
+            border-color: #93C5FD;
+            background: linear-gradient(135deg, #F0F4FF 0%, #DBEAFE 100%);
+        }
+
+        .profile-photo-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1E3A8A, #3B82F6);
+            box-shadow: 0 8px 24px rgba(30, 58, 138, 0.25);
+            font-size: 2rem;
+            font-weight: 900;
+            color: #FFFFFF;
+        }
+
+        .profile-photo-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .profile-photo-actions .btn {
+            min-height: 40px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            border-radius: 10px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            border: 2px solid #DBEAFE;
+            background: #FFFFFF;
+            color: #2563EB;
+        }
+
+        .profile-photo-actions .btn:hover {
+            background: #EFF6FF;
+            border-color: #93C5FD;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Form Grid */
+        .profile-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1.5rem;
+        }
+
+        .field-group {
+            display: grid;
+            gap: 0.6rem;
+        }
+
+        .field-group label {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: #1E3A8A;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .field-group input,
+        .field-group textarea {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            font-size: 0.95rem;
+            border: 2px solid #E5E7EB;
+            border-radius: 10px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: #FAFBFC;
+            color: #1F2937;
+        }
+
+        .field-group input:focus,
+        .field-group textarea:focus {
+            outline: none;
+            border-color: #2563EB;
+            background: #FFFFFF;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .field-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .field-group input[readonly] {
+            background: #F0F4FF;
+            border-color: #DBEAFE;
+            color: #6B7280;
+            cursor: not-allowed;
+        }
+
+        .field-group input[readonly]:focus {
+            box-shadow: none;
+        }
+
+        #profileIdentifier {
+            background: #F8FAFF;
+            border-color: #E5E7EB;
+            color: #4B5563;
+            font-weight: 700;
+            font-family: 'Monaco', 'Courier New', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        /* Form Actions */
+        .profile-form-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 2rem;
+            border-top: 2px solid #E5E7EB;
+            background: linear-gradient(135deg, #F0F4FF 0%, #EFF6FF 100%);
+            border-radius: 0 0 16px 16px;
+            margin-left: -2rem;
+            margin-right: -2rem;
+            margin-bottom: -2rem;
+        }
+
+        .profile-notice {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #6B7280;
+            min-height: 20px;
+        }
+
+        .profile-notice.success {
+            color: #059669;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .profile-notice.error {
+            color: #DC2626;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-4px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #profileSaveBtn {
+            min-height: 44px;
+            padding: 0 2.5rem;
+            font-size: 0.95rem;
+            font-weight: 800;
+            min-width: 180px;
+            background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+            border: none;
+            color: #FFFFFF;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        #profileSaveBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+        }
+
+        #profileSaveBtn:active {
+            transform: translateY(0);
+        }
+
+        /* Password Section */
+        .password-section {
+            margin-top: 0;
+            padding: 2rem;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            transition: none;
+        }
+
+        .password-section:hover {
+            border-color: transparent;
+            background: transparent;
+        }
+
+        .password-section h3 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #1E3A8A;
+            margin: 0 0 1.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .password-section h3::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%);
+            border-radius: 2px;
+        }
+
+        .password-form-group {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .password-form-group .field-group {
+            display: grid;
+            gap: 0.6rem;
+        }
+
+        .password-form-group label {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: #1E3A8A;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .password-form-group input {
+            padding: 0.85rem 1rem;
+            border-radius: 10px;
+            border: 2px solid #DBEAFE;
+            background: #FFFFFF;
+            color: #1F2937;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .password-form-group input:focus {
+            outline: none;
+            border-color: #DC2626;
+            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+        }
+
+        #passwordNotice {
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        #passwordNotice.success {
+            background: #DBEAFE;
+            color: #0C4A6E;
+            border: 2px solid #7DD3FC;
+        }
+
+        #passwordNotice.error {
+            background: #FECACA;
+            color: #7F1D1D;
+            border: 2px solid #FCA5A5;
+        }
+
+        #passwordChangeBtn {
+            margin-top: 1.5rem;
+            padding: 0.85rem 2rem;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+            color: #FFFFFF;
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+        }
+
+        #passwordChangeBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.35);
+        }
+
+        #passwordChangeBtn:active {
+            transform: translateY(0);
+        }
+
+        .is-hidden {
+            display: none !important;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .profile-page .container {
+                padding: 1.5rem 1rem;
+            }
+
+            .profile-form-card {
+                padding: 1.5rem;
+            }
+
+            .profile-page-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .profile-photo-editor {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .profile-photo-actions {
+                width: 100%;
+                gap: 0.5rem;
+            }
+
+            .profile-photo-actions .btn {
+                flex: 1;
+            }
+
+            .profile-form-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .profile-form-actions {
+                flex-direction: column-reverse;
+                align-items: stretch;
+            }
+
+            .profile-notice {
+                order: 2;
+            }
+
+            #profileSaveBtn {
+                width: 100%;
+                min-width: auto;
+            }
+
+            .password-section {
+                padding: 1.5rem;
+            }
+
+            #passwordChangeBtn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="profile-page">
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="header-brand-group">
+                <a href="profile.html" class="brand" id="profileHomeLink">
+                    <span class="brand-mark">SE</span>
+                    <span class="brand-copy">
+                        <span class="brand-name">Smart Exam System</span>
+                        <span class="brand-page">Profile Settings</span>
+                    </span>
+                </a>
+            </div>
+            <div class="header-utility" style="display:flex;align-items:center;gap:0.75rem;">
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <main class="content-column">
+            <section class="profile-page-header">
+                <h1>Profile Settings</h1>
+                <p>Manage your account information and security</p>
+            </section>
+
+            <section class="profile-form-card">
+                    <form class="profile-form" id="profileForm">
+                        <!-- Profile Photo Section at Top -->
+                        <div class="profile-photo-editor">
+                            <div class="profile-photo-preview" id="profilePhotoEditorAvatar">SE</div>
+                            <div style="flex: 1;">
+                                <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 800; color: #1E3A8A;">Profile Photo</h3>
+                                <p style="margin: 0 0 1rem 0; font-size: 0.85rem; color: #6B7280;">Upload a clear profile photo (JPG, PNG)</p>
+                                <div class="profile-photo-actions">
+                                    <label class="btn btn-secondary" for="profilePhotoInput">Upload Photo</label>
+                                    <button class="btn btn-secondary" type="button" id="profilePhotoRemoveBtn">Remove Photo</button>
+                                </div>
+                            </div>
+                            <input id="profilePhotoInput" type="file" accept="image/*" class="is-hidden">
+                        </div>
+
+                        <!-- Basic Information Section -->
+                        <div class="form-section-header">
+                            <h2>Basic Information</h2>
+                        </div>
+                        <div class="profile-form-grid">
+                            <div class="field-group">
+                                <label for="profileFirstName">First Name</label>
+                                <input id="profileFirstName" type="text" required>
+                            </div>
+                            <div class="field-group">
+                                <label for="profileLastName">Last Name</label>
+                                <input id="profileLastName" type="text" required>
+                            </div>
+                            <div class="field-group">
+                                <label for="profileEmail">Email Address</label>
+                                <input id="profileEmail" type="email" readonly>
+                            </div>
+                            <div class="field-group">
+                                <label for="profileRole">Role</label>
+                                <input id="profileRole" type="text" readonly>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information Section -->
+                        <div class="form-section-header" style="margin-top: 2rem;">
+                            <h2>Contact Information</h2>
+                        </div>
+                        <div class="profile-form-grid">
+                            <div class="field-group">
+                                <label for="profileDepartment">Department</label>
+                                <input id="profileDepartment" type="text" placeholder="e.g., Software Engineering">
+                            </div>
+                            <div class="field-group">
+                                <label for="profilePhone">Phone Number</label>
+                                <input id="profilePhone" type="text" placeholder="+1 (555) 000-0000">
+                            </div>
+                            <div class="field-group" id="profileBatchGroup">
+                                <label for="profileBatch">Batch / Session</label>
+                                <input id="profileBatch" type="text" placeholder="e.g., 2024-2025">
+                            </div>
+                            <div class="field-group">
+                                <label for="profileIdentifier">Account ID</label>
+                                <input id="profileIdentifier" type="text" readonly>
+                            </div>
+                            <div class="field-group" style="grid-column: 1 / -1;">
+                                <label for="profileAddress">Address</label>
+                                <input id="profileAddress" type="text" placeholder="Street address, city, country">
+                            </div>
+                        </div>
+
+                        <!-- Bio Section -->
+                        <div class="form-section-header" style="margin-top: 2rem;">
+                            <h2>Professional Summary</h2>
+                        </div>
+                        <div class="field-group">
+                            <label for="profileBio">Bio</label>
+                            <textarea id="profileBio" placeholder="Share a brief professional summary about yourself..."></textarea>
+                        </div>
+
+                        <!-- Change Password Section - MOVED UP -->
+                        <div class="form-section-header" style="margin-top: 2rem;">
+                            <h2 style="color: #DC2626;">Change Password</h2>
+                        </div>
+                        <div class="password-form-group">
+                            <div class="field-group">
+                                <label for="newPassword">New Password</label>
+                                <input type="password" id="newPassword" minlength="8" placeholder="At least 8 characters">
+                            </div>
+                            <div class="field-group">
+                                <label for="confirmPassword">Confirm New Password</label>
+                                <input type="password" id="confirmPassword" minlength="8" placeholder="Repeat new password">
+                            </div>
+                        </div>
+                        <button type="button" id="passwordChangeBtn" onclick="handlePasswordChange(event)" style="margin-top: 1.5rem; padding: 0.85rem 2rem; border-radius: 10px; border: none; background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%); color: #FFFFFF; font-weight: 800; font-size: 0.95rem; cursor: pointer; font-family: inherit; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);">Update Password</button>
+                        <div id="passwordNotice" style="display:none; margin-top: 1rem;"></div>
+
+                        <!-- Form Actions - SAVE BUTTON AT THE VERY END -->
+                        <div class="profile-form-actions">
+                            <div class="profile-notice" id="profileNotice"></div>
+                            <button class="btn btn-primary" type="submit" id="profileSaveBtn">Save Profile</button>
+                        </div>
+                    </form>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="js/supabase.min.js"></script>
+    <script src="js/app-config.js"></script>
+    <script src="js/session-manager.js"></script>
+    <script src="js/user-profile.js"></script>
+    <script>
+        const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.AppConfig
+        const supabaseClient = window.supabase?.createClient
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            : null
+
+        function logout() {
+            if (window.SessionManager) {
+                window.SessionManager.logout({ loginUrl: 'login.html' })
+                return
+            }
+            localStorage.clear()
+            sessionStorage.clear()
+            window.location.href = 'login.html'
+        }
+
+        function getRoleConfig(role) {
+            const normalized = String(role || '').toLowerCase()
+            if (normalized === 'admin') {
+                return {
+                    sidebarTitle: 'Admin Profile',
+                    backHref: 'dashboard-admin.html',
+                    backLabel: 'Back to Admin Dashboard',
+                    summaryRole: 'Administrator',
+                    nav: [
+                        { href: 'dashboard-admin.html', icon: 'DB', title: 'Dashboard', meta: 'Home' },
+                        { href: 'manage-users.html', icon: 'US', title: 'Manage Users', meta: 'Users' },
+                        { href: 'analytics.html', icon: 'AN', title: 'Analytics', meta: 'Reports' },
+                        { href: 'profile.html', icon: 'PF', title: 'Profile', meta: 'Edit', active: true }
+                    ]
+                }
+            }
+            if (normalized === 'student') {
+                return {
+                    sidebarTitle: 'Student Profile',
+                    backHref: 'dashboard-student.html',
+                    backLabel: 'Back to Student Dashboard',
+                    summaryRole: 'Student',
+                    nav: [
+                        { href: 'dashboard-student.html', icon: 'DB', title: 'Dashboard', meta: 'Home' },
+                        { href: 'dashboard-student.html#upcomingSection', icon: 'EX', title: 'Exams', meta: 'Live' },
+                        { href: 'dashboard-student.html#completedSection', icon: 'RS', title: 'Results', meta: 'Scores' },
+                        { href: 'profile.html', icon: 'PF', title: 'Profile', meta: 'Edit', active: true }
+                    ]
+                }
+            }
+            return {
+                sidebarTitle: 'Teacher Profile',
+                backHref: 'dashboard-teacher.html',
+                backLabel: 'Back to Teacher Dashboard',
+                summaryRole: 'Teacher',
+                nav: [
+                    { href: 'dashboard-teacher.html', icon: 'DB', title: 'Dashboard', meta: 'Home' },
+                    { href: 'create-exam.html', icon: 'CE', title: 'Create Exam', meta: 'New' },
+                    { href: 'analytics.html', icon: 'AN', title: 'Analytics', meta: 'Live' },
+                    { href: 'question-bank.html', icon: 'QB', title: 'Question Bank', meta: 'Bank' },
+                    { href: 'profile.html', icon: 'PF', title: 'Profile', meta: 'Edit', active: true }
+                ]
+            }
+        }
+
+        function getIdentifier(profile) {
+            if (profile.role === 'teacher') return profile.teacher_id || 'Not assigned'
+            if (profile.role === 'student') return profile.student_id || 'Not assigned'
+            if (profile.role === 'admin') return profile.admin_id || 'Not assigned'
+            return profile.id || 'Not assigned'
+        }
+
+        function getIdentifierLabel(profile) {
+            if (profile.role === 'teacher') return 'Teacher ID'
+            if (profile.role === 'student') return 'Student ID'
+            if (profile.role === 'admin') return 'Admin ID'
+            return 'Account ID'
+        }
+
+        function setNotice(message, type) {
+            const notice = document.getElementById('profileNotice')
+            if (!notice) return
+            notice.textContent = message || ''
+            notice.className = `profile-notice${type ? ` ${type}` : ''}`
+        }
+
+        function navigateAfterSuccessfulSave(profile) {
+            const role = String(profile?.role || '').toLowerCase()
+            if (role === 'teacher') {
+                const target = 'teacher-shell.html?page=' + encodeURIComponent('dashboard-teacher.html?view=dashboard')
+                if (window.top && window.top !== window && window.top.location) {
+                    window.top.location.href = target
+                } else {
+                    window.location.href = target
+                }
+                return
+            }
+
+            const config = getRoleConfig(role)
+            window.location.href = config.backHref || 'profile.html'
+        }
+
+        let currentProfileState = null
+        let pendingProfilePhotoUrl = ''
+
+        function syncPhotoControls() {
+            const removeBtn = document.getElementById('profilePhotoRemoveBtn')
+            if (removeBtn) {
+                removeBtn.disabled = !pendingProfilePhotoUrl
+            }
+        }
+
+        function renderProfileIdentity(profile) {
+            const config = getRoleConfig(profile.role)
+            window.UserProfile.applyIdentity({
+                profile: {
+                    ...profile,
+                    profile_photo_url: pendingProfilePhotoUrl || profile.profile_photo_url || ''
+                },
+                avatarTargets: [
+                    'profilePhotoEditorAvatar'
+                ],
+                meta: config.summaryRole
+            })
+            syncPhotoControls()
+        }
+
+        function readFileAsDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader()
+                reader.onload = () => resolve(String(reader.result || ''))
+                reader.onerror = () => reject(new Error('Unable to read that image file.'))
+                reader.readAsDataURL(file)
+            })
+        }
+
+        function loadImage(dataUrl) {
+            return new Promise((resolve, reject) => {
+                const img = new Image()
+                img.onload = () => resolve(img)
+                img.onerror = () => reject(new Error('Unable to load that image.'))
+                img.src = dataUrl
+            })
+        }
+
+        async function optimizeProfilePhoto(file) {
+            if (!file) throw new Error('Please choose an image file.')
+            if (!String(file.type || '').startsWith('image/')) {
+                throw new Error('Only image files are supported for profile photos.')
+            }
+
+            const rawDataUrl = await readFileAsDataUrl(file)
+            const image = await loadImage(rawDataUrl)
+            const maxDimension = 320
+            const scale = Math.min(1, maxDimension / image.width, maxDimension / image.height)
+            const width = Math.max(1, Math.round(image.width * scale))
+            const height = Math.max(1, Math.round(image.height * scale))
+            const canvas = document.createElement('canvas')
+            canvas.width = width
+            canvas.height = height
+            const context = canvas.getContext('2d')
+            if (!context) {
+                return rawDataUrl
+            }
+            context.drawImage(image, 0, 0, width, height)
+            return canvas.toDataURL('image/jpeg', 0.84)
+        }
+
+        function fillProfile(profile) {
+            currentProfileState = { ...profile }
+            pendingProfilePhotoUrl = profile.profile_photo_url || ''
+            const config = getRoleConfig(profile.role)
+            const identifier = getIdentifier(profile)
+
+            document.getElementById('profileHomeLink').href = config.backHref || 'profile.html'
+
+            // Back button removed — navigation via sidebar
+
+            renderProfileIdentity(profile)
+
+            document.getElementById('profileFirstName').value = profile.first_name || ''
+            document.getElementById('profileLastName').value = profile.last_name || ''
+            document.getElementById('profileEmail').value = profile.email || ''
+            document.getElementById('profileRole').value = config.summaryRole
+            document.getElementById('profileDepartment').value = profile.department || ''
+            document.getElementById('profilePhone').value = profile.phone || ''
+            document.getElementById('profileBatch').value = profile.batch || ''
+            document.getElementById('profileIdentifier').value = identifier
+            document.getElementById('profileAddress').value = profile.address || ''
+            document.getElementById('profileBio').value = profile.bio || ''
+
+            document.getElementById('profileBatchGroup').classList.toggle('is-hidden', profile.role !== 'student')
+        }
+
+        async function initProfilePage() {
+            const storedProfile = window.UserProfile ? window.UserProfile.getStoredProfile() : null
+            if (storedProfile && (storedProfile.email || storedProfile.displayName !== 'User')) {
+                fillProfile(storedProfile)
+            }
+
+            if (!window.__TEACHER_SHELL_EMBEDDED__ && window.SessionManager && !window.SessionManager.init({ loginUrl: 'login.html', requireAuth: true })) {
+                return
+            }
+
+            try {
+                const profile = await window.UserProfile.fetchProfile(supabaseClient)
+                fillProfile(profile)
+            } catch (error) {
+                console.error('Profile load failed:', error)
+                if (storedProfile && (storedProfile.email || storedProfile.displayName !== 'User')) {
+                    fillProfile(storedProfile)
+                }
+            }
+
+            const form = document.getElementById('profileForm')
+            const saveBtn = document.getElementById('profileSaveBtn')
+            const photoInput = document.getElementById('profilePhotoInput')
+            const removePhotoBtn = document.getElementById('profilePhotoRemoveBtn')
+
+            photoInput.addEventListener('change', async function () {
+                const [file] = Array.from(photoInput.files || [])
+                if (!file) return
+                try {
+                    pendingProfilePhotoUrl = await optimizeProfilePhoto(file)
+                    if (currentProfileState) {
+                        renderProfileIdentity(currentProfileState)
+                    }
+                    setNotice('Profile photo selected. Save profile to apply it everywhere.', 'success')
+                } catch (error) {
+                    console.error('Profile photo processing failed:', error)
+                    setNotice(error.message || 'Unable to process that image.', 'error')
+                } finally {
+                    photoInput.value = ''
+                }
+            })
+
+            removePhotoBtn.addEventListener('click', function () {
+                pendingProfilePhotoUrl = ''
+                if (currentProfileState) {
+                    renderProfileIdentity(currentProfileState)
+                }
+                setNotice('Profile photo removed. Save profile to confirm the change.', 'success')
+            })
+
+            form.addEventListener('submit', async function (event) {
+                event.preventDefault()
+                setNotice('')
+                saveBtn.disabled = true
+                saveBtn.textContent = 'Saving...'
+
+                try {
+                    const nextProfile = await window.UserProfile.saveProfile(supabaseClient, {
+                        first_name: document.getElementById('profileFirstName').value,
+                        last_name: document.getElementById('profileLastName').value,
+                        department: document.getElementById('profileDepartment').value,
+                        phone: document.getElementById('profilePhone').value,
+                        batch: document.getElementById('profileBatch').value,
+                        address: document.getElementById('profileAddress').value,
+                        bio: document.getElementById('profileBio').value,
+                        profile_photo_url: pendingProfilePhotoUrl
+                    })
+                    fillProfile(nextProfile)
+                    setNotice('Profile updated successfully.', 'success')
+                    setTimeout(() => navigateAfterSuccessfulSave(nextProfile), 200)
+                } catch (error) {
+                    console.error('Profile save failed:', error)
+                    setNotice(error.message || 'Unable to save profile right now.', 'error')
+                } finally {
+                    saveBtn.disabled = false
+                    saveBtn.textContent = 'Save Profile'
+                }
+            })
+        }
+
+        document.addEventListener('DOMContentLoaded', initProfilePage)
+
+        async function handlePasswordChange(event) {
+            event.preventDefault();
+            const newPwd     = (document.getElementById('newPassword')?.value || '').trim();
+            const confirmPwd = (document.getElementById('confirmPassword')?.value || '').trim();
+            const noticeEl   = document.getElementById('passwordNotice');
+            const btn        = document.getElementById('passwordChangeBtn');
+
+            const showPwdNotice = (msg, type) => {
+                if (!noticeEl) return;
+                noticeEl.style.display = 'block';
+                noticeEl.textContent = msg;
+                noticeEl.style.background = type === 'success' ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)';
+                noticeEl.style.color = type === 'success' ? '#6ee7b7' : '#fca5a5';
+                noticeEl.style.border = type === 'success' ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(239,68,68,0.3)';
+                noticeEl.style.borderRadius = '8px';
+                noticeEl.style.padding = '0.7rem 1rem';
+            };
+
+            if (!newPwd || newPwd.length < 8) { showPwdNotice('Password must be at least 8 characters.', 'error'); return; }
+            if (newPwd !== confirmPwd) { showPwdNotice('Passwords do not match.', 'error'); return; }
+            if (!supabaseClient) { showPwdNotice('Authentication client not available.', 'error'); return; }
+
+            if (btn) { btn.disabled = true; btn.textContent = 'Updating...'; }
+            try {
+                const { error } = await supabaseClient.auth.updateUser({ password: newPwd });
+                if (error) throw error;
+                showPwdNotice('Password updated successfully.', 'success');
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+            } catch (err) {
+                showPwdNotice(err.message || 'Failed to update password.', 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = 'Update Password'; }
+            }
+        }
+    </script>
+    <script src="js/chatbot.js"></script>
+</body>
+</html>
+
+

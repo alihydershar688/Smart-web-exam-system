@@ -1,0 +1,1529 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Exam System | Automated Assessment Platform</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        (function () {
+            const hash = window.location.hash || '';
+            const search = window.location.search || '';
+            const hasRecoveryHash = hash.includes('access_token=') && hash.includes('type=recovery');
+            const hasRecoveryCode = search.includes('code=');
+
+            if (hasRecoveryHash || hasRecoveryCode) {
+                const resetUrl = `reset-password.html${search}${hash}`;
+                window.location.replace(resetUrl);
+            }
+        })();
+    </script>
+</head>
+<body class="homepage-page">
+    <!-- Navigation -->
+    <nav class="navbar homepage-topbar" aria-label="Primary navigation">
+        <div class="container homepage-nav-container">
+            <div class="navbar-content homepage-navbar">
+                <button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobileNavDrawer">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <a href="#home" class="logo homepage-logo">
+                    <span class="logo-mark" aria-hidden="true">SE</span>
+                    <span>Smart Exam System</span>
+                </a>
+                <div class="nav-links homepage-nav-links">
+                    <a href="#home" class="nav-link">Home</a>
+                    <a href="#features" class="nav-link">Features</a>
+                    <a href="#about" class="nav-link">About</a>
+                </div>
+                <div class="homepage-auth-links">
+                    <a href="login.html" class="btn nav-login-btn">Login</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+    <aside class="mobile-nav-drawer" id="mobileNavDrawer" aria-hidden="true">
+        <div class="mobile-drawer-header">
+            <div class="mobile-drawer-brand">
+                <span class="logo-mark" aria-hidden="true">SE</span>
+                <span>Smart Exam System</span>
+            </div>
+            <button class="mobile-close-btn" id="mobileCloseBtn" type="button" aria-label="Close navigation menu">&times;</button>
+        </div>
+        <nav class="mobile-drawer-links" aria-label="Mobile navigation">
+            <a href="#home" class="mobile-drawer-link">Home</a>
+            <a href="#features" class="mobile-drawer-link">Features</a>
+            <a href="#about" class="mobile-drawer-link">About</a>
+            <a href="login.html" class="mobile-drawer-link mobile-drawer-link-cta">Login</a>
+        </nav>
+    </aside>
+
+    <!-- Hero Section (Home) -->
+    <section id="home" class="hero hero-fullscreen hero-theme">
+        <div class="container hero-content-wrap">
+            <div class="hero-content">
+                <p class="hero-kicker">Teacher-Student Assessment Workflow</p>
+                <h1 class="hero-title">
+                    Smart Exam System
+                </h1>
+                <p class="hero-subtitle">
+                    Smart Exam System gives universities a clearer digital assessment workflow by helping teachers create papers from course material, manage student attempts, review answers, and publish results with more consistency and control.
+                </p>
+                <p class="hero-support-copy">
+                    By connecting paper generation, student attempts, teacher review, grading, and result publication in one place, Smart Exam System helps institutions make assessment more transparent, efficient, and easier to manage for teachers, students, and academic departments.
+                </p>
+                <div class="hero-actions">
+                    <a href="login.html" class="btn btn-primary hero-primary-btn">
+                        Start Creating Exams
+                    </a>
+                    <a href="#features" class="btn btn-outline hero-outline-btn">
+                        Learn More
+                    </a>
+                    </div>
+                </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="section-theme section-theme-a">
+        <div class="container">
+            <div class="text-center mb-3 section-heading">
+                <h2>Built for Real Exam Operations</h2>
+                <p class="section-subtitle">From content upload to publishing, attempts, grading, and results</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M4 5h16v11H9l-5 4V5Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M8 9h8M8 12h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <p class="feature-kicker">Creation</p>
+                    <h3>Material-Based Question Generation</h3>
+                    <p class="card-copy">Generate MCQs, short, and long questions directly from uploaded course material and selected subject.</p>
+                </div>
+                <div class="stat-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M8 3h8m-9 4h10a2 2 0 0 1 2 2v9a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V9a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                            <path d="m9 13 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <p class="feature-kicker">Evaluation</p>
+                    <h3>Hybrid Grading Pipeline</h3>
+                    <p class="card-copy">Objective questions are auto-graded, while subjective answers are prepared for teacher review and final marks.</p>
+                </div>
+                <div class="stat-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M12 3 5 6v6c0 5 3.5 8.5 7 9 3.5-.5 7-4 7-9V6l-7-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                            <path d="m9.5 12 1.7 1.7 3.3-3.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <p class="feature-kicker">Delivery</p>
+                    <h3>Structured Exam Flow</h3>
+                    <p class="card-copy">Supports exam publishing, student attempts, result pages, and teacher-side submission review in one flow.</p>
+                </div>
+                <div class="stat-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M4 18h16M7 16V9m5 7V6m5 10v-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <p class="feature-kicker">Reporting</p>
+                    <h3>Dashboard Insights</h3>
+                    <p class="card-copy">Track pending grading, completed attempts, scores, percentages, and per-exam performance summaries.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="section-theme section-theme-b">
+        <div class="container">
+            <div class="text-center mb-3 section-heading">
+                <h2>How Smart Exam System Works</h2>
+                <p class="section-subtitle">A complete teacher-to-student assessment cycle</p>
+            </div>
+
+            <div class="flow-grid">
+                <div class="card flow-card">
+                    <span class="step-pill">Step 01</span>
+                    <h3>Create and Upload</h3>
+                    <p class="card-copy">Teacher selects course/subject and uploads lecture material (PDF, DOCX, PPT).</p>
+                </div>
+                <div class="card flow-card">
+                    <span class="step-pill">Step 02</span>
+                    <h3>Generate and Review</h3>
+                    <p class="card-copy">The system generates questions, shuffles options, and lets the teacher review before publishing.</p>
+                </div>
+                <div class="card flow-card">
+                    <span class="step-pill">Step 03</span>
+                    <h3>Student Attempt</h3>
+                    <p class="card-copy">Published exams appear on the student dashboard where students attempt and submit online.</p>
+                </div>
+                <div class="card flow-card">
+                    <span class="step-pill">Step 04</span>
+                    <h3>Grade and Publish Results</h3>
+                    <p class="card-copy">Objective grading is automatic; teachers review remaining answers and students receive final results.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section-theme section-theme-c">
+        <div class="container">
+            <!-- Our Story -->
+            <div class="card section-block">
+                <div class="about-header">
+                    <h2 class="about-title">About Smart Exam System</h2>
+                    <p class="about-subtitle">
+                        A practical end-to-end exam management platform
+                    </p>
+                </div>
+                <div class="about-body">
+                    <p class="about-copy">
+                        Smart Exam System is a Final Year Project designed to solve practical exam management challenges in academic environments.
+                        It connects exam creation, student attempts, grading, and reporting in a single consistent workflow.
+                    </p>
+                    <p class="about-copy">
+                        The platform focuses on reliability and clarity: teachers generate exams from their own material, students attempt from a clean dashboard,
+                        objective responses are graded automatically, and subjective responses stay under teacher control for fair evaluation.
+                    </p>
+                    <p class="about-copy">
+                        By reducing manual handling and keeping creation, submission, review, and result publication connected, the system supports a more transparent and easier university assessment process with clearer accountability for both teachers and students.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Team Section -->
+            <div class="glass-panel section-block">
+                <div class="text-center mb-3 section-heading">
+                    <h2>Meet Our Team</h2>
+                    <p class="section-subtitle">The team behind Smart Exam System</p>
+                </div>
+
+            <div class="team-grid">
+               
+                <div class="team-card">
+                    <div class="team-avatar">AH</div>
+                    <h3>Ali Hyder</h3>
+                    <p class="team-role">Project Creator, Lead Developer & System Architect</p>
+                    <p class="team-id">B22F0764SE051</p>
+                    <div class="team-skills">
+                        <span class="skill-tag">Python</span>
+                        <span class="skill-tag">Full Stack Development</span>
+                        <span class="skill-tag">Language Models</span>
+                        <span class="skill-tag">Security</span>
+                    </div>
+                </div>
+                <div class="team-card">
+                    <div class="team-avatar">BQ</div>
+                    <h3>Badar Ul Islam Qureshi</h3>
+                    <p class="team-role">Team Lead & Data Architecture</p>
+                    <p class="team-id">B22F1501SE151</p>
+                    <div class="team-skills">
+                        <span class="skill-tag">PostgreSQL</span>
+                        <span class="skill-tag">System Testing</span>
+                        <span class="skill-tag">Documentation</span>
+                    </div>
+                </div>
+                <div class="team-card">
+                    <div class="team-avatar">KS</div>
+                    <h3>Kashan Sardar</h3>
+                    <p class="team-role">Frontend Developer & UX Designer</p>
+                    <p class="team-id">B22F0328SE121</p>
+                    <div class="team-skills">
+                        <span class="skill-tag">HTML/CSS/JS</span>
+                        <span class="skill-tag">Bootstrap</span>
+                        <span class="skill-tag">Analytics</span>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- Supervisors -->
+            <div class="card section-block">
+                <div class="text-center">
+                    <h2>Project Supervisors</h2>
+                    <p class="section-gap-bottom">Guiding us through this journey</p>
+                
+                <div class="supervisors-grid">
+                    <div class="supervisor-card">
+                        <div class="supervisor-avatar">DM</div>
+                        <h3>Dr. Musadaq Mansoor</h3>
+                        <p class="supervisor-role">Project Supervisor</p>
+                        <p class="supervisor-department">Department of Software Engineering</p>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technology Stack -->
+            <div class="glass-panel section-block">
+                <div class="text-center mb-3 section-heading">
+                    <h2>Technology Stack</h2>
+                    <p class="section-subtitle">Current stack used in this project implementation</p>
+                </div>
+
+            <div class="tech-stack">
+                <div class="tech-category">
+                    <h3>Frontend</h3>
+                    <div class="tech-items">
+                        <span class="tech-tag">HTML5</span>
+                        <span class="tech-tag">CSS3</span>
+                        <span class="tech-tag">JavaScript</span>
+                        <span class="tech-tag">Bootstrap</span>
+                    </div>
+                </div>
+
+                <div class="tech-category">
+                    <h3>Backend & Data</h3>
+                    <div class="tech-items">
+                        <span class="tech-tag">Python (Flask)</span>
+                        <span class="tech-tag">Supabase</span>
+                        <span class="tech-tag">PostgreSQL</span>
+                        <span class="tech-tag">RESTful APIs</span>
+                    </div>
+                </div>
+
+                <div class="tech-category">
+                    <h3>Question Generation & Grading</h3>
+                    <div class="tech-items">
+                        <span class="tech-tag">Ollama (Local Models)</span>
+                        <span class="tech-tag">Prompt Templates</span>
+                        <span class="tech-tag">Auto Objective Grading</span>
+                        <span class="tech-tag">Teacher Review Pipeline</span>
+                    </div>
+                </div>
+
+                <div class="tech-category">
+                    <h3>Development</h3>
+                    <div class="tech-items">
+                        <span class="tech-tag">Agile Methodology</span>
+                        <span class="tech-tag">Git</span>
+                        <span class="tech-tag">VS Code</span>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project Details -->
+            <div class="card">
+                <h2 class="text-center">Project Information</h2>
+            
+            <div class="project-details">
+                <div class="detail-item">
+                    <h4 class="detail-title">Project Type</h4>
+                    <p>Final Year Project (BS Software Engineering)</p>
+                </div>
+                
+                <div class="detail-item">
+                    <h4 class="detail-title">Institution</h4>
+                    <p>Pak Austria Fachhochschule Institute of Applied Sciences and Technology, Mang Haripur</p>
+                </div>
+                
+                <div class="detail-item">
+                    <h4 class="detail-title">Duration</h4>
+                    <p>Two-semester academic development cycle</p>
+                </div>
+                
+                <div class="detail-item">
+                    <h4 class="detail-title">Objective</h4>
+                    <p>To provide a complete digital exam workflow with material-based paper generation, transparent grading, and linked teacher-student dashboards.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="homepage-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand-block">
+                    <div class="footer-brand">
+                        <span class="logo-mark" aria-hidden="true">SE</span>
+                        <div>
+                            <h4 class="footer-title">Smart Exam System</h4>
+                            <p class="footer-copy">A university-focused assessment platform for material-based paper generation, structured attempts, transparent grading, and connected academic reporting.</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="footer-title">Project Purpose</h4>
+                    <p>Create a clearer digital workflow for university exams.</p>
+                    <p>Reduce manual assessment overhead for teachers.</p>
+                    <p>Give students a cleaner attempt and result experience.</p>
+                </div>
+                <div>
+                    <h4 class="footer-title">Academic Information</h4>
+                    <p>Final Year Project</p>
+                    <p>BS Software Engineering</p>
+                    <p>Pak Austria Fachhochschule Institute of Applied Sciences and Technology, Mang Haripur</p>
+                </div>
+                <div>
+                    <h4 class="footer-title">Project Team</h4>
+                    <p>Ali Hyder</p>
+                    <p>Badar Ul Islam Qureshi</p>
+                    <p>Kashan Sardar</p>
+                </div>
+                <div>
+                    <h4 class="footer-title">Supervision</h4>
+                    <p>Dr. Musadaq Mansoor</p>
+                    <p>Department of Software Engineering</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Smart Exam System. Educational project for transparent and easy university assessment.</p>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: "Manrope", "Segoe UI", sans-serif;
+            background: #071126;
+            color: #f8fafc;
+            font-size: 17px;
+            line-height: 1.65;
+        }
+        body.homepage-page {
+            background:
+                radial-gradient(circle at 8% 18%, rgba(56, 189, 248, 0.16), transparent 24%),
+                radial-gradient(circle at 88% 14%, rgba(37, 99, 235, 0.16), transparent 26%),
+                linear-gradient(160deg, #081126 0%, #0b1838 38%, #0e3a68 72%, #0f766e 100%);
+            color: #f8fafc;
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
+        }
+        :root {
+            --surface-glass: rgba(15, 23, 42, 0.42);
+            --surface-border: rgba(255, 255, 255, 0.15);
+        }
+        #home,
+        #features,
+        #about {
+            scroll-margin-top: 90px;
+        }
+        .homepage-navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            gap: 1rem;
+            padding: 0;
+        }
+        .homepage-auth-links {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        /* Group tabs + login together on the right */
+        .homepage-right-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .homepage-topbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(8, 11, 34, 0.92);
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid rgba(129, 140, 248, 0.16);
+            box-shadow: 0 4px 24px rgba(2, 6, 23, 0.32);
+            animation: navSlideDown 0.6s ease both;
+        }
+        .homepage-nav-container {
+            max-width: 1280px;
+            width: 100%;
+            margin: 0 auto;
+            padding-left: 24px;
+            padding-right: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            min-height: 68px;
+            box-sizing: border-box;
+        }
+        .homepage-logo {
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            color: #f8fafc;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .homepage-logo:hover {
+            color: #f8fafc;
+        }
+        .logo-mark {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            background: transparent;
+            box-shadow: none;
+            position: relative;
+            overflow: hidden;
+            color: transparent;
+            font-size: 0;
+        }
+        .logo-mark::before {
+            content: "";
+            width: 74%;
+            height: 74%;
+            display: block;
+            background: url("./assets/smart-exam-mark.svg") center/contain no-repeat;
+            filter: drop-shadow(0 6px 12px rgba(37, 99, 235, 0.22));
+        }
+        .homepage-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            flex: 0;
+            justify-content: flex-end;
+            margin-left: auto;
+        }
+        .homepage-nav-links .nav-link {
+            color: rgba(226, 232, 240, 0.86);
+            font-weight: 700;
+            padding: 0.62rem 1rem;
+            border-radius: 999px;
+            transition: all 0.25s ease;
+            position: relative;
+            text-decoration: none;
+        }
+        .homepage-nav-links .nav-link::after {
+            content: "";
+            position: absolute;
+            left: 1rem;
+            right: 1rem;
+            bottom: 0.35rem;
+            height: 2px;
+            border-radius: 2px;
+            background: linear-gradient(90deg, #60a5fa, #2dd4bf);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.25s ease;
+        }
+        .homepage-nav-links .nav-link:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .homepage-nav-links .nav-link:hover::after {
+            transform: scaleX(1);
+        }
+        .homepage-nav-links .nav-link.active {
+            color: #ffffff;
+            background: linear-gradient(180deg, rgba(79, 70, 229, 0.22), rgba(37, 99, 235, 0.12));
+        }
+        .homepage-nav-links .nav-link.active::after {
+            transform: scaleX(1);
+        }
+        .homepage-auth-links {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .mobile-menu-btn,
+        .mobile-nav-overlay,
+        .mobile-nav-drawer {
+            display: none;
+        }
+        .mobile-menu-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            background: rgba(255, 255, 255, 0.82);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        }
+        .mobile-menu-btn span {
+            width: 18px;
+            height: 2px;
+            background: #0A1628;
+            border-radius: 999px;
+            display: block;
+        }
+        .mobile-nav-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.46);
+            backdrop-filter: blur(3px);
+            z-index: 1300;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        .mobile-nav-drawer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: min(86vw, 320px);
+            height: 100vh;
+            background: linear-gradient(180deg, #f8fbff 0%, #edf5ff 100%);
+            box-shadow: 18px 0 40px rgba(15, 23, 42, 0.18);
+            z-index: 1400;
+            padding: 1.2rem 1rem 1.4rem;
+            transform: translateX(-100%);
+            transition: transform 0.28s ease;
+        }
+        .mobile-nav-open .mobile-nav-overlay {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .mobile-nav-open .mobile-nav-drawer {
+            transform: translateX(0);
+        }
+        .mobile-drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+            margin-bottom: 1rem;
+        }
+        .mobile-drawer-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 800;
+            color: #1e293b;
+        }
+        .mobile-close-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.24);
+            background: white;
+            color: #0f172a;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .mobile-drawer-links {
+            display: grid;
+            gap: 0.7rem;
+        }
+        .mobile-drawer-link {
+            display: block;
+            padding: 0.95rem 1rem;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.86);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            color: #1e293b;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+        }
+        .mobile-drawer-link-cta {
+            background: linear-gradient(135deg, #0f766e, #14b8a6);
+            color: white;
+            border-color: transparent;
+            margin-top: 0.45rem;
+        }
+        .nav-login-btn {
+            background: linear-gradient(135deg, #1E3A8A, #3B82F6);
+            color: #ffffff !important;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            padding: 0.76rem 1.45rem;
+            border-radius: 14px;
+            box-shadow: 0 14px 28px rgba(37, 99, 235, 0.24);
+            text-decoration: none;
+            font-weight: 700;
+        }
+        .nav-login-btn:hover {
+            transform: translateY(-1px);
+            background: linear-gradient(135deg, #4338ca, #2563eb);
+            box-shadow: 0 16px 32px rgba(29, 78, 216, 0.3);
+        }
+        .hero-kicker {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.92);
+            font-size: 1rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 700;
+            padding: 0.55rem 1.15rem;
+            border-radius: 999px;
+            border: 1px solid rgba(191, 219, 254, 0.34);
+            background: rgba(255, 255, 255, 0.08);
+            animation: badgePulse 2.8s ease-in-out infinite;
+        }
+        .hero-theme {
+            background: linear-gradient(125deg, rgba(8, 17, 38, 0.3) 0%, rgba(15, 76, 129, 0.14) 46%, rgba(15, 118, 110, 0.18) 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-content-wrap {
+            position: relative;
+            z-index: 2;
+        }
+        .hero-content {
+            max-width: 980px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .hero-title {
+            color: white;
+            font-size: clamp(2.4rem, 5vw, 4.2rem);
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.08;
+            max-width: 14ch;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .hero-subtitle {
+            max-width: 720px;
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            margin: 0 auto 2rem;
+            opacity: 0.96;
+            line-height: 1.75;
+            color: rgba(241, 245, 249, 0.96);
+        }
+        .hero-support-copy {
+            max-width: 680px;
+            margin: 0 auto 2.5rem;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: rgba(191, 219, 254, 0.88);
+        }
+        .hero-actions {
+            display: flex;
+            gap: 1.1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .hero-primary-btn,
+        .hero-outline-btn {
+            font-size: 1.08rem;
+            padding: 16px 32px;
+            border-radius: 14px;
+        }
+        .hero-primary-btn {
+            background: linear-gradient(135deg, #14b8a6, #2563eb);
+            box-shadow: 0 16px 28px rgba(37, 99, 235, 0.28);
+        }
+        .hero-outline-btn {
+            border: 2px solid rgba(255, 255, 255, 0.85);
+            color: white;
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .hero-primary-btn:hover,
+        .hero-outline-btn:hover {
+            transform: translateY(-2px);
+        }
+        .hero-fullscreen {
+            min-height: 100vh;
+            min-height: 100svh;
+            display: flex;
+            align-items: center;
+            padding: 3rem 0 3rem;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: "";
+            position: absolute;
+            width: 360px;
+            height: 360px;
+            border-radius: 50%;
+            top: 12%;
+            left: -120px;
+            background: radial-gradient(circle, rgba(103, 232, 249, 0.2), transparent 70%);
+            animation: floatGlow 8s ease-in-out infinite;
+        }
+        .hero::after {
+            content: "";
+            position: absolute;
+            width: 420px;
+            height: 420px;
+            border-radius: 50%;
+            bottom: -140px;
+            right: -100px;
+            background: radial-gradient(circle, rgba(20, 184, 166, 0.18), transparent 68%);
+            animation: floatGlow 10s ease-in-out infinite reverse;
+        }
+        .hero-content > * {
+            animation: fadeUp 0.8s ease both;
+        }
+        .hero-content > *:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+        .hero-content > *:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+        .hero-content > *:nth-child(3) {
+            animation-delay: 0.25s;
+        }
+        .hero-content > *:nth-child(4) {
+            animation-delay: 0.35s;
+        }
+        .section-theme {
+            color: white;
+            padding: clamp(3.5rem, 7vw, 5rem) 0;
+            position: relative;
+            overflow: hidden;
+            min-height: auto;
+            display: block;
+        }
+        .section-theme > .container {
+            width: 100%;
+        }
+        /* Prevent external CSS from breaking homepage layout */
+        .homepage-page .container {
+            max-width: 1280px !important;
+            width: min(1280px, calc(100% - 48px)) !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        .homepage-page * {
+            box-sizing: border-box;
+        }
+        .section-theme::before {
+            content: "";
+            position: absolute;
+            width: 340px;
+            height: 340px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(103, 232, 249, 0.16), transparent 70%);
+            top: -110px;
+            right: -90px;
+            pointer-events: none;
+        }
+        .section-heading {
+            max-width: 760px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .section-heading h2 {
+            color: #f8fafc;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.7rem;
+            font-size: clamp(1.9rem, 3.5vw, 2.5rem);
+        }
+        .section-theme h2,
+        .section-theme h3,
+        .section-theme h4 {
+            color: #f8fafc;
+            text-shadow: 0 1px 10px rgba(8, 17, 38, 0.3);
+        }
+        .section-theme p {
+            color: rgba(255, 255, 255, 0.86);
+        }
+        .section-subtitle {
+            color: rgba(255, 255, 255, 0.82);
+            font-size: 1.06rem;
+            line-height: 1.65;
+        }
+        .section-block {
+            margin-bottom: 2.5rem;
+        }
+        .about-header,
+        .about-body {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .about-header {
+            text-align: center;
+        }
+        .about-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .about-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.82);
+            margin-bottom: 2rem;
+        }
+        .about-copy {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .section-gap-bottom {
+            margin-bottom: 3rem;
+        }
+        .section-theme-a {
+            background: linear-gradient(140deg, #0c1f3f 0%, #0f4c81 48%, #0f766e 100%);
+        }
+        .section-theme-b {
+            background: linear-gradient(140deg, #0A1628 0%, #1E3A8A 52%, #1e40af 100%);
+        }
+        .section-theme-c {
+            background: linear-gradient(140deg, #081126 0%, #173c6f 52%, #0f766e 100%);
+        }
+
+        /* Team Section Styles */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .team-card {
+            background: var(--surface-glass);
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(8, 17, 38, 0.35);
+            border: 1px solid var(--surface-border);
+            backdrop-filter: blur(8px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            height: 100%;
+        }
+
+        .team-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 14px 26px rgba(15, 118, 110, 0.24);
+        }
+
+        .team-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #0f4c81 0%, #0f766e 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            margin: 0 auto 1rem;
+        }
+
+        .team-role {
+            color: #67e8f9;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .team-id {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        .team-card h3 {
+            color: #f8fafc;
+            margin-bottom: 0.4rem;
+        }
+
+        .team-skills {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .skill-tag {
+            background: rgba(255, 255, 255, 0.14);
+            color: #ecfeff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Supervisors */
+        .supervisors-grid {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        .supervisor-card {
+            background: var(--surface-glass);
+            padding: 2rem 1.6rem;
+            border-radius: 16px;
+            text-align: center;
+            width: 100%;
+            max-width: 340px;
+            border: 1px solid var(--surface-border);
+            box-shadow: 0 10px 28px rgba(8, 17, 38, 0.3);
+        }
+
+        .supervisor-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #0f766e 0%, #0f4c81 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            margin: 0 auto 1rem;
+        }
+
+        .supervisor-role {
+            color: #5eead4;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .supervisor-department {
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 0.9rem;
+        }
+        .supervisor-card h3 {
+            color: #f8fafc;
+            line-height: 1.25;
+            margin-bottom: 0.9rem;
+            font-size: 2rem;
+        }
+
+        /* Technology Stack */
+        .tech-stack {
+            display: grid;
+            gap: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .tech-category {
+            background: var(--surface-glass);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border-left: 4px solid #5eead4;
+            border: 1px solid var(--surface-border);
+        }
+
+        .tech-category h3 {
+            margin-bottom: 1rem;
+            color: #ecfeff;
+        }
+
+        .tech-items {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tech-tag {
+            background: linear-gradient(135deg, #0f766e, #14b8a6);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Project Details */
+        .project-details {
+            display: grid;
+            gap: 1.5rem;
+            max-width: 900px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            margin: 0 auto;
+            margin-top: 2rem;
+        }
+
+        .detail-item {
+            background: var(--surface-glass);
+            padding: 1.2rem;
+            border-radius: 14px;
+            border-left: 4px solid #14b8a6;
+            border: 1px solid var(--surface-border);
+        }
+
+        .detail-item h4 {
+            margin-bottom: 0.5rem;
+            color: #99f6e4;
+        }
+        .detail-title {
+            color: #67e8f9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.25rem;
+            margin-top: 2rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .flow-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: var(--surface-glass);
+            padding: 1.35rem;
+            border-radius: 16px;
+            text-align: left;
+            box-shadow: 0 10px 28px rgba(8, 17, 38, 0.35);
+            border: 1px solid var(--surface-border);
+            backdrop-filter: blur(7px);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 14px 28px rgba(15, 118, 110, 0.22);
+        }
+
+        .stat-card h3 {
+            color: #ecfeff;
+            font-size: 1.08rem;
+            margin: 0.2rem 0 0.25rem;
+        }
+
+        .stat-card p {
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0;
+            line-height: 1.55;
+            font-size: 0.94rem;
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            margin: 0 0 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #67e8f9;
+            background: rgba(15, 118, 110, 0.2);
+            border: 1px solid rgba(94, 234, 212, 0.45);
+            box-shadow: inset 0 0 18px rgba(103, 232, 249, 0.12);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stat-card:hover .feature-icon {
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 8px 20px rgba(20, 184, 166, 0.25), inset 0 0 18px rgba(103, 232, 249, 0.2);
+        }
+        .feature-icon svg {
+            width: 26px;
+            height: 26px;
+        }
+        .feature-kicker {
+            margin: 0;
+            color: #99f6e4;
+            text-transform: uppercase;
+            font-size: 0.73rem;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+        }
+        .card-copy {
+            color: rgba(255, 255, 255, 0.84);
+            line-height: 1.58;
+        }
+
+        .card {
+            background: var(--surface-glass);
+            padding: 1.35rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 28px rgba(8, 17, 38, 0.35);
+            border: 1px solid var(--surface-border);
+            backdrop-filter: blur(7px);
+            transition: all 0.3s ease;
+        }
+        .flow-card {
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+            text-align: left;
+        }
+        .card:hover,
+        .team-card:hover,
+        .supervisor-card:hover,
+        .tech-category:hover,
+        .detail-item:hover {
+            transform: translateY(-4px);
+            border-color: rgba(103, 232, 249, 0.45);
+        }
+        .step-pill {
+            display: inline-block;
+            margin-bottom: 0.95rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 999px;
+            background: rgba(103, 232, 249, 0.14);
+            color: #99f6e4;
+            border: 1px solid rgba(153, 246, 228, 0.35);
+            letter-spacing: 0.04em;
+            font-weight: 700;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+        }
+
+        .card h3 {
+            color: #ecfeff;
+            margin: 0.15rem 0 0.45rem;
+            font-size: 1.06rem;
+        }
+
+        .card p {
+            color: rgba(255, 255, 255, 0.82);
+            margin: 0;
+        }
+        /* Button Styles */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:focus-visible,
+        .nav-link:focus-visible,
+        .homepage-logo:focus-visible {
+            outline: 2px solid #67e8f9;
+            outline-offset: 2px;
+        }
+
+        .btn-primary {
+            background: #0f766e;
+            color: white !important;
+        }
+
+        .btn-primary:hover {
+            background: #115e59;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid white;
+            color: white !important;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.28);
+            padding: 4rem 2rem;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+        }
+        .homepage-footer {
+            background: linear-gradient(180deg, #082357, #071126);
+            color: white;
+            padding: 3.25rem 0 1.4rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: minmax(240px, 1.25fr) repeat(4, minmax(150px, 1fr));
+            gap: 1.8rem;
+            align-items: start;
+        }
+        .footer-bottom {
+            border-top: 1px solid #334155;
+            margin-top: 2.2rem;
+            padding-top: 1rem;
+            text-align: center;
+            color: rgba(226, 232, 240, 0.76);
+        }
+        .footer-title {
+            color: #ffffff;
+            font-size: 1rem;
+            margin-bottom: 0.8rem;
+        }
+        .footer-brand {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        .footer-brand .logo-mark {
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+        }
+        .footer-copy {
+            color: rgba(226, 232, 240, 0.84);
+            line-height: 1.8;
+            max-width: 320px;
+        }
+        .homepage-footer p {
+            color: rgba(226, 232, 240, 0.82);
+            line-height: 1.75;
+            margin-bottom: 0.35rem;
+        }
+        .reveal {
+            opacity: 0;
+            transform: translateY(24px) scale(0.985);
+            transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: opacity, transform;
+        }
+        .reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(22px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes floatGlow {
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-18px);
+            }
+        }
+        @keyframes navSlideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-14px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes badgePulse {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(103, 232, 249, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(103, 232, 249, 0);
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation: none !important;
+                transition: none !important;
+                scroll-behavior: auto !important;
+            }
+            .reveal {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .homepage-nav-container {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+            .homepage-navbar {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+            .homepage-logo {
+                justify-content: flex-start;
+                margin-right: auto;
+            }
+            .homepage-nav-links {
+                display: none;
+            }
+            .homepage-auth-links {
+                display: none;
+            }
+            .mobile-menu-btn {
+                display: inline-flex;
+            }
+            .mobile-nav-overlay,
+            .mobile-nav-drawer {
+                display: block;
+            }
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .supervisors-grid {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tech-items {
+                justify-content: center;
+            }
+
+            .hero-title {
+                font-size: 2.2rem !important;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem !important;
+            }
+            .hero-support-copy {
+                font-size: 0.95rem;
+                margin: 0 auto 1.5rem;
+            }
+            .hero-kicker {
+                font-size: 0.78rem;
+            }
+            .hero-actions .btn {
+                width: min(280px, 100%);
+                text-align: center;
+            }
+            .glass-panel {
+                padding: 2.8rem 1.1rem;
+            }
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Micro Consistency Pass */
+        .btn, button, .action-btn {
+            border-radius: 10px !important;
+            font-weight: 700;
+        }
+
+        .card, .stat-card, .panel, .question-card, .auth-card {
+            border-radius: 14px !important;
+        }
+
+        .navbar, .topbar, .exam-header {
+            border-radius: 16px;
+        }
+
+        h1 {
+            letter-spacing: -0.02em;
+        }
+
+    </style>
+
+    <script>
+        (function () {
+            const items = document.querySelectorAll(
+                ".section-heading, .stat-card, .flow-grid .card, .team-card, .supervisor-card, .tech-category, .detail-item, .glass-panel, .homepage-footer .container > *"
+            );
+
+            items.forEach((el, i) => {
+                el.classList.add("reveal");
+                el.style.transitionDelay = `${Math.min(i % 6, 4) * 60}ms`;
+            });
+
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add("is-visible");
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                },
+                { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+            );
+
+            items.forEach((el) => observer.observe(el));
+
+            const links = document.querySelectorAll(".homepage-nav-links .nav-link");
+            const mobileLinks = document.querySelectorAll(".mobile-drawer-link");
+            const sections = document.querySelectorAll("#home, #features, #about");
+            const body = document.body;
+            const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+            const mobileCloseBtn = document.getElementById("mobileCloseBtn");
+            const mobileNavOverlay = document.getElementById("mobileNavOverlay");
+            const mobileNavDrawer = document.getElementById("mobileNavDrawer");
+            const setActive = (id) => {
+                links.forEach((link) => {
+                    const isActive = link.getAttribute("href") === `#${id}`;
+                    link.classList.toggle("active", isActive);
+                    if (isActive) link.setAttribute("aria-current", "page");
+                    else link.removeAttribute("aria-current");
+                });
+            };
+
+            const closeMobileNav = () => {
+                body.classList.remove("mobile-nav-open");
+                if (mobileMenuBtn) mobileMenuBtn.setAttribute("aria-expanded", "false");
+                if (mobileNavDrawer) mobileNavDrawer.setAttribute("aria-hidden", "true");
+            };
+
+            const openMobileNav = () => {
+                body.classList.add("mobile-nav-open");
+                if (mobileMenuBtn) mobileMenuBtn.setAttribute("aria-expanded", "true");
+                if (mobileNavDrawer) mobileNavDrawer.setAttribute("aria-hidden", "false");
+            };
+
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener("click", () => {
+                    if (body.classList.contains("mobile-nav-open")) closeMobileNav();
+                    else openMobileNav();
+                });
+            }
+            if (mobileCloseBtn) mobileCloseBtn.addEventListener("click", closeMobileNav);
+            if (mobileNavOverlay) mobileNavOverlay.addEventListener("click", closeMobileNav);
+            mobileLinks.forEach((link) => link.addEventListener("click", closeMobileNav));
+            window.addEventListener("resize", () => {
+                if (window.innerWidth > 768) closeMobileNav();
+            });
+
+            const navObserver = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) setActive(entry.target.id);
+                    });
+                },
+                { threshold: 0.55 }
+            );
+            sections.forEach((section) => navObserver.observe(section));
+        })();
+    </script>
+    <script src="js/main.js"></script>
+</body>
+</html>
+
+

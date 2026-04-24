@@ -1,0 +1,1469 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%234f46e5'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='28' fill='white' font-family='Arial' font-weight='bold'%3ESE%3C/text%3E%3C/svg%3E">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Manage Users | Smart Exam System</title>
+    <script>
+        (function restoreAdminSessionPreboot() {
+            try {
+                if (sessionStorage.getItem('isLoggedIn')) return;
+                if (localStorage.getItem('isLoggedIn') !== 'true') return;
+                if ((localStorage.getItem('userRole') || '').toLowerCase() !== 'admin') return;
+                [
+                    'isLoggedIn', 'userRole', 'userEmail', 'userId', 'userName',
+                    'userFirstName', 'userLastName', 'studentId', 'teacherId',
+                    'adminId', 'authLoginAt', 'authLastActivityAt', 'deviceId'
+                ].forEach((key) => {
+                    const value = localStorage.getItem(key);
+                    if (value !== null && value !== undefined && value !== '') {
+                        sessionStorage.setItem(key, value);
+                    }
+                });
+            } catch (_) {}
+        })();
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --bg: #F0F4FF; --surface: #FFFFFF; --border: #DBEAFE; --text: #1E3A8A; --muted: #6B7280; --primary: #1E3A8A; --success: #3B82F6; --danger: #DC2626; --warning: #EF9F27; --shadow: 0 2px 8px rgba(30, 58, 138, 0.08); }
+        body { font-family: 'Manrope', sans-serif; background: #F0F4FF; color: var(--text); min-height: 100vh; }
+        .navbar { position: sticky; top: 0; z-index: 20; background: #1E3A8A; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .navbar-content, .container { width: min(1240px, calc(100% - 32px)); margin: 0 auto; }
+        .navbar-content { height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+        .logo { text-decoration: none; color: #FFFFFF; font-weight: 800; font-size: 1.15rem; }
+        .nav-link { text-decoration: none; color: rgba(255,255,255,0.75); font-weight: 600; padding: 0.7rem 0.95rem; border-radius: 10px; }
+        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.12); color: #ffffff; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.78rem 1rem; border-radius: 10px; border: 1px solid transparent; text-decoration: none; font-weight: 700; cursor: pointer; }
+        .btn-primary { background: #1E3A8A; color: #fff; }
+        .btn-secondary { background: #FFFFFF; color: #1E3A8A; border: 1px solid #BFDBFE; }
+        .btn-secondary:hover { background: #EFF6FF; color: #1E3A8A; }
+        .btn-warning { background: #FEF3C7; color: #B45309; border: 1px solid #F59E0B; }
+        .btn-danger { background: #FEE2E2; color: #B91C1C; border: 1px solid #EF4444; }
+        .btn-success { background: #DCFCE7; color: #15803D; border: 1px solid #10B981; }
+        .container { padding: 2rem 0 3rem; }
+        .hero, .card { background: #FFFFFF; border: 1px solid #DBEAFE; border-radius: 18px; box-shadow: 0 2px 8px rgba(30, 58, 138, 0.08); }
+        .hero { padding: 1.6rem; margin-bottom: 1rem; display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; flex-wrap: wrap; }
+        .hero h1 { font-size: 1.9rem; margin-bottom: 0.35rem; }
+        .hero p, .muted { color: var(--muted); }
+        .hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+        .card { padding: 1.3rem; margin-top: 1rem; }
+        .filters { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 1rem; }
+        .field-group { display: flex; flex-direction: column; gap: 0.4rem; }
+        .field-group label { font-size: 0.9rem; font-weight: 700; color: var(--muted); }
+        .field-group select, .field-group input { border: 1px solid #BFDBFE; border-radius: 10px; padding: 0.8rem 0.9rem; font: inherit; background: #F0F4FF; color: #1F2937; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 0.95rem 0.85rem; border-bottom: 1px solid #DBEAFE; }
+        th { font-size: 0.8rem; color: #FFFFFF; text-transform: uppercase; letter-spacing: 0.06em; background: #1E3A8A; }
+        td { color: #1F2937; }
+        .badge { display: inline-flex; align-items: center; padding: 0.32rem 0.7rem; border-radius: 999px; font-size: 0.8rem; font-weight: 700; }
+        .badge-student { background: #DBEAFE; color: #1D4ED8; }
+        .badge-teacher { background: #E6F1FB; color: #185FA5; }
+        .badge-admin { background: #F3EFFE; color: #534AB7; }
+        .badge-active { background: #DCFCE7; color: #15803D; }
+        .badge-suspended { background: #FEE2E2; color: #B91C1C; }
+        .badge-pending { background: #FEF3C7; color: #B45309; }
+        .badge-rejected { background: #FEE2E2; color: #7F1D1D; }
+        .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .notice { display: none; margin-top: 1rem; padding: 0.85rem 1rem; border-radius: 12px; font-weight: 700; }
+        .notice.show { display: block; }
+        .notice.success { background: #ecfdf3; color: #166534; border: 1px solid #bbf7d0; }
+        .notice.error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        .summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem; margin-top: 1rem; }
+        .summary-item { 
+            border: none; 
+            border-radius: 0; 
+            padding: 0; 
+            background: transparent;
+            transition: none;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #6B7280;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        .summary-item:hover {
+            border-color: transparent;
+            background: transparent;
+            box-shadow: none;
+        }
+        .summary-item strong { 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem; 
+            margin-top: 0; 
+            color: #FFFFFF;
+            background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
+            padding: 0.75rem 1.2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            min-width: 100px;
+            text-align: center;
+        }
+        .summary-item:nth-child(1) strong {
+            background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        .summary-item:nth-child(2) strong {
+            background: linear-gradient(135deg, #10B981 0%, #047857 100%);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        .summary-item:nth-child(3) strong {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        /* Clickable Total & Active cards */
+        #cardTotalUsers, #cardActiveUsers {
+            cursor: pointer !important;
+            transition: transform 0.18s ease;
+            border-radius: 12px !important;
+            padding: 8px !important;
+            margin: -8px !important;
+        }
+        #cardTotalUsers:hover {
+            transform: translateY(-2px);
+            background: rgba(59,130,246,0.05) !important;
+        }
+        #cardActiveUsers:hover {
+            transform: translateY(-2px);
+            background: rgba(16,185,129,0.05) !important;
+        }
+        .pending-card {
+            cursor: pointer !important;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+            border-radius: 12px !important;
+            padding: 8px !important;
+            margin: -8px !important;
+        }
+        .pending-card:hover {
+            transform: translateY(-2px);
+            background: rgba(245,158,11,0.06) !important;
+            box-shadow: 0 4px 16px rgba(245,158,11,0.15) !important;
+        }
+        .pending-card:hover strong {
+            box-shadow: 0 12px 28px rgba(245,158,11,0.5), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+        }
+        .empty { text-align: center; color: var(--muted); padding: 1.5rem 0; }
+        .assignment-grid { grid-template-columns: minmax(240px, 0.9fr) minmax(280px, 1.15fr) minmax(220px, 0.95fr); align-items: start; }
+        .assignment-summary { min-height: 144px; border: 1px solid #DBEAFE; border-radius: 12px; background: #EFF6FF; padding: 0.9rem 1rem; color: #6B7280; line-height: 1.5; box-shadow: none; }
+        .assignment-summary strong { display: block; color: #1E3A8A; margin-bottom: 0.5rem; font-size: 0.98rem; }
+        .course-chip-list { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+        .course-chip { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.34rem 0.5rem 0.34rem 0.7rem; border-radius: 999px; background: #EEF4FF; border: 1px solid #BFDBFE; color: #1D4ED8; font-size: 0.82rem; font-weight: 700; }
+        .course-chip-remove { background: none; border: none; cursor: pointer; color: #1D4ED8; font-size: 1rem; line-height: 1; padding: 0 2px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; transition: background 0.15s; }
+        .course-chip-remove:hover { background: rgba(30,58,138,0.15); color: #DC2626; }
+        @media (max-width: 960px) { .filters, .summary-grid { grid-template-columns: 1fr 1fr; } .navbar-content { flex-wrap: wrap; height: auto; padding: 1rem 0; } }
+        @media (max-width: 720px) { .filters, .summary-grid { grid-template-columns: 1fr; } .nav-links { width: 100%; overflow-x: auto; } }
+
+
+        /* Admin Shell Sync */
+        .navbar-content {
+            min-height: 82px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.25rem;
+            width: 100%;
+            margin: 0;
+            padding: 0 1.75rem;
+        }
+        .brand-wrap { display: flex; align-items: center; }
+        .logo {
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 800;
+            color: #f8fafc !important;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+        .logo::before {
+            content: 'SE';
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(140deg, #1E3A8A, #3B82F6);
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            box-shadow: 0 8px 18px rgba(30,58,138,0.28);
+            flex-shrink: 0;
+        }
+        .brand-copy {
+            display: grid;
+            gap: 0.18rem;
+        }
+        .brand-name {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: rgba(191, 219, 254, 0.7) !important;
+            font-weight: 800;
+        }
+        .brand-page {
+            font-size: 1.2rem;
+            color: #f8fafc !important;
+        }
+        .user-panel {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.9rem;
+            padding: 0.55rem 0.65rem 0.55rem 1rem;
+            border-radius: 18px;
+            background: rgba(30, 58, 138, 0.72);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+        .user-meta { text-align: right; }
+        .user-name { font-weight: 700; color: #f8fafc; }
+        .user-role { color: #BFDBFE; font-size: 0.88rem; }
+        .container {
+            width: 100%;
+            margin: 0;
+            padding: 1.5rem 1.75rem 2rem 0.85rem;
+            position: relative;
+            z-index: 1;
+        }
+        .app-shell {
+            display: grid;
+            grid-template-columns: 336px minmax(0, 1fr);
+            gap: 1.5rem;
+            align-items: start;
+        }
+        .sidebar {
+            position: sticky;
+            top: 92px;
+            min-height: calc(100vh - 112px);
+            max-height: calc(100vh - 112px);
+            display: flex;
+            flex-direction: column;
+            background: #1E3A8A;
+            border: none;
+            border-radius: 22px;
+            box-shadow: 0 2px 8px rgba(30, 58, 138, 0.15);
+            padding: 1.1rem;
+            overflow: hidden;
+        }
+        .sidebar::before {
+            display: none;
+        }
+        .sidebar-head,
+        .sidebar-nav,
+        .sidebar-summary {
+            position: relative;
+            z-index: 1;
+        }
+        .sidebar-head {
+            margin-bottom: 1rem;
+            padding: 0.2rem 0.15rem 0.95rem;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+        }
+        .sidebar-title {
+            font-size: 0.74rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(191, 219, 254, 0.7);
+            font-weight: 800;
+            margin-bottom: 0.9rem;
+            padding: 0 0.35rem;
+        }
+        .sidebar-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0 0.35rem;
+        }
+        .sidebar-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #f8fafc;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            flex-shrink: 0;
+        }
+        .sidebar-profile-copy { min-width: 0; }
+        .sidebar-profile-name {
+            display: block;
+            font-size: 1rem;
+            font-weight: 800;
+            color: #f8fafc;
+        }
+        .sidebar-profile-meta {
+            display: block;
+            margin-top: 0.18rem;
+            font-size: 0.82rem;
+            color: #94a3b8;
+        }
+        .sidebar-nav {
+            display: grid;
+            gap: 0.45rem;
+            overflow-y: auto;
+            padding-right: 0.1rem;
+        }
+        .sidebar-link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.8rem;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 16px;
+            padding: 0.82rem 0.9rem;
+            text-decoration: none;
+            color: #f8fafc;
+            background: rgba(15, 23, 42, 0.26);
+            transition: all 0.22s ease;
+            overflow: hidden;
+        }
+        .sidebar-link::before {
+            content: '';
+            position: absolute;
+            left: -1px;
+            top: 10px;
+            bottom: 10px;
+            width: 3px;
+            border-radius: 999px;
+            background: transparent;
+            transition: background 0.22s ease;
+        }
+        .sidebar-link-main {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            min-width: 0;
+        }
+        .sidebar-link-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            background: rgba(255, 255, 255, 0.03);
+            color: #cbd5e1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.88rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+        .sidebar-link-copy { min-width: 0; }
+        .sidebar-link-title {
+            display: block;
+            color: #f8fafc;
+            font-size: 0.98rem;
+            font-weight: 800;
+        }
+        .sidebar-link-desc {
+            display: block;
+            margin-top: 0.22rem;
+            color: #94a3b8;
+            font-size: 0.76rem;
+            line-height: 1.35;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .sidebar-link-meta {
+            color: #94a3b8;
+            font-size: 0.73rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .sidebar-link:hover,
+        .sidebar-link.active {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+        .sidebar-link:hover::before,
+        .sidebar-link.active::before {
+            background: linear-gradient(180deg, #93C5FD, #BFDBFE);
+        }
+        .sidebar-link:hover .sidebar-link-icon,
+        .sidebar-link.active .sidebar-link-icon {
+            background: rgba(255, 255, 255, 0.22);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+        .sidebar-link:hover .sidebar-link-desc,
+        .sidebar-link.active .sidebar-link-desc,
+        .sidebar-link:hover .sidebar-link-meta,
+        .sidebar-link.active .sidebar-link-meta {
+            color: rgba(226, 232, 240, 0.92);
+        }
+        .sidebar-summary {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.16);
+            display: grid;
+            gap: 0.75rem;
+        }
+        .sidebar-summary-card {
+            background: rgba(15, 23, 42, 0.32);
+            border: 1px solid rgba(148, 163, 184, 0.12);
+            border-radius: 14px;
+            padding: 0.95rem 1rem;
+        }
+        .sidebar-summary-label {
+            display: block;
+            color: #94a3b8;
+            font-size: 0.74rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .sidebar-summary-value {
+            display: block;
+            color: #f8fafc;
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin-top: 0.32rem;
+        }
+        .sidebar-summary-card.accent .sidebar-summary-value {
+            color: rgba(219,234,254,0.9);
+        }
+        .content-column { min-width: 0; }
+        table { background: transparent; }
+        th { color: rgba(226, 232, 240, 0.72); }
+        td { color: #e2e8f0; }
+        .summary-item { 
+            border: none;
+            background: transparent;
+            padding: 0;
+            color: rgba(203, 213, 225, 0.9);
+        }
+        .summary-item strong { 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
+            padding: 0.75rem 1.2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            min-width: 100px;
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+        .summary-item:nth-child(2) strong {
+            background: linear-gradient(135deg, #10B981 0%, #047857 100%);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        .summary-item:nth-child(3) strong {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        @media (max-width: 980px) {
+            .app-shell { grid-template-columns: 1fr; }
+            .sidebar {
+                position: static;
+                min-height: auto;
+                max-height: none;
+            }
+            .sidebar-nav {
+                overflow: visible;
+                padding-right: 0;
+            }
+            .navbar-content {
+                padding: 1rem 1.25rem;
+            }
+        }
+        @media (max-width: 720px) {
+            .navbar-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .brand-wrap,
+            .user-panel {
+                justify-content: space-between;
+            }
+            .container {
+                padding: 1rem 1rem 1.75rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="css/ui-system.css?v=blue4">
+    <link rel="stylesheet" href="css/product-theme.css?v=blue4">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=blue4">
+    <link rel="stylesheet" href="css/role-dashboard-match.css?v=blue4">
+</head>
+<body class="admin-dashboard-page manage-users-page">
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="header-brand-group">
+                <button class="shell-toggle" type="button" data-sidebar-toggle aria-label="Toggle sidebar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                        <path d="M4 7h16M4 12h16M4 17h16" />
+                    </svg>
+                </button>
+                <div class="brand-wrap">
+                    <a href="dashboard-admin.html" class="logo">
+                        <span class="brand-copy">
+                            <span class="brand-name">Smart Exam System</span>
+                            <span class="brand-page">Admin User Management</span>
+                        </span>
+                    </a>
+                </div>
+            </div>
+            <div class="header-utility">
+                <!-- Notification Bell -->
+                <div style="position:relative;display:inline-flex;align-items:center;">
+                    <button id="muNotifBtn" onclick="toggleMuNotifPanel()" aria-label="Notifications"
+                        style="position:relative;width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,0.1);color:#BFDBFE;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s;flex-shrink:0;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                        <span id="muNotifBadge" style="display:none;position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;background:#EF4444;color:#fff;border-radius:999px;font-size:10px;font-weight:800;align-items:center;justify-content:center;padding:0 4px;border:2px solid #1E3A8A;line-height:1;"></span>
+                    </button>
+                    <!-- Mini panel -->
+                    <div id="muNotifPanel" style="display:none;position:absolute;top:calc(100% + 10px);right:0;width:300px;background:#fff;border:1px solid #DBEAFE;border-radius:14px;box-shadow:0 12px 40px rgba(30,58,138,0.18);z-index:9999;overflow:hidden;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;border-bottom:1px solid #EFF6FF;">
+                            <span style="font-size:13px;font-weight:700;color:#1E3A8A;">Notifications</span>
+                            <a href="dashboard-admin.html" style="font-size:11px;font-weight:600;color:#3B82F6;text-decoration:none;">View all</a>
+                        </div>
+                        <div id="muNotifList" style="max-height:280px;overflow-y:auto;padding:8px 0;">
+                            <div style="padding:20px 16px;text-align:center;color:#9CA3AF;font-size:13px;">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <a class="header-profile-trigger" href="profile.html" aria-label="Open profile">
+                    <span class="header-profile-avatar" id="headerProfileAvatar">AD</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="app-shell">
+            <aside class="sidebar">
+                <div class="sidebar-head">
+                    <div class="sidebar-title">Admin Workspace</div>
+                    <div class="sidebar-profile">
+                        <div class="sidebar-avatar" id="sidebarAvatar">AD</div>
+                        <div class="sidebar-profile-copy">
+                            <span class="sidebar-profile-name" id="sidebarAdminName">Administrator</span>
+                            <span class="sidebar-profile-meta" id="sidebarAdminMeta">admin@example.com</span>
+                        </div>
+                    </div>
+                </div>
+                <nav class="sidebar-nav" aria-label="Admin Navigation">
+                    <a href="dashboard-admin.html" class="sidebar-link">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 11.5L12 4l9 7.5" />
+                                    <path d="M5.5 10.5V20h13V10.5" />
+                                    <path d="M9.5 20v-5h5v5" />
+                                </svg>
+                            </span>
+                            <span class="sidebar-link-copy">
+                                <span class="sidebar-link-title">Dashboard</span>
+                                <span class="sidebar-link-desc">Overview and system activity</span>
+                            </span>
+                        </span>
+                        <span>Home</span>
+                    </a>
+                    <a href="manage-users.html?v=20260314-admin-shell" class="sidebar-link active">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 21v-1.5A3.5 3.5 0 0 0 12.5 16h-4A3.5 3.5 0 0 0 5 19.5V21" />
+                                    <circle cx="10.5" cy="8" r="3" />
+                                    <path d="M19 21v-1a3 3 0 0 0-2.1-2.86" />
+                                    <path d="M15.5 5.3a3 3 0 0 1 0 5.4" />
+                                </svg>
+                            </span>
+                            <span class="sidebar-link-copy">
+                                <span class="sidebar-link-title">Manage Users</span>
+                                <span class="sidebar-link-desc">Accounts, roles, and access state</span>
+                            </span>
+                        </span>
+                        <span>Live</span>
+                    </a>
+                    <a href="analytics.html?v=20260314-admin-shell" class="sidebar-link">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 20h16" />
+                                    <path d="M7 16V10" />
+                                    <path d="M12 16V6" />
+                                    <path d="M17 16v-3" />
+                                </svg>
+                            </span>
+                            <span class="sidebar-link-copy">
+                                <span class="sidebar-link-title">Analytics</span>
+                                <span class="sidebar-link-desc">Platform metrics and exam trends</span>
+                            </span>
+                        </span>
+                        <span>Insights</span>
+                    </a>
+                    <a href="dashboard-admin.html#controlSection" class="sidebar-link">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 3l7 4v5c0 4.2-2.9 8-7 9-4.1-1-7-4.8-7-9V7l7-4Z" />
+                                    <path d="M9.5 12.5l1.8 1.8 3.7-4" />
+                                </svg>
+                            </span>
+                            <span class="sidebar-link-copy">
+                                <span class="sidebar-link-title">Transfer Control</span>
+                                <span class="sidebar-link-desc">Active admin handover and audit trail</span>
+                            </span>
+                        </span>
+                        <span>Admin</span>
+                    </a>
+                </nav>
+                <div class="sidebar-footer">
+                    <a class="sidebar-footer-link" href="profile.html" data-short="PF">
+                        <span>PF</span>
+                        <span>Profile</span>
+                    </a>
+                    <button class="sidebar-footer-button" type="button" onclick="logout()" data-short="LO">
+                        <span aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                                <path d="M16 17l5-5-5-5" />
+                                <path d="M21 12H9" />
+                            </svg>
+                        </span>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </aside>
+
+            <main class="content-column">
+                <section class="hero">
+                    <div>
+                        <h1>User Management</h1>
+                        <p>Review users, filter by status, and control account availability. Active admin protection is enforced from the backend.</p>
+                    </div>
+                    <div class="hero-actions">
+                        <button type="button" class="btn btn-primary" onclick="document.getElementById('csvModal').style.display='flex'">
+                            Bulk Enroll via CSV
+                        </button>
+                    </div>
+                </section>
+                <section class="summary-grid">
+                    <div class="summary-item" id="cardTotalUsers" onclick="filterToAll()" title="Click to show all users" style="cursor:pointer;">
+                        <span class="muted">Total Users</span><br>
+                        <strong id="totalUsersCount">0</strong>
+                    </div>
+                    <div class="summary-item" id="cardActiveUsers" onclick="filterToActive()" title="Click to show active users" style="cursor:pointer;">
+                        <span class="muted">Active Users</span><br>
+                        <strong id="activeUsersCount">0</strong>
+                    </div>
+                    <div class="summary-item pending-card" id="pendingCard" onclick="filterToPending()" title="Click to view pending approvals" style="cursor:pointer;">
+                        <span class="muted">Pending Approval</span><br>
+                        <strong id="flaggedUsersCount">0</strong>
+                    </div>
+                </section>
+                <section class="card">
+                    <div class="filters">
+                        <div class="field-group"><label for="roleFilter">Role</label><select id="roleFilter"><option value="all">All Roles</option><option value="student">Students</option><option value="teacher">Teachers</option><option value="admin">Administrators</option></select></div>
+                        <div class="field-group"><label for="statusFilter">Status</label><select id="statusFilter"><option value="all">All Status</option><option value="active">Active</option><option value="pending">Pending Approval</option><option value="rejected">Rejected</option><option value="suspended">Suspended</option></select></div>
+                        <div class="field-group"><label for="searchInput">Search</label><input id="searchInput" type="text" placeholder="Search by name, email, or ID"></div>
+                    </div>
+                    <div class="notice" id="pageNotice"></div>
+                </section>
+                <section class="card">
+                    <h3 style="margin-bottom: 1rem;">System Users</h3>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>User ID</th><th>Name</th><th>Email</th><th>Role</th><th>Department</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+                            <tbody id="usersTableBody"><tr><td colspan="8" class="empty">Loading users...</td></tr></tbody>
+                        </table>
+                    </div>
+                </section>
+                <section class="card">
+                    <div class="hero" style="padding: 0; margin: 0; background: transparent; border: 0; box-shadow: none;">
+                        <div>
+                            <h3 style="margin-bottom: 0.35rem;">Course Access</h3>
+                            <p class="muted">Assign or remove courses for students and teachers. Click � on a course chip to remove it individually.</p>
+                        </div>
+                    </div>
+                    <div class="filters assignment-grid">
+                        <div class="field-group">
+                            <label for="assignmentStudentSelect">User (Student/Teacher)</label>
+                            <select id="assignmentStudentSelect">
+                                <option value="">Select a user</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label for="assignmentCourseSelect">Courses</label>
+                            <select id="assignmentCourseSelect" multiple size="8"></select>
+                        </div>
+                        <div class="field-group">
+                            <label>Current Access</label>
+                            <div class="assignment-summary" id="assignmentSummary">Select a user to review or update course access.</div>
+                        </div>
+                    </div>
+                    <div class="hero-actions" style="margin-top: 1rem; gap: 0.75rem; display: flex; flex-wrap: wrap;">
+                        <button type="button" class="btn btn-primary" id="saveAssignmentsButton">Save Course Assignments</button>
+                        <button type="button" class="btn btn-danger" id="removeAllCoursesBtn" onclick="removeAllCourses()" style="display:none;">Remove All Courses</button>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+    <script src="js/supabase.min.js"></script>
+    <script src="js/app-config.js?v=20260407-admin"></script>
+    <script src="js/session-manager.js?v=20260407-admin"></script>
+    <script src="js/user-profile.js?v=20260407-admin"></script>
+    <script src="js/app-shell.js?v=20260407-admin"></script>
+    <script>
+        const state = {
+            users: [],
+            filteredUsers: [],
+            courses: [],
+            selectedUserId: '',
+            selectedUserRole: '',
+            selectedUserCourseIds: [],
+            activeAdminEmail: '',
+            activeAdminId: ''
+        }
+        const { SUPABASE_URL, SUPABASE_ANON_KEY, getBackendBase } = window.AppConfig
+        const { createClient } = supabase
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        function restoreAdminSessionStorage() {
+            if (sessionStorage.getItem('isLoggedIn')) return
+            if (localStorage.getItem('isLoggedIn') !== 'true') return
+            if ((localStorage.getItem('userRole') || '').toLowerCase() !== 'admin') return
+            ;['isLoggedIn','userRole','userEmail','userId','userName','userFirstName','userLastName','studentId','teacherId','adminId','authLoginAt','authLastActivityAt','deviceId'].forEach((key) => {
+                const value = localStorage.getItem(key)
+                if (value !== null && value !== undefined && value !== '') {
+                    sessionStorage.setItem(key, value)
+                }
+            })
+        }
+        function forceManageUsersSidebarVisible() {
+            document.body.classList.remove('sidebar-collapsed')
+            localStorage.setItem('appShellSidebarCollapsed', '0')
+            document.querySelectorAll('.sidebar-link-main').forEach((node) => {
+                node.style.display = 'flex'
+                node.style.alignItems = 'center'
+                node.style.gap = '10px'
+            })
+            document.querySelectorAll('.sidebar-link-icon').forEach((node) => {
+                node.style.display = 'inline-flex'
+                node.style.alignItems = 'center'
+                node.style.justifyContent = 'center'
+                node.style.opacity = '1'
+                node.style.visibility = 'visible'
+            })
+            document.querySelectorAll('.sidebar-link-copy').forEach((node) => {
+                node.style.display = 'block'
+                node.style.opacity = '1'
+                node.style.visibility = 'visible'
+            })
+            document.querySelectorAll('.sidebar-link-title').forEach((node) => {
+                node.style.display = 'block'
+                node.style.opacity = '1'
+                node.style.visibility = 'visible'
+                node.style.color = '#eaf2ff'
+            })
+        }
+        async function adminRequest(path, options = {}) {
+            const headers = await window.AppConfig.buildAuthHeaders(supabaseClient, options.headers || {})
+            return fetch(`${getBackendBase()}${path}`, { ...options, headers })
+        }
+        function getDisplayName() {
+            const fullName = (localStorage.getItem('userName') || '').trim()
+            if (fullName) return fullName
+            const first = (localStorage.getItem('userFirstName') || '').trim()
+            const last = (localStorage.getItem('userLastName') || '').trim()
+            return [first, last].filter(Boolean).join(' ').trim() || 'Administrator'
+        }
+        function getInitials(name) {
+            const parts = String(name || '').trim().split(/\s+/).filter(Boolean)
+            if (!parts.length) return 'AD'
+            return parts.slice(0, 2).map((part) => part[0].toUpperCase()).join('')
+        }
+        function clearAuthSession() { ['isLoggedIn','userRole','userEmail','userId','userName','userFirstName','userLastName','studentId','teacherId','adminId','authLoginAt','authLastActivityAt','authLogoutAt'].forEach((key) => { localStorage.removeItem(key); sessionStorage.removeItem(key) }) }
+        function logout() {
+            if (window.SessionManager) {
+                window.SessionManager.logout('manual')
+                return
+            }
+            clearAuthSession()
+            window.location.href = 'login.html'
+        }
+        function escapeHtml(value) { return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;') }
+        function setNotice(message, type = 'success') { const el = document.getElementById('pageNotice'); el.className = `notice show ${type}`; el.textContent = message }
+        function clearNotice() { const el = document.getElementById('pageNotice'); el.className = 'notice'; el.textContent = '' }
+        function getUserRecordId(user) { return String(user?.id || user?.user_id || user?.student_id || user?.teacher_id || user?.admin_id || '').trim() }
+        function getUserDisplayName(user) { return [user?.first_name, user?.last_name].filter(Boolean).join(' ').trim() || user?.email || 'User' }
+        function getCourseLabel(course) {
+            const code = String(course?.course_code || '').trim()
+            const name = String(course?.course_name || '').trim()
+            if (code && name) return `${code} - ${name}`
+            return code || name || 'Course'
+        }
+        async function requireActiveAdminAccess() {
+            const adminEmail = (localStorage.getItem('userEmail') || '').trim().toLowerCase()
+            if (localStorage.getItem('isLoggedIn') !== 'true' || localStorage.getItem('userRole') !== 'admin' || !adminEmail) { clearAuthSession(); window.location.href = 'login.html?return=manage-users.html'; return false }
+            try {
+                const response = await adminRequest('/admin/access-check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: adminEmail, admin_id: localStorage.getItem('adminId') || '' }) })
+                const data = await response.json().catch(() => ({}))
+                if (!response.ok || !data.success || !data.authorized) {
+                    clearAuthSession(); window.location.href = 'login.html?return=manage-users.html'; return false
+                }
+                state.activeAdminEmail = ((data.identity || {}).email || adminEmail || '').toLowerCase()
+                state.activeAdminId = (data.identity || {}).admin_id || localStorage.getItem('adminId') || ''
+                return true
+            } catch (error) {
+                const message = String(error?.message || '').toLowerCase()
+                if (message.includes('failed to fetch') || message.includes('network')) {
+                    setNotice('Backend not reachable. Admin data will load once the server is available.', 'error')
+                    return true
+                }
+                clearAuthSession(); window.location.href = 'login.html?return=manage-users.html'; return false
+            }
+        }
+        window.addEventListener('DOMContentLoaded', async () => {
+            restoreAdminSessionStorage()
+            localStorage.setItem('appShellSidebarCollapsed', '0')
+            document.body.classList.remove('sidebar-collapsed')
+            if (window.AppShell) window.AppShell.init()
+            forceManageUsersSidebarVisible()
+            window.requestAnimationFrame(forceManageUsersSidebarVisible)
+            window.setTimeout(forceManageUsersSidebarVisible, 80)
+            document.querySelectorAll('[data-sidebar-toggle]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    window.requestAnimationFrame(forceManageUsersSidebarVisible)
+                    window.setTimeout(forceManageUsersSidebarVisible, 40)
+                })
+            })
+            if (window.SessionManager && !window.SessionManager.init({ loginUrl: 'login.html', requireAuth: true })) return
+            const allowed = await requireActiveAdminAccess()
+            if (!allowed) return
+            const profile = window.UserProfile ? window.UserProfile.getStoredProfile() : null
+            const displayName = profile?.displayName || getDisplayName()
+            document.getElementById('sidebarAdminName').textContent = displayName
+            document.getElementById('sidebarAdminMeta').textContent = window.UserProfile
+                ? window.UserProfile.getProfileMeta(profile, 'Administrator')
+                : (profile?.email || 'Administrator')
+            document.getElementById('sidebarAvatar').textContent = profile?.initials || getInitials(displayName)
+            const headerAvatarEl = document.getElementById('headerProfileAvatar')
+            if (headerAvatarEl) headerAvatarEl.textContent = profile?.initials || getInitials(displayName)
+            bindFilters()
+            bindAssignmentControls()
+            await Promise.all([loadUsers(), loadCourses()])
+            populateAssignmentStudentOptions()
+            renderAssignmentSummary()
+            loadNavbarNotifications()
+        })
+        function bindFilters() { document.getElementById('roleFilter').addEventListener('change', applyFilters); document.getElementById('statusFilter').addEventListener('change', applyFilters); document.getElementById('searchInput').addEventListener('input', applyFilters) }
+
+        // ── Navbar Notification Bell ─────────────────────────────
+        async function loadNavbarNotifications() {
+            try {
+                const { data: pending } = await supabaseClient
+                    .from('users')
+                    .select('id,first_name,last_name,email,created_at')
+                    .eq('status', 'pending')
+                    .order('created_at', { ascending: false })
+                    .limit(10)
+                    .execute()
+
+                const count = (pending || []).length
+                const badge = document.getElementById('muNotifBadge')
+                const list  = document.getElementById('muNotifList')
+
+                if (badge) {
+                    if (count > 0) {
+                        badge.textContent = count > 9 ? '9+' : count
+                        badge.style.display = 'inline-flex'
+                    } else {
+                        badge.style.display = 'none'
+                    }
+                }
+
+                if (list) {
+                    if (!pending || pending.length === 0) {
+                        list.innerHTML = '<div style="padding:20px 16px;text-align:center;color:#9CA3AF;font-size:13px;">No pending approvals</div>'
+                    } else {
+                        list.innerHTML = pending.map(u => {
+                            const name = [u.first_name, u.last_name].filter(Boolean).join(' ') || u.email
+                            const time = u.created_at ? new Date(u.created_at).toLocaleDateString() : ''
+                            return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 16px;border-bottom:1px solid #F0F4FF;cursor:pointer;" onclick="filterToPending()">
+                                <div style="width:8px;height:8px;border-radius:50%;background:#F59E0B;flex-shrink:0;margin-top:5px;"></div>
+                                <div>
+                                    <div style="font-size:13px;color:#1F2937;font-weight:500;">${escapeHtml(name)} awaiting approval</div>
+                                    <div style="font-size:11px;color:#9CA3AF;">${time}</div>
+                                </div>
+                            </div>`
+                        }).join('') + `<div style="padding:10px 16px;text-align:center;border-top:1px solid #EFF6FF;">
+                            <a href="#" onclick="filterToPending();document.getElementById('muNotifPanel').style.display='none';return false;" style="font-size:12px;font-weight:600;color:#3B82F6;text-decoration:none;">Review ${count} pending user${count>1?'s':''} →</a>
+                        </div>`
+                    }
+                }
+            } catch(e) { /* non-critical */ }
+        }
+
+        function toggleMuNotifPanel() {
+            const panel = document.getElementById('muNotifPanel')
+            if (!panel) return
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none'
+        }
+
+        // Close panel when clicking outside
+        document.addEventListener('click', function(e) {
+            const panel = document.getElementById('muNotifPanel')
+            const btn   = document.getElementById('muNotifBtn')
+            if (panel && btn && !panel.contains(e.target) && !btn.contains(e.target)) {
+                panel.style.display = 'none'
+            }
+        })
+
+        function filterToPending() {
+            const statusFilter = document.getElementById('statusFilter')
+            if (statusFilter) {
+                statusFilter.value = 'pending'
+                applyFilters()
+                document.querySelector('.filters')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }
+            highlightCard('pendingCard')
+        }
+
+        function filterToActive() {
+            const statusFilter = document.getElementById('statusFilter')
+            if (statusFilter) {
+                statusFilter.value = 'active'
+                applyFilters()
+                document.querySelector('.filters')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }
+            highlightCard('cardActiveUsers')
+        }
+
+        function filterToAll() {
+            const statusFilter = document.getElementById('statusFilter')
+            const roleFilter   = document.getElementById('roleFilter')
+            if (statusFilter) statusFilter.value = 'all'
+            if (roleFilter)   roleFilter.value   = 'all'
+            applyFilters()
+            document.querySelector('.filters')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            highlightCard('cardTotalUsers')
+        }
+
+        function highlightCard(cardId) {
+            // Brief highlight to show which card was clicked
+            ['cardTotalUsers','cardActiveUsers','pendingCard'].forEach(id => {
+                const el = document.getElementById(id)
+                if (el) el.style.outline = ''
+            })
+            const card = document.getElementById(cardId)
+            if (card) {
+                card.style.outline = '2px solid #3B82F6'
+                setTimeout(() => { card.style.outline = '' }, 1200)
+            }
+        }
+        function bindAssignmentControls() {
+            document.getElementById('assignmentStudentSelect').addEventListener('change', async (event) => {
+                const userId = String(event.target.value || '').trim()
+                const user = state.users.find((candidate) => getUserRecordId(candidate) === userId)
+                state.selectedUserId = userId
+                state.selectedUserRole = String(user?.role || '').toLowerCase()
+                if (!userId) {
+                    state.selectedUserCourseIds = []
+                    syncAssignmentCourseSelection()
+                    renderAssignmentSummary()
+                    return
+                }
+                await loadUserCourseAssignments(userId, state.selectedUserRole)
+            })
+            document.getElementById('saveAssignmentsButton').addEventListener('click', saveUserCourseAssignments)
+        }
+        async function loadUsers() {
+            clearNotice()
+            try {
+                const response = await adminRequest('/admin/users')
+                const data = await response.json()
+                if (!response.ok || !data.success) throw new Error(data.error || 'Failed to load users')
+                state.users = Array.isArray(data.users) ? data.users : []
+                updateSummary(); applyFilters(); populateAssignmentStudentOptions()
+            } catch (error) {
+                document.getElementById('usersTableBody').innerHTML = `<tr><td colspan="8" class="empty">${escapeHtml(error.message || 'Failed to load users.')}</td></tr>`
+                setNotice(error.message || 'Failed to load users.', 'error')
+            }
+        }
+        async function loadCourses() {
+            try {
+                const response = await adminRequest('/admin/courses')
+                const data = await response.json()
+                if (!response.ok || !data.success) throw new Error(data.error || 'Failed to load courses')
+                state.courses = Array.isArray(data.courses) ? data.courses : []
+                renderAssignmentCourseOptions()
+            } catch (error) {
+                state.courses = []
+                renderAssignmentCourseOptions()
+                setNotice(error.message || 'Failed to load courses.', 'error')
+            }
+        }
+        function updateSummary() {
+            const total   = state.users.length
+            const active  = state.users.filter((user) => String(user.status || '').toLowerCase() === 'active').length
+            const pending = state.users.filter((user) => String(user.status || '').toLowerCase() === 'pending').length
+
+            document.getElementById('totalUsersCount').textContent  = total
+            document.getElementById('activeUsersCount').textContent = active
+            // Show REAL pending count — not total-active
+            document.getElementById('flaggedUsersCount').textContent = pending
+
+            // Show pending approval alert banner
+            let alertBanner = document.getElementById('pendingApprovalBanner')
+            if (pending > 0) {
+                if (!alertBanner) {
+                    alertBanner = document.createElement('div')
+                    alertBanner.id = 'pendingApprovalBanner'
+                    alertBanner.style.cssText = 'background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:14px 18px;margin-bottom:12px;color:#fcd34d;font-weight:700;font-size:0.9rem;display:flex;align-items:center;justify-content:space-between;gap:12px;'
+                    const summarySection = document.querySelector('.summary-grid')
+                    if (summarySection) summarySection.insertAdjacentElement('afterend', alertBanner)
+                }
+                alertBanner.innerHTML = `
+                    <span>&#9888; ${pending} user${pending > 1 ? 's' : ''} pending approval &mdash; review and activate their accounts.</span>
+                    <button onclick="document.getElementById('statusFilter').value='pending';applyFilters()" style="background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.4);color:#fcd34d;padding:6px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.82rem;">View Pending</button>
+                `
+            } else if (alertBanner) {
+                alertBanner.remove()
+            }
+        }
+        function populateAssignmentStudentOptions() {
+            const select = document.getElementById('assignmentStudentSelect')
+            if (!select) return
+            const userOptions = state.users
+                .filter((user) => ['student', 'teacher'].includes(String(user.role || '').toLowerCase()))
+                .sort((a, b) => getUserDisplayName(a).localeCompare(getUserDisplayName(b)))
+                .map((user) => {
+                    const userId = getUserRecordId(user)
+                    const roleLabel = String(user.role || '').toLowerCase() === 'teacher' ? 'Teacher' : 'Student'
+                    return `<option value="${escapeHtml(userId)}">${escapeHtml(getUserDisplayName(user))} � ${escapeHtml(roleLabel)} � ${escapeHtml(user.email || 'No email')}</option>`
+                })
+                .join('')
+            select.innerHTML = `<option value="">Select a user</option>${userOptions}`
+            if (state.selectedUserId) {
+                select.value = state.selectedUserId
+            }
+        }
+
+        function renderAssignmentCourseOptions() {
+            const select = document.getElementById('assignmentCourseSelect')
+            if (!select) return
+            if (!state.courses.length) {
+                select.innerHTML = '<option value="">No courses found</option>'
+                select.disabled = true
+                return
+            }
+            select.disabled = false
+            select.innerHTML = state.courses.map((course) => {
+                const courseId = String(course.id || course.course_id || '').trim()
+                const semester = String(course.semester || '').trim()
+                const academicYear = String(course.academic_year || '').trim()
+                const suffix = [semester && `Semester ${semester}`, academicYear].filter(Boolean).join(' | ')
+                const label = suffix ? `${getCourseLabel(course)} (${suffix})` : getCourseLabel(course)
+                return `<option value="${escapeHtml(courseId)}">${escapeHtml(label)}</option>`
+            }).join('')
+            syncAssignmentCourseSelection()
+        }
+        function syncAssignmentCourseSelection() {
+            const select = document.getElementById('assignmentCourseSelect')
+            if (!select) return
+            const selectedSet = new Set(state.selectedUserCourseIds || [])
+            Array.from(select.options).forEach((option) => {
+                option.selected = selectedSet.has(option.value)
+            })
+        }
+        async function loadUserCourseAssignments(userId, role) {
+            try {
+                const endpoint = role === 'teacher'
+                    ? `/admin/teachers/${encodeURIComponent(userId)}/courses`
+                    : `/admin/users/${encodeURIComponent(userId)}/courses`
+                const response = await adminRequest(endpoint)
+                const data = await response.json()
+                if (!response.ok || !data.success) throw new Error(data.error || 'Failed to load course assignments')
+                // Keep the original selectedUserId � don't overwrite with API response ID
+                state.selectedUserCourseIds = Array.isArray(data.course_ids) ? data.course_ids.map((id) => String(id || '').trim()).filter(Boolean) : []
+                syncAssignmentCourseSelection()
+                renderAssignmentSummary(data.courses || [])
+            } catch (error) {
+                state.selectedUserCourseIds = []
+                syncAssignmentCourseSelection()
+                renderAssignmentSummary()
+                setNotice(error.message || 'Failed to load course assignments.', 'error')
+            }
+        }
+        async function saveUserCourseAssignments() {
+            clearNotice()
+            if (!state.selectedUserId) {
+                setNotice('Select a user first.', 'error')
+                return
+            }
+            if (!['student', 'teacher'].includes(state.selectedUserRole)) {
+                setNotice('Only students or teachers can be assigned courses.', 'error')
+                return
+            }
+            const select = document.getElementById('assignmentCourseSelect')
+            const courseIds = Array.from(select.selectedOptions || []).map((option) => option.value).filter(Boolean)
+            const button = document.getElementById('saveAssignmentsButton')
+            const originalText = button.textContent
+            button.disabled = true
+            button.textContent = 'Saving...'
+            try {
+                const endpoint = state.selectedUserRole === 'teacher'
+                    ? `/admin/teachers/${encodeURIComponent(state.selectedUserId)}/courses`
+                    : `/admin/users/${encodeURIComponent(state.selectedUserId)}/courses`
+                console.log('[CourseAssign] Saving:', endpoint, 'courseIds:', courseIds, 'role:', state.selectedUserRole, 'userId:', state.selectedUserId)
+                const response = await adminRequest(endpoint, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ course_ids: courseIds })
+                })
+                const data = await response.json()
+                console.log('[CourseAssign] Response:', response.status, data)
+                if (!response.ok || !data.success) throw new Error(data.error || `Server error ${response.status}`)
+                state.selectedUserCourseIds = courseIds
+                renderAssignmentSummary(data.courses || [])
+                setNotice('Course assignments updated successfully.', 'success')
+            } catch (error) {
+                setNotice(error.message || 'Failed to save course assignments.', 'error')
+            } finally {
+                button.disabled = false
+                button.textContent = originalText
+            }
+        }
+
+        function renderAssignmentSummary(courses = null) {
+            const summary = document.getElementById('assignmentSummary')
+            const removeAllBtn = document.getElementById('removeAllCoursesBtn')
+            if (!summary) return
+            if (!state.selectedUserId) {
+                summary.textContent = 'Select a user to review or update course access.'
+                if (removeAllBtn) removeAllBtn.style.display = 'none'
+                return
+            }
+            const user = state.users.find((candidate) => getUserRecordId(candidate) === state.selectedUserId)
+            const courseRows = Array.isArray(courses)
+                ? courses
+                : state.courses.filter((course) => state.selectedUserCourseIds.includes(String(course.id || course.course_id || '').trim()))
+            const roleLabel = String(user?.role || '').toLowerCase() === 'teacher' ? 'Teacher' : 'Student'
+            const courseMarkup = courseRows.length
+                ? `<div class="course-chip-list">${courseRows.map((course) => {
+                    const cid = String(course.id || course.course_id || '').trim()
+                    const label = escapeHtml(getCourseLabel(course))
+                    return `<span class="course-chip">${label}<button type="button" class="course-chip-remove" onclick="removeSingleCourse('${cid}')" title="Remove this course">�</button></span>`
+                }).join('')}</div>`
+                : '<span class="muted">No approved courses assigned yet.</span>'
+            summary.innerHTML = `
+                <strong>${escapeHtml(getUserDisplayName(user || {}))}</strong>
+                <div class="muted" style="margin-bottom: 0.75rem;">${escapeHtml(roleLabel)} � ${escapeHtml(user?.email || 'User')}</div>
+                ${courseMarkup}
+                ${courseRows.length ? `<button type="button" class="btn btn-danger" style="margin-top:0.75rem;font-size:0.8rem;padding:6px 14px;" onclick="removeAllCourses()">Remove All Courses</button>` : ''}
+            `
+            if (removeAllBtn) removeAllBtn.style.display = courseRows.length ? 'inline-flex' : 'none'
+        }
+        async function removeSingleCourse(courseId) {
+            if (!state.selectedUserId) return
+            const newIds = (state.selectedUserCourseIds || []).filter(id => id !== courseId)
+            await saveSpecificCourseIds(newIds)
+        }
+
+        async function removeAllCourses() {
+            if (!state.selectedUserId) return
+            if (!confirm('Remove ALL courses from this user?')) return
+            await saveSpecificCourseIds([])
+        }
+
+        async function saveSpecificCourseIds(courseIds) {
+            const button = document.getElementById('saveAssignmentsButton')
+            const orig = button ? button.textContent : ''
+            if (button) { button.disabled = true; button.textContent = 'Saving...' }
+            try {
+                const endpoint = state.selectedUserRole === 'teacher'
+                    ? `/admin/teachers/${encodeURIComponent(state.selectedUserId)}/courses`
+                    : `/admin/users/${encodeURIComponent(state.selectedUserId)}/courses`
+                const response = await adminRequest(endpoint, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ course_ids: courseIds })
+                })
+                const data = await response.json()
+                if (!response.ok || !data.success) throw new Error(data.error || 'Failed to update')
+                state.selectedUserCourseIds = courseIds
+                syncAssignmentCourseSelection()
+                renderAssignmentSummary(data.courses || [])
+                setNotice('Course assignments updated.', 'success')
+            } catch (error) {
+                setNotice(error.message || 'Failed to update courses.', 'error')
+            } finally {
+                if (button) { button.disabled = false; button.textContent = orig }
+            }
+        }
+
+        function applyFilters() {
+            const role = document.getElementById('roleFilter').value
+            const status = document.getElementById('statusFilter').value
+            const query = document.getElementById('searchInput').value.trim().toLowerCase()
+            state.filteredUsers = state.users.filter((user) => {
+                const userRole = String(user.role || '').toLowerCase()
+                const userStatus = String(user.status || '').toLowerCase()
+                const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ').toLowerCase()
+                const userId = String(user.student_id || user.teacher_id || user.admin_id || user.user_id || '').toLowerCase()
+                return (role === 'all' || userRole === role) && (status === 'all' || userStatus === status) && (!query || fullName.includes(query) || String(user.email || '').toLowerCase().includes(query) || userId.includes(query))
+            })
+            renderUsers()
+        }
+        function renderUsers() {
+            const tbody = document.getElementById('usersTableBody')
+            tbody.innerHTML = ''
+            if (!state.filteredUsers.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty">No users match the selected filters.</td></tr>'; return }
+            state.filteredUsers.forEach((user) => {
+                const tr = document.createElement('tr')
+                const role = String(user.role || '').toLowerCase()
+                const status = String(user.status || 'unknown').toLowerCase()
+                const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Unnamed User'
+                const userId = user.student_id || user.teacher_id || user.admin_id || user.user_id || 'N/A'
+                const department = user.department || user.teacher_department || user.student_department || 'N/A'
+                const isActiveAdmin = String(user.email || '').toLowerCase() === state.activeAdminEmail || String(user.admin_id || '') === state.activeAdminId
+                tr.innerHTML = `<td>${escapeHtml(userId)}</td><td>${escapeHtml(fullName)}</td><td>${escapeHtml(user.email || '')}</td><td><span class="badge badge-${escapeHtml(role)}">${escapeHtml(role.toUpperCase())}</span></td><td>${escapeHtml(department)}</td><td><span class="badge badge-${escapeHtml(status)}">${escapeHtml(status)}</span></td><td>${escapeHtml(formatDate(user.created_at))}</td><td class="actions"></td>`
+                const actions = tr.querySelector('.actions')
+                actions.appendChild(createStatusButton(user, isActiveAdmin))
+                if (role === 'student' || role === 'teacher') {
+                    const assignmentButton = document.createElement('button')
+                    assignmentButton.type = 'button'
+                    assignmentButton.className = 'btn btn-secondary'
+                    assignmentButton.textContent = 'Assign Courses'
+                    assignmentButton.addEventListener('click', async () => {
+                        const userId = getUserRecordId(user)
+                        state.selectedUserId = userId
+                        state.selectedUserRole = role
+                        populateAssignmentStudentOptions()
+                        document.getElementById('assignmentStudentSelect').value = userId
+                        await loadUserCourseAssignments(userId, role)
+                        document.getElementById('assignmentStudentSelect').scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    })
+                    actions.appendChild(assignmentButton)
+                }
+                tbody.appendChild(tr)
+            })
+        }
+        function createStatusButton(user, isActiveAdmin) {
+            const currentStatus = String(user.status || '').toLowerCase()
+            const button = document.createElement('button')
+            button.type = 'button'
+            if (isActiveAdmin) { button.className = 'btn btn-secondary'; button.textContent = 'Protected'; button.disabled = true; button.title = 'The active admin cannot be suspended from this screen.'; return button }
+
+            // Pending users get Approve + Reject buttons
+            if (currentStatus === 'pending') {
+                const wrap = document.createElement('div')
+                wrap.style.cssText = 'display:flex;gap:6px;'
+
+                const approveBtn = document.createElement('button')
+                approveBtn.type = 'button'
+                approveBtn.className = 'btn btn-success'
+                approveBtn.textContent = 'Approve'
+                approveBtn.style.cssText = 'background:#15803D;color:#fff;border:none;padding:6px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.82rem;'
+                approveBtn.addEventListener('click', () => updateUserStatus(user.email, 'active', approveBtn))
+
+                const rejectBtn = document.createElement('button')
+                rejectBtn.type = 'button'
+                rejectBtn.className = 'btn btn-danger'
+                rejectBtn.textContent = 'Reject'
+                rejectBtn.style.cssText = 'background:#B91C1C;color:#fff;border:none;padding:6px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.82rem;'
+                rejectBtn.addEventListener('click', () => updateUserStatus(user.email, 'rejected', rejectBtn))
+
+                wrap.appendChild(approveBtn)
+                wrap.appendChild(rejectBtn)
+                return wrap
+            }
+
+            const nextStatus = currentStatus === 'active' ? 'suspended' : 'active'
+            button.className = currentStatus === 'active' ? 'btn btn-warning' : 'btn btn-success'
+            button.textContent = currentStatus === 'active' ? 'Suspend' : 'Activate'
+            button.addEventListener('click', () => updateUserStatus(user.email, nextStatus, button))
+            return button
+        }
+        async function updateUserStatus(userEmail, nextStatus, button) {
+            clearNotice()
+            const originalText = button.textContent
+            button.disabled = true
+            button.textContent = 'Updating...'
+            try {
+                const response = await adminRequest('/admin/users/status', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_email: userEmail, status: nextStatus }) })
+                const data = await response.json()
+                if (!response.ok || !data.success) throw new Error(data.error || 'Failed to update user status')
+                const target = state.users.find((user) => String(user.email || '').toLowerCase() === String(userEmail || '').toLowerCase())
+                if (target) target.status = nextStatus
+                updateSummary(); applyFilters(); setNotice(`User status updated to ${nextStatus}.`, 'success')
+            } catch (error) {
+                button.disabled = false
+                button.textContent = originalText
+                setNotice(error.message || 'Failed to update user status.', 'error')
+            }
+        }
+        function formatDate(value) { if (!value) return 'N/A'; const date = new Date(value); if (Number.isNaN(date.getTime())) return 'N/A'; return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }
+    </script>
+    <script src="js/ui-feedback.js"></script>
+
+    <!-- CSV Bulk Enrollment Modal -->
+    <div id="csvModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+        <div style="background:#FFFFFF;border:1px solid #DBEAFE;border-radius:18px;padding:32px;max-width:560px;width:100%;box-shadow:0 24px 60px rgba(30,58,138,0.2);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h2 style="font-size:1.15rem;font-weight:800;color:#f8fafc;">Bulk Enroll Students via CSV</h2>
+                <button onclick="document.getElementById('csvModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:1.5rem;cursor:pointer;">&times;</button>
+            </div>
+            <p style="color:#94a3b8;font-size:0.88rem;margin-bottom:16px;line-height:1.6;">
+                Upload a CSV file with two columns: <strong style="color:rgba(219,234,254,0.9);">email</strong> and <strong style="color:rgba(219,234,254,0.9);">course_code</strong>.<br>
+                Example: <code style="background:rgba(255,255,255,0.06);padding:2px 6px;border-radius:4px;">student@uni.edu,DB101</code>
+            </p>
+            <div style="margin-bottom:16px;">
+                <a href="data:text/csv;charset=utf-8,email%2Ccourse_code%0Astudent1%40uni.edu%2CDB101%0Astudent2%40uni.edu%2CPROG101"
+                   download="enrollment_template.csv"
+                   style="color:#1E3A8A;font-size:0.82rem;text-decoration:underline;">
+                    Download CSV Template
+                </a>
+            </div>
+            <input type="file" id="csvFileInput" accept=".csv,.txt" style="display:none;" onchange="handleCSVUpload(event)">
+            <div id="csvDropZone"
+                 onclick="document.getElementById('csvFileInput').click()"
+                 ondragover="event.preventDefault();this.style.borderColor='#1E3A8A'"
+                 ondragleave="this.style.borderColor='#BFDBFE'"
+                 ondrop="event.preventDefault();handleCSVDrop(event)"
+                 style="border:2px dashed #BFDBFE;border-radius:12px;padding:32px;text-align:center;cursor:pointer;color:#6B7280;font-size:0.9rem;transition:border-color 0.2s;">
+                Click to choose CSV file or drag &amp; drop here
+            </div>
+            <div id="csvPreview" style="display:none;margin-top:16px;max-height:180px;overflow-y:auto;background:rgba(15,23,42,0.5);border-radius:10px;padding:12px;font-size:0.82rem;color:#cbd5e1;"></div>
+            <div id="csvResult" style="display:none;margin-top:16px;padding:14px;border-radius:10px;font-size:0.88rem;font-weight:600;"></div>
+            <div style="display:flex;gap:12px;margin-top:20px;">
+                <button onclick="document.getElementById('csvModal').style.display='none'" style="flex:1;padding:12px;border-radius:10px;border:1px solid #BFDBFE;background:#FFFFFF;color:#1E3A8A;font-weight:700;cursor:pointer;">Cancel</button>
+                <button id="csvSubmitBtn" onclick="submitCSVEnrollment()" disabled style="flex:1;padding:12px;border-radius:10px;border:none;background:#1E3A8A;color:#fff;font-weight:700;cursor:pointer;opacity:0.5;">Enroll Students</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let csvParsedRows = []
+
+    function handleCSVDrop(event) {
+        const file = event.dataTransfer.files[0]
+        if (file) processCSVFile(file)
+    }
+
+    function handleCSVUpload(event) {
+        const file = event.target.files[0]
+        if (file) processCSVFile(file)
+    }
+
+    function processCSVFile(file) {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            const text = e.target.result
+            const lines = text.split(/\r?\n/).filter(l => l.trim())
+            csvParsedRows = []
+            const preview = []
+            for (const line of lines) {
+                const parts = line.split(',')
+                if (parts.length < 2) continue
+                const email = parts[0].trim().toLowerCase()
+                const code  = parts[1].trim().toUpperCase()
+                if (!email || email === 'email') continue
+                csvParsedRows.push({ email, course_code: code })
+                preview.push(`${email} ? ${code}`)
+            }
+            const previewEl = document.getElementById('csvPreview')
+            previewEl.style.display = 'block'
+            previewEl.innerHTML = `<strong style="color:#1E3A8A;">${csvParsedRows.length} rows found:</strong><br>` + preview.slice(0, 20).join('<br>') + (preview.length > 20 ? `<br>...and ${preview.length - 20} more` : '')
+            document.getElementById('csvSubmitBtn').disabled = csvParsedRows.length === 0
+            document.getElementById('csvSubmitBtn').style.opacity = csvParsedRows.length === 0 ? '0.5' : '1'
+            document.getElementById('csvResult').style.display = 'none'
+        }
+        reader.readAsText(file)
+    }
+
+    async function submitCSVEnrollment() {
+        if (!csvParsedRows.length) return
+        const btn = document.getElementById('csvSubmitBtn')
+        btn.disabled = true
+        btn.textContent = 'Enrolling...'
+        const resultEl = document.getElementById('csvResult')
+        try {
+            const headers = await window.AppConfig.buildAuthHeaders(supabaseClient, { 'Content-Type': 'application/json' })
+            const resp = await fetch(`${window.AppConfig.getBackendBase()}/admin/enroll-csv`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ rows: csvParsedRows })
+            })
+            const data = await resp.json()
+            if (data.success) {
+                const s = data.summary
+                resultEl.style.display = 'block'
+                resultEl.style.background = 'rgba(16,185,129,0.12)'
+                resultEl.style.border = '1px solid rgba(16,185,129,0.3)'
+                resultEl.style.color = '#6ee7b7'
+                resultEl.innerHTML = `? Done � Enrolled: <strong>${s.enrolled}</strong> | Skipped: <strong>${s.skipped}</strong> | Errors: <strong>${s.errors}</strong>`
+                if (s.errors > 0) {
+                    const errRows = data.results.filter(r => r.status === 'error')
+                    resultEl.innerHTML += '<br><small style="color:#fca5a5;">' + errRows.slice(0,5).map(r => `${r.email}: ${r.reason}`).join(' | ') + '</small>'
+                }
+            } else {
+                resultEl.style.display = 'block'
+                resultEl.style.background = 'rgba(239,68,68,0.1)'
+                resultEl.style.border = '1px solid rgba(239,68,68,0.25)'
+                resultEl.style.color = '#fca5a5'
+                resultEl.textContent = '? ' + (data.error || 'Enrollment failed')
+            }
+        } catch (err) {
+            resultEl.style.display = 'block'
+            resultEl.style.color = '#fca5a5'
+            resultEl.textContent = '? ' + err.message
+        } finally {
+            btn.disabled = false
+            btn.textContent = 'Enroll Students'
+        }
+    }
+    </script>
+    <script src="js/chatbot.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

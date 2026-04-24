@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%234f46e5'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='28' fill='white' font-family='Arial' font-weight='bold'%3ESE%3C/text%3E%3C/svg%3E">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Analytics | Smart Exam System</title>
+    <script src="js/teacher-shell.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --ink: #1F2937;
+            --muted: #6B7280;
+            --brand: #1E3A8A;
+            --brand-strong: #1e40af;
+            --surface: #FFFFFF;
+            --surface-alt: #EFF6FF;
+            --border: #DBEAFE;
+            --shadow: 0 4px 16px rgba(30, 58, 138, 0.1);
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            color: var(--ink);
+            min-height: 100vh;
+            background: #F0F4FF;
+            padding: 0;
+        }
+
+        .navbar {
+            max-width: 1240px;
+            margin: 0 auto 20px;
+            background: #1E3A8A;
+            border: none;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand-mark {
+            width: 40px; height: 40px; border-radius: 12px;
+            background: linear-gradient(140deg, #1E3A8A, #3B82F6);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+        }
+        .brand-name { font-size: 12px; color: rgba(191, 219, 254, 0.82); text-transform: uppercase; letter-spacing: 1px; }
+        .brand-page { font-size: 18px; font-weight: 700; color: #f8fafc; }
+
+        .nav-actions { display: flex; gap: 10px; }
+        .btn {
+            text-decoration: none;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            border: 1px solid var(--border);
+            color: #1F2937;
+            background: #F8FAFF;
+        }
+        .btn:hover { background: #F8FAFF; }
+
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+            display: grid;
+            gap: 16px;
+        }
+
+        .panel {
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: var(--shadow);
+            padding: 18px;
+        }
+
+        .headline h1 { font-size: 1.8rem; margin-bottom: 6px; }
+        .headline p { color: var(--muted); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 12px;
+        }
+
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+        }
+        .stat .label { color: var(--muted); font-size: 0.85rem; }
+        .stat .value { color: #1E3A8A; font-size: 1.9rem; font-weight: 800; margin-top: 6px; }
+        .stat .sub { color: var(--muted); font-size: 0.82rem; margin-top: 4px; }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 16px;
+        }
+
+        .list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface);
+            color: #1F2937;
+        }
+
+        .chip {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            background: rgba(20, 184, 166, 0.2);
+            color: #99f6e4;
+            border: 1px solid rgba(20, 184, 166, 0.45);
+        }
+
+        .empty { color: var(--muted); padding: 8px 0; }
+
+        @media (max-width: 900px) {
+            body { padding: 12px; }
+            .navbar { flex-direction: column; align-items: flex-start; }
+            .two-col { grid-template-columns: 1fr; }
+        }
+
+
+        /* Shared Dashboard Shell */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1001;
+            max-width: none;
+            margin: 0;
+            padding: 0;
+            border-radius: 0;
+        }
+        .navbar-content {
+            min-height: 82px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.25rem;
+            width: 100%;
+            margin: 0;
+            padding: 0 1.75rem;
+        }
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+        }
+        .logo {
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.85rem;
+            color: #f8fafc !important;
+        }
+        .logo::before {
+            content: 'SE';
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(140deg, #1E3A8A, #3B82F6);
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            box-shadow: 0 8px 18px rgba(30,58,138,0.28);
+            flex-shrink: 0;
+        }
+        .brand-copy {
+            display: grid;
+            gap: 0.18rem;
+        }
+        .brand-page {
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+        .user-panel {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.9rem;
+            padding: 0.55rem 0.65rem 0.55rem 1rem;
+            border-radius: 18px;
+            background: rgba(30, 58, 138, 0.72);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+        .user-meta { text-align: right; }
+        .user-name { font-weight: 700; color: #f8fafc; }
+        .user-role { color: #BFDBFE; font-size: 0.88rem; }
+        .sidebar-footer-button.btn-logout {
+            background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+            padding: 0.75rem 1.25rem !important;
+            font-weight: 600 !important;
+            font-size: 0.95rem !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 0.5rem !important;
+            cursor: pointer !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+        .sidebar-footer-button.btn-logout:hover {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important;
+            box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+            transform: translateY(-2px) !important;
+        }
+        .sidebar-footer-button.btn-logout:active {
+            transform: translateY(0) !important;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+        }
+        .sidebar-footer-button.btn-logout i {
+            font-size: 1.1rem !important;
+            transition: transform 0.3s ease !important;
+        }
+        .sidebar-footer-button.btn-logout:hover i {
+            transform: translateX(2px) !important;
+        }
+        .container {
+            max-width: none;
+            margin: 0;
+            width: 100%;
+            padding: 1.5rem 1.75rem 2rem 0.85rem;
+            position: relative;
+            z-index: 1;
+        }
+        .app-shell {
+            display: grid;
+            grid-template-columns: 336px minmax(0, 1fr);
+            gap: 1.5rem;
+            align-items: start;
+        }
+        .sidebar {
+            position: sticky;
+            top: 92px;
+            min-height: calc(100vh - 112px);
+            max-height: calc(100vh - 112px);
+            display: flex;
+            flex-direction: column;
+            background: #1E3A8A;
+            border: none;
+            border-radius: 22px;
+            box-shadow: 0 2px 8px rgba(30, 58, 138, 0.15);
+            padding: 1.1rem;
+            overflow: hidden;
+        }
+        .sidebar::before {
+            display: none;
+        }
+        .sidebar-head,
+        .sidebar-nav,
+        .sidebar-summary {
+            position: relative;
+            z-index: 1;
+        }
+        .sidebar-head {
+            margin-bottom: 1rem;
+            padding: 0.2rem 0.15rem 0.95rem;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+        }
+        .sidebar-title {
+            font-size: 0.74rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(191, 219, 254, 0.7);
+            font-weight: 800;
+            margin-bottom: 0.9rem;
+            padding: 0 0.35rem;
+        }
+        .sidebar-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0 0.35rem;
+        }
+        .sidebar-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #f8fafc;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            flex-shrink: 0;
+        }
+        .sidebar-profile-copy { min-width: 0; }
+        .sidebar-profile-name {
+            display: block;
+            font-size: 1rem;
+            font-weight: 800;
+            color: #f8fafc;
+        }
+        .sidebar-profile-meta {
+            display: block;
+            margin-top: 0.18rem;
+            font-size: 0.82rem;
+            color: #6B7280;
+        }
+        .sidebar-nav {
+            display: grid;
+            gap: 0.45rem;
+            overflow-y: auto;
+            padding-right: 0.1rem;
+        }
+        .sidebar-link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.8rem;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 16px;
+            padding: 0.82rem 0.9rem;
+            text-decoration: none;
+            color: #f8fafc;
+            background: #F8FAFF;
+            transition: all 0.22s ease;
+            overflow: hidden;
+        }
+        .sidebar-link::before {
+            content: '';
+            position: absolute;
+            left: -1px;
+            top: 10px;
+            bottom: 10px;
+            width: 3px;
+            border-radius: 999px;
+            background: transparent;
+            transition: background 0.22s ease;
+        }
+        .sidebar-link-main {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            min-width: 0;
+        }
+        .sidebar-link-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            background: rgba(255, 255, 255, 0.03);
+            color: #374151;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.88rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+        .sidebar-link-copy { min-width: 0; }
+        .sidebar-link-title {
+            display: block;
+            color: #f8fafc;
+            font-size: 0.98rem;
+            font-weight: 800;
+        }
+        .sidebar-link-desc {
+            display: block;
+            margin-top: 0.22rem;
+            color: #6B7280;
+            font-size: 0.76rem;
+            line-height: 1.35;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .sidebar-link-meta {
+            color: #6B7280;
+            font-size: 0.73rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .sidebar-link:hover,
+        .sidebar-link.active {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+        .sidebar-link:hover::before,
+        .sidebar-link.active::before {
+            background: linear-gradient(180deg, #93C5FD, #BFDBFE);
+        }
+        .sidebar-link:hover .sidebar-link-icon,
+        .sidebar-link.active .sidebar-link-icon {
+            background: rgba(255, 255, 255, 0.22);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+        .sidebar-link:hover .sidebar-link-desc,
+        .sidebar-link.active .sidebar-link-desc,
+        .sidebar-link:hover .sidebar-link-meta,
+        .sidebar-link.active .sidebar-link-meta {
+            color: rgba(226, 232, 240, 0.92);
+        }
+        .sidebar-summary {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.16);
+            display: grid;
+            gap: 0.75rem;
+        }
+        .sidebar-summary-card {
+            background: #F8FAFF;
+            border: 1px solid rgba(148, 163, 184, 0.12);
+            border-radius: 14px;
+            padding: 0.95rem 1rem;
+        }
+        .sidebar-summary-label {
+            display: block;
+            color: #6B7280;
+            font-size: 0.74rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .sidebar-summary-value {
+            display: block;
+            color: #f8fafc;
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin-top: 0.32rem;
+        }
+        .sidebar-summary-card.accent .sidebar-summary-value {
+            color: #9FE1CB;
+        }
+        .content-column {
+            min-width: 0;
+            display: grid;
+            gap: 16px;
+        }
+        @media (max-width: 980px) {
+            .app-shell { grid-template-columns: 1fr; }
+            .sidebar {
+                position: static;
+                min-height: auto;
+                max-height: none;
+            }
+            .sidebar-nav {
+                overflow: visible;
+                padding-right: 0;
+            }
+            .navbar-content {
+                padding: 1rem 1.25rem;
+            }
+        }
+        @media (max-width: 720px) {
+            body { padding: 0; }
+            .navbar-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .brand-wrap,
+            .user-panel {
+                justify-content: space-between;
+            }
+            .container {
+                padding: 1rem 1rem 1.75rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="css/ui-system.css?v=1776841996">
+    <link rel="stylesheet" href="css/product-theme.css?v=1776841996">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=blue4">
+    <link rel="stylesheet" href="css/role-dashboard-match.css?v=blue4">
+</head>
+<body class="analytics-shell-page admin-dashboard-page">
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="header-brand-group">
+                <button class="shell-toggle" type="button" data-sidebar-toggle aria-label="Toggle sidebar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                        <path d="M4 7h16M4 12h16M4 17h16" />
+                    </svg>
+                </button>
+                <div class="brand-wrap">
+                    <a href="dashboard-admin.html" class="logo">
+                        <span class="brand-copy">
+                            <span class="brand-name">Smart Exam System</span>
+                            <span class="brand-page">Analytics</span>
+                        </span>
+                    </a>
+                </div>
+            </div>
+            <div class="header-utility">
+                <a class="header-profile-trigger" href="profile.html" aria-label="Open profile">
+                    <span class="header-profile-avatar" id="headerProfileAvatar">AN</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="app-shell">
+            <aside class="sidebar">
+                <nav class="sidebar-nav">
+                    <a href="dashboard-admin.html" class="sidebar-link" data-nav="dashboard">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon" aria-hidden="true">
+                                <i class="bi bi-grid-1x2-fill"></i>
+                            </span>
+                            <span class="sidebar-link-copy">
+                                <span class="sidebar-link-title">Dashboard</span>
+                            </span>
+                        </span>
+                    </a>
+                    <a href="manage-users.html?v=20260407-admin" class="sidebar-link" data-nav="users">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon" aria-hidden="true">
+                                <i class="bi bi-people-fill"></i>
+                            </span>
+                            <span class="sidebar-link-copy">
+                                <span class="sidebar-link-title">Manage Users</span>
+                            </span>
+                        </span>
+                    </a>
+                    <a href="analytics.html?v=20260407-admin" class="sidebar-link active" data-nav="analytics">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon" aria-hidden="true">
+                                <i class="bi bi-bar-chart-line-fill"></i>
+                            </span>
+                            <span class="sidebar-link-copy">
+                                <span class="sidebar-link-title">Analytics</span>
+                            </span>
+                        </span>
+                    </a>
+                    <a href="dashboard-admin.html#controlSection" class="sidebar-link" data-nav="control">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon" aria-hidden="true">
+                                <i class="bi bi-shield-check"></i>
+                            </span>
+                            <span class="sidebar-link-copy">
+                                <span class="sidebar-link-title">Transfer Control</span>
+                            </span>
+                        </span>
+                    </a>
+                    <a href="dashboard-admin.html#quickActionsSection" class="sidebar-link" data-nav="operations">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon" aria-hidden="true">
+                                <i class="bi bi-sliders2-vertical"></i>
+                            </span>
+                            <span class="sidebar-link-copy">
+                                <span class="sidebar-link-title">Admin Tools</span>
+                            </span>
+                        </span>
+                    </a>
+                </nav>
+                <div class="sidebar-footer">
+                    <button class="sidebar-footer-button btn-logout" type="button" onclick="logout()">
+                        <span aria-hidden="true">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </span>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </aside>
+
+            <main class="content-column">
+                <section class="hero">
+                    <div>
+                        <h1>System Analytics</h1>
+                        <p>Live overview of users, exams, submissions, and grading workload across the platform.</p>
+                    </div>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary" type="button" onclick="loadAnalytics()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:middle;">
+                                <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                            </svg>
+                            Refresh Analytics
+                        </button>
+                    </div>
+                </section>
+
+                <section class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-head">
+                            <span class="stat-label">Total Users</span>
+                            <span class="stat-icon">US</span>
+                        </div>
+                        <span class="stat-number" id="totalUsers">0</span>
+                        <div class="stat-footer" id="usersSub">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-head">
+                            <span class="stat-label">Total Exams</span>
+                            <span class="stat-icon">EX</span>
+                        </div>
+                        <span class="stat-number" id="totalExams">0</span>
+                        <div class="stat-footer">Published and draft records</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-head">
+                            <span class="stat-label">Attempts</span>
+                            <span class="stat-icon">AT</span>
+                        </div>
+                        <span class="stat-number" id="totalAttempts">0</span>
+                        <div class="stat-footer">Tracked submission records</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-head">
+                            <span class="stat-label">Pending Reviews</span>
+                            <span class="stat-icon">RV</span>
+                        </div>
+                        <span class="stat-number" id="pendingReviews">0</span>
+                        <div class="stat-footer">Needs teacher review</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-head">
+                            <span class="stat-label">Average Score</span>
+                            <span class="stat-icon">AV</span>
+                        </div>
+                        <span class="stat-number" id="avgScore">0%</span>
+                        <div class="stat-footer">Across graded attempts</div>
+                    </div>
+                </section>
+
+                <section class="two-col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Recent Attempts</h3>
+                            <span class="badge badge-info">Live</span>
+                        </div>
+                        <div class="list" id="recentAttempts"><div class="empty">Loading...</div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Review Status Breakdown</h3>
+                            <span class="badge badge-warning">Queue</span>
+                        </div>
+                        <div class="list" id="reviewBreakdown">
+                            <div class="row"><span>Pending</span><span class="chip" id="rbPending">0</span></div>
+                            <div class="row"><span>Auto Graded</span><span class="chip" id="rbAuto">0</span></div>
+                            <div class="row"><span>Teacher Graded</span><span class="chip" id="rbTeacher">0</span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card" id="scoreDistPanel" style="margin-top:1rem;">
+                    <div class="card-header">
+                        <h3>Score Distribution</h3>
+                        <span class="badge badge-info">Bands</span>
+                    </div>
+                    <div id="scoreDistChart" style="display:grid;gap:8px;margin-top:12px;"></div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/supabase.min.js"></script>
+    <script src="js/app-config.js?v=20260314-sidebar-fix"></script>
+    <script src="js/session-manager.js?v=20260314-sidebar-fix"></script>
+    <script src="js/user-profile.js?v=20260314-sidebar-fix"></script>
+    <script src="js/app-shell.js?v=20260314-sidebar-fix"></script>
+    <script>
+        const { SUPABASE_URL, SUPABASE_ANON_KEY, getBackendBase } = window.AppConfig;
+        const AI_BACKEND_URL = getBackendBase();
+        const { createClient } = supabase;
+        const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const shellState = { role: (localStorage.getItem('userRole') || 'teacher').toLowerCase() };
+
+        function getShellIcon(key) {
+            const icons = {
+                dashboard: `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 11.5L12 4l9 7.5" />
+                        <path d="M5.5 10.5V20h13V10.5" />
+                        <path d="M9.5 20v-5h5v5" />
+                    </svg>
+                `,
+                users: `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-1.5A3.5 3.5 0 0 0 12.5 16h-4A3.5 3.5 0 0 0 5 19.5V21" />
+                        <circle cx="10.5" cy="8" r="3" />
+                        <path d="M19 21v-1a3 3 0 0 0-2.1-2.86" />
+                        <path d="M15.5 5.3a3 3 0 0 1 0 5.4" />
+                    </svg>
+                `,
+                analytics: `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 20h16" />
+                        <path d="M7 16V10" />
+                        <path d="M12 16V6" />
+                        <path d="M17 16v-3" />
+                    </svg>
+                `,
+                create: `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 5v14" />
+                        <path d="M5 12h14" />
+                        <rect x="4" y="4" width="16" height="16" rx="3" />
+                    </svg>
+                `,
+                control: `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3l7 4v5c0 4.2-2.9 8-7 9-4.1-1-7-4.8-7-9V7l7-4Z" />
+                        <path d="M9.5 12.5l1.8 1.8 3.7-4" />
+                    </svg>
+                `,
+                exams: `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="5" y="4" width="14" height="16" rx="2" />
+                        <path d="M9 8h6" />
+                        <path d="M9 12h6" />
+                        <path d="M9 16h4" />
+                    </svg>
+                `,
+                submissions: `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3v12" />
+                        <path d="M7 10l5 5 5-5" />
+                        <path d="M5 21h14" />
+                    </svg>
+                `
+            };
+            return icons[key] || icons.dashboard;
+        }
+
+        function forceAnalyticsSidebarVisible() {
+            document.body.classList.remove('sidebar-collapsed');
+            localStorage.setItem('appShellSidebarCollapsed', '0');
+            document.querySelectorAll('.sidebar-link-main').forEach((node) => {
+                node.style.display = 'flex';
+                node.style.alignItems = 'center';
+                node.style.gap = '10px';
+            });
+            document.querySelectorAll('.sidebar-link-icon').forEach((node) => {
+                node.style.display = 'inline-flex';
+                node.style.alignItems = 'center';
+                node.style.justifyContent = 'center';
+                node.style.opacity = '1';
+                node.style.visibility = 'visible';
+            });
+            document.querySelectorAll('.sidebar-link-copy').forEach((node) => {
+                node.style.display = 'block';
+                node.style.opacity = '1';
+                node.style.visibility = 'visible';
+            });
+            document.querySelectorAll('.sidebar-link-title').forEach((node) => {
+                node.style.display = 'block';
+                node.style.opacity = '1';
+                node.style.visibility = 'visible';
+                node.style.color = '#eaf2ff';
+            });
+        }
+
+        function getDisplayName() {
+            const fullName = (localStorage.getItem('userName') || '').trim();
+            if (fullName) return fullName;
+            const first = (localStorage.getItem('userFirstName') || '').trim();
+            const last = (localStorage.getItem('userLastName') || '').trim();
+            return [first, last].filter(Boolean).join(' ').trim() || 'Analytics Viewer';
+        }
+
+        function getInitials(name) {
+            const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+            if (!parts.length) return 'AN';
+            return parts.slice(0, 2).map((part) => part[0].toUpperCase()).join('');
+        }
+
+        function logout() {
+            if (window.SessionManager) {
+                window.SessionManager.logout('manual');
+                return;
+            }
+            window.location.href = 'login.html';
+        }
+
+        function initShell() {
+            const profile = window.UserProfile ? window.UserProfile.getStoredProfile() : null;
+            const displayName = profile?.displayName || getDisplayName();
+            const role = shellState.role === 'admin' ? 'admin' : 'teacher';
+            // Do NOT add sidebar-simple � it collapses the sidebar
+            document.body.classList.add('analytics-shell-page');
+            document.body.classList.toggle('admin-dashboard-page', role === 'admin');
+            localStorage.setItem('appShellSidebarCollapsed', '0');
+            document.body.classList.remove('sidebar-collapsed');
+            if (window.AppShell) window.AppShell.init();
+            const roleMeta = role === 'admin' ? 'Administrative Analytics' : 'Teaching Analytics';
+            const sidebarMeta = window.UserProfile
+                ? window.UserProfile.getProfileMeta(profile, roleMeta)
+                : (profile?.email || roleMeta);
+            const nav = role === 'admin'
+                ? [
+                    { href: 'dashboard-admin.html?v=20260407-admin', icon: getShellIcon('dashboard'), title: 'Dashboard', desc: 'Overview and control center', meta: 'Home' },
+                    { href: 'manage-users.html?v=20260407-admin', icon: getShellIcon('users'), title: 'Manage Users', desc: 'Accounts, roles, and status', meta: 'Access' },
+                    { href: 'analytics.html?v=20260407-admin', icon: getShellIcon('analytics'), title: 'Analytics', desc: 'Platform metrics and performance', meta: 'Live', active: true },
+                    { href: 'dashboard-admin.html?v=20260407-admin#controlSection', icon: getShellIcon('control'), title: 'Transfer Control', desc: 'Admin handover and audit trail', meta: 'Admin' }
+                ]
+                : [
+                    { href: 'dashboard-teacher.html', icon: getShellIcon('dashboard'), title: 'Dashboard', desc: 'Overview and live metrics', meta: 'Home' },
+                    { href: 'dashboard-teacher.html#recentExamsSection', icon: getShellIcon('exams'), title: 'Exams', desc: 'Published, draft, and archived', meta: 'List' },
+                    { href: 'create-exam.html', icon: getShellIcon('create'), title: 'Create Exam', desc: 'Build a new paper from material', meta: 'New' },
+                    { href: 'dashboard-teacher.html#pendingGradingSection', icon: getShellIcon('submissions'), title: 'Submissions', desc: 'Review pending attempts', meta: 'Review' },
+                    { href: 'analytics.html', icon: getShellIcon('analytics'), title: 'Analytics', desc: 'Performance and grading insights', meta: 'Live', active: true }
+                ];
+
+            // Update header avatar only � sidebar is now static HTML
+            const headerAvatarEl = document.getElementById('headerProfileAvatar');
+            if (headerAvatarEl) headerAvatarEl.textContent = profile?.initials || getInitials(displayName);
+        }
+
+        const fmtDate = (v) => {
+            if (!v) return 'N/A';
+            const d = new Date(v);
+            if (Number.isNaN(d.getTime())) return 'N/A';
+            return d.toLocaleString();
+        };
+
+        const formatAttemptStatus = (value) => {
+            const status = String(value || 'submitted').toLowerCase().replace(/_/g, ' ');
+            return status.replace(/\b\w/g, (char) => char.toUpperCase());
+        };
+
+        async function fetchBackendStats(examId) {
+            // Compute grading stats directly from student_answers � no RPC needed
+            try {
+                const { data: attempts } = await db
+                    .from('exam_attempts')
+                    .select('attempt_id')
+                    .eq('exam_id', examId);
+                if (!attempts || !attempts.length) return { counts: { pending: 0, auto_graded: 0, teacher_graded: 0 } };
+
+                const attemptIds = attempts.map(a => a.attempt_id).filter(Boolean);
+                const { data: answers } = await db
+                    .from('student_answers')
+                    .select('review_status')
+                    .in('attempt_id', attemptIds);
+
+                const counts = { pending: 0, auto_graded: 0, teacher_graded: 0 };
+                for (const ans of (answers || [])) {
+                    const s = (ans.review_status || '').toLowerCase();
+                    if (s === 'pending') counts.pending++;
+                    else if (s === 'auto_graded') counts.auto_graded++;
+                    else if (s === 'teacher_graded') counts.teacher_graded++;
+                }
+                return { success: true, counts };
+            } catch (e) {
+                return null;
+            }
+        }
+                return data;
+            } catch (_) {
+                return null;
+            }
+        }
+
+        async function loadAnalytics() {
+            try {
+                // Try backend API first (has service role access)
+                const headers = await window.AppConfig.buildAuthHeaders(db);
+                const backendBase = window.AppConfig.getBackendBase();
+
+                let users = [], exams = [], allAttempts = [], attempts = [];
+
+                try {
+                    const [uRes, eRes, aRes] = await Promise.all([
+                        fetch(`${backendBase}/admin/users`, { headers }),
+                        fetch(`${backendBase}/admin/courses`, { headers }),
+                        fetch(`${backendBase}/submissions?status=submitted,pending_grading,graded,completed&limit=500`, { headers })
+                    ]);
+                    if (uRes.ok) { const d = await uRes.json(); users = d.users || []; }
+                    if (eRes.ok) { const d = await eRes.json(); exams = d.courses || []; }
+                    if (aRes.ok) { const d = await aRes.json(); allAttempts = d.submissions || []; }
+                } catch (_) {}
+
+                // Fallback to Supabase direct if backend failed
+                if (!users.length) {
+                    const r = await db.from('users').select('id, role'); users = r.data || [];
+                }
+                if (!exams.length) {
+                    const r = await db.from('exams').select('exam_id, status'); exams = r.data || [];
+                }
+                if (!allAttempts.length) {
+                    const r = await db.from('exam_attempts').select('attempt_id, status, percentage, submitted_at').limit(500);
+                    allAttempts = r.data || [];
+                }
+
+                // Get 8 most recent for the list
+                attempts = [...allAttempts].sort((a,b) => new Date(b.submitted_at||0) - new Date(a.submitted_at||0)).slice(0, 8);
+
+                const roleCount = users.reduce((acc, u) => {
+                    const k = (u.role || 'unknown').toLowerCase();
+                    acc[k] = (acc[k] || 0) + 1;
+                    return acc;
+                }, {});
+
+                document.getElementById('totalUsers').textContent = users.length;
+                document.getElementById('usersSub').textContent = `Teachers ${roleCount.teacher || 0}  Students ${roleCount.student || 0}  Admins ${roleCount.admin || 0}`;
+                document.getElementById('totalExams').textContent = exams.length;
+                document.getElementById('totalAttempts').textContent = allAttempts.length;
+
+                const gradedAttempts = allAttempts.filter(a => ['graded', 'completed', 'pending_grading', 'submitted'].includes((a.status || '').toLowerCase()) && a.percentage !== null && a.percentage !== undefined);
+                const avg = gradedAttempts.length ? gradedAttempts.reduce((s,a) => s + Number(a.percentage || 0), 0) / gradedAttempts.length : 0;
+                document.getElementById('avgScore').textContent = `${avg.toFixed(1)}%`;
+
+                const pendingAttempts = allAttempts.filter(a => ['submitted', 'pending_grading'].includes((a.status || '').toLowerCase())).length;
+                document.getElementById('pendingReviews').textContent = pendingAttempts;
+                let breakdown = { pending: 0, auto: 0, teacher: 0 };
+                const examIds = (exams || []).map(e => e.exam_id).filter(Boolean);
+                for (const examId of examIds) {
+                    const stats = await fetchBackendStats(examId);
+                    if (!stats) continue;
+                    const counts = stats.counts || {};
+                    breakdown.pending += Number(counts.pending || 0);
+                    breakdown.auto += Number(counts.auto_graded || 0);
+                    breakdown.teacher += Number(counts.teacher_graded || 0);
+                }
+
+                document.getElementById('rbPending').textContent = breakdown.pending;
+                document.getElementById('rbAuto').textContent = breakdown.auto;
+                document.getElementById('rbTeacher').textContent = breakdown.teacher;
+
+                // Score distribution
+                const bands = [
+                    { label: '0�20%',  min: 0,  max: 20,  color: '#ef4444' },
+                    { label: '20�40%', min: 20, max: 40,  color: '#f97316' },
+                    { label: '40�60%', min: 40, max: 60,  color: '#f59e0b' },
+                    { label: '60�80%', min: 60, max: 80,  color: '#3b82f6' },
+                    { label: '80�100%',min: 80, max: 101, color: '#10b981' },
+                ];
+                const allAttempts = attemptsRes.data || [];
+                const total = allAttempts.filter(a => a.percentage !== null).length || 1;
+                const distEl = document.getElementById('scoreDistChart');
+                if (distEl) {
+                    distEl.innerHTML = bands.map(b => {
+                        const count = allAttempts.filter(a => a.percentage !== null && a.percentage >= b.min && a.percentage < b.max).length;
+                        const pct = Math.round((count / total) * 100);
+                        return `<div style="display:grid;grid-template-columns:70px 1fr 40px;align-items:center;gap:10px;">
+                            <span style="font-size:0.8rem;color:#94a3b8;">${b.label}</span>
+                            <div style="background:rgba(255,255,255,0.06);border-radius:999px;height:10px;overflow:hidden;">
+                                <div style="width:${pct}%;height:100%;background:${b.color};border-radius:999px;transition:width 0.5s;"></div>
+                            </div>
+                            <span style="font-size:0.82rem;font-weight:700;color:#f8fafc;">${count}</span>
+                        </div>`;
+                    }).join('');
+                }
+
+                const recent = document.getElementById('recentAttempts');
+                if (!attempts.length) {
+                    recent.innerHTML = '<div class="empty">No attempts found.</div>';
+                } else {
+                    recent.innerHTML = attempts.map((a, idx) => `
+                        <div class="row">
+                            <span><strong>Attempt ${idx + 1}</strong>  ${a.attempt_id ? String(a.attempt_id).slice(0, 8) : 'N/A'}</span>
+                            <span class="chip">${formatAttemptStatus(a.status)}</span>
+                            <span>${fmtDate(a.submitted_at)}</span>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Analytics load error', err);
+                document.getElementById('recentAttempts').innerHTML = `<div class="empty">Unable to load analytics: ${err.message}</div>`;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!window.__TEACHER_SHELL_EMBEDDED__ && window.SessionManager) {
+                const ok = window.SessionManager.init({ loginUrl: 'login.html', requireAuth: true });
+                if (!ok) return;
+            }
+            initShell();
+            loadAnalytics();
+        });
+    </script>
+    <script src="js/ui-feedback.js"></script>
+    <script src="js/chatbot.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+

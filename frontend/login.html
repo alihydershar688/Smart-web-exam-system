@@ -1,0 +1,1322 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Smart Exam System</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232563eb'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-size='24' fill='white' font-family='Arial'%3ESE%3C/text%3E%3C/svg%3E">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #3b82f6 100%);
+            position: relative;
+            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Animated Background Elements */
+        body::before {
+            content: '';
+            position: fixed;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
+            animation: rotateBg 40s linear infinite;
+            pointer-events: none;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.05"><path fill="white" d="M20,20 L30,20 L25,30 Z M70,50 L85,50 L77.5,65 Z M40,75 L55,75 L47.5,90 Z M10,60 L20,60 L15,70 Z M80,15 L90,15 L85,25 Z"/><circle cx="50" cy="50" r="3"/><circle cx="25" cy="30" r="2"/><circle cx="75" cy="20" r="2"/><circle cx="85" cy="70" r="2.5"/><circle cx="15" cy="80" r="1.5"/></svg>') repeat;
+            pointer-events: none;
+            animation: floatPattern 60s linear infinite;
+        }
+
+        @keyframes rotateBg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes floatPattern {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(20px, 20px) rotate(2deg); }
+            100% { transform: translate(-20px, -20px) rotate(-2deg); }
+        }
+
+        /* Floating particles */
+        .particle {
+            position: fixed;
+            background: rgba(59, 130, 246, 0.4);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFloat 15s ease-in-out infinite;
+        }
+
+        @keyframes particleFloat {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 480px;
+            position: relative;
+            z-index: 10;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Glassmorphism Card - REDUCED HEIGHT */
+        .auth-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border-radius: 40px;
+            padding: 40px 40px 32px 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .auth-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.35);
+        }
+
+        /* Header - REDUCED MARGIN */
+        .auth-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            text-decoration: none;
+        }
+
+        .logo-mark {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 26px;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .logo-mark:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .auth-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+
+        /* Form Elements - REDUCED MARGIN */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .form-control:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        select.form-control {
+            cursor: pointer;
+            appearance: none;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 20px;
+        }
+
+        select.form-control option {
+            background: #1e293b;
+            color: white;
+        }
+
+        /* Password Field */
+        .password-field {
+            position: relative;
+        }
+
+        .password-field .form-control {
+            padding-right: 85px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(59, 130, 246, 0.8);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 6px 14px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .password-toggle:hover {
+            background: #3b82f6;
+            transform: translateY(-50%) scale(1.02);
+        }
+
+        /* CAPTCHA Panel - REDUCED PADDING */
+        .verification-panel {
+            display: none;
+            margin-bottom: 18px;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .verification-panel.show {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .verification-title {
+            color: white;
+            font-weight: 700;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .verification-text {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 11px;
+            margin-bottom: 10px;
+        }
+
+        .verification-row {
+            display: grid;
+            grid-template-columns: 1fr 90px;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .captcha-artboard {
+            position: relative;
+            height: 52px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .captcha-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .captcha-refresh {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 10px;
+            padding: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            height: 52px;
+            width: 100%;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .captcha-refresh:hover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.3);
+        }
+
+        .verification-hint {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 10px;
+            margin-top: 6px;
+        }
+
+        /* Support Row - REDUCED MARGIN */
+        .support-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 16px 0 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* Checkbox */
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .checkbox-label .checkbox-custom {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .checkbox-label input[type="checkbox"]:checked + .checkbox-custom {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .checkbox-label input[type="checkbox"]:checked + .checkbox-custom::after {
+            content: '';
+            display: block;
+            width: 5px;
+            height: 9px;
+            border: 2px solid white;
+            border-top: none;
+            border-left: none;
+            transform: rotate(45deg) translateY(-1px);
+        }
+
+        .checkbox-label span {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 12px;
+        }
+
+        .forgot-password-link a {
+            color: #93c5fd;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .forgot-password-link a:hover {
+            color: white;
+            text-decoration: underline;
+        }
+
+        /* Buttons - REDUCED PADDING */
+        .btn {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Footer - REDUCED MARGIN & PADDING */
+        .auth-footer {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            text-align: center;
+        }
+
+        .auth-footer .btn-secondary {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 10px 28px;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .auth-footer .btn-secondary:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        .auth-footer-note {
+            text-align: center;
+            margin-top: 16px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 11px;
+        }
+
+        /* Alerts */
+        .error-message, .success-message {
+            padding: 10px 14px;
+            border-radius: 14px;
+            margin-bottom: 18px;
+            font-size: 12px;
+            font-weight: 500;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .error-message.show, .success-message.show {
+            display: block;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.2);
+            border-left: 3px solid #ef4444;
+            color: #fecaca;
+        }
+
+        .success-message {
+            background: rgba(34, 197, 94, 0.2);
+            border-left: 3px solid #22c55e;
+            color: #bbf7d0;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+        }
+
+        .modal.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 32px;
+            border-radius: 28px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            font-size: 26px;
+            cursor: pointer;
+            color: white;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(239, 68, 68, 0.3);
+            transform: rotate(90deg);
+        }
+
+        /* Responsive */
+        @media (max-width: 560px) {
+            body {
+                padding: 16px;
+            }
+
+            .auth-card {
+                padding: 28px 24px 24px 24px;
+            }
+
+            .auth-header h1 {
+                font-size: 28px;
+            }
+
+            .logo-mark {
+                width: 48px;
+                height: 48px;
+                font-size: 24px;
+            }
+
+            .logo-text {
+                font-size: 20px;
+            }
+
+            .support-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .verification-row {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 24px 20px;
+                margin: 16px;
+                width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating particles -->
+    <div class="particle" style="width: 4px; height: 4px; top: 20%; left: 10%; animation-duration: 12s;"></div>
+    <div class="particle" style="width: 6px; height: 6px; top: 60%; left: 85%; animation-duration: 18s;"></div>
+    <div class="particle" style="width: 3px; height: 3px; top: 70%; left: 20%; animation-duration: 14s;"></div>
+    <div class="particle" style="width: 5px; height: 5px; top: 30%; left: 75%; animation-duration: 20s;"></div>
+    <div class="particle" style="width: 4px; height: 4px; top: 80%; left: 50%; animation-duration: 16s;"></div>
+    <div class="particle" style="width: 7px; height: 7px; top: 15%; left: 45%; animation-duration: 22s;"></div>
+    <div class="particle" style="width: 3px; height: 3px; top: 45%; left: 15%; animation-duration: 11s;"></div>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="logo">
+                    <span class="logo-mark">SE</span>
+                    <span class="logo-text">Smart Exam System</span>
+                </div>
+                <h1>Welcome Back</h1>
+                <p class="auth-subtitle">Sign in to your account</p>
+            </div>
+
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
+
+            <form class="auth-form" id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" id="emailInput" class="form-control" placeholder="Enter your email" autocomplete="username email" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div class="password-field">
+                        <input type="password" id="passwordInput" class="form-control" placeholder="Enter your password" autocomplete="current-password" required>
+                        <button type="button" class="password-toggle" data-target="passwordInput">Show</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Account Type</label>
+                    <select id="roleSelect" class="form-control" required>
+                        <option value="">Select your role</option>
+                        <option value="student">Student</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="admin">Administrator</option>
+                    </select>
+                </div>
+
+                <div class="verification-panel" id="captchaBox">
+                    <div class="verification-title">Security Verification</div>
+                    <div class="verification-text">Enter the code shown below</div>
+                    <div class="verification-row">
+                        <div class="captcha-artboard">
+                            <canvas id="captchaCanvas" class="captcha-canvas" width="300" height="52"></canvas>
+                        </div>
+                        <button type="button" class="captcha-refresh" id="captchaRefreshBtn">Refresh</button>
+                    </div>
+                    <div class="verification-input-row">
+                        <input type="text" id="captchaInput" class="form-control" placeholder="Enter verification code" autocomplete="off" inputmode="text">
+                    </div>
+                    <div class="verification-hint">Verification appears after filling all fields</div>
+                </div>
+
+                <div class="support-row">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="rememberMe">
+                        <span class="checkbox-custom"></span>
+                        <span>Remember me</span>
+                    </label>
+
+                    <div class="forgot-password-link">
+                        <a href="#" id="forgotPasswordBtn">Forgot Password?</a>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <a href="signup.html" class="btn-secondary">Create Account</a>
+                <p class="auth-footer-note">Secure University Portal Access</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Reset Password</h2>
+                <button type="button" class="modal-close" id="closeModal">×</button>
+            </div>
+            <div id="forgotErrorMessage" class="error-message"></div>
+            <div id="forgotSuccessMessage" class="success-message"></div>
+            <form id="forgotPasswordForm">
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" id="forgotEmailInput" class="form-control" placeholder="Enter your email" required>
+                </div>
+                <button type="submit" class="btn btn-primary" id="sendResetLinkBtn">Send Reset Link</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/supabase.min.js"></script>
+    <script src="js/app-config.js"></script>
+    <script src="js/admin-policy.js"></script>
+
+    <script>
+        console.log('Login page loaded - Glassmorphism Design - Fixed Height');
+
+        let supabaseClient = null;
+        try {
+            const { SUPABASE_URL, SUPABASE_ANON_KEY, getBackendBase } = window.AppConfig;
+            const { createClient } = supabase;
+            supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch(e) {
+            console.warn('Supabase init skipped:', e.message);
+        }
+
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const roleSelect = document.getElementById('roleSelect');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const rememberMe = document.getElementById('rememberMe');
+        const captchaBox = document.getElementById('captchaBox');
+        const captchaInput = document.getElementById('captchaInput');
+        const captchaCanvas = document.getElementById('captchaCanvas');
+        const captchaRefreshBtn = document.getElementById('captchaRefreshBtn');
+
+        let captchaAnswer = '';
+
+        const RATE_KEY = 'login_attempts';
+        const LOCKOUT_KEY = 'login_lockout_until';
+        const MAX_ATTEMPTS = 5;
+        const LOCKOUT_MS = 15 * 60 * 1000;
+
+        function getRateState() {
+            try {
+                return {
+                    attempts: parseInt(localStorage.getItem(RATE_KEY) || '0', 10),
+                    lockoutUntil: parseInt(localStorage.getItem(LOCKOUT_KEY) || '0', 10)
+                };
+            } catch (_) { return { attempts: 0, lockoutUntil: 0 }; }
+        }
+
+        function recordFailedAttempt() {
+            const state = getRateState();
+            const newAttempts = state.attempts + 1;
+            localStorage.setItem(RATE_KEY, String(newAttempts));
+            if (newAttempts >= MAX_ATTEMPTS) {
+                const until = Date.now() + LOCKOUT_MS;
+                localStorage.setItem(LOCKOUT_KEY, String(until));
+                localStorage.setItem(RATE_KEY, '0');
+            }
+        }
+
+        function clearRateLimit() {
+            localStorage.removeItem(RATE_KEY);
+            localStorage.removeItem(LOCKOUT_KEY);
+        }
+
+        function checkLockout() {
+            const state = getRateState();
+            if (state.lockoutUntil > Date.now()) {
+                const remaining = Math.ceil((state.lockoutUntil - Date.now()) / 60000);
+                return `Too many failed attempts. Please wait ${remaining} minute${remaining > 1 ? 's' : ''}.`;
+            }
+            return null;
+        }
+
+        document.querySelectorAll('.password-toggle').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.getElementById(btn.dataset.target);
+                if (!target) return;
+                const reveal = target.type === 'password';
+                target.type = reveal ? 'text' : 'password';
+                btn.textContent = reveal ? 'Hide' : 'Show';
+            });
+        });
+
+        const AUTH_KEYS = [
+            'isLoggedIn', 'userRole', 'userEmail', 'userId', 'userName',
+            'userFirstName', 'userLastName', 'studentId', 'teacherId', 'adminId',
+            'userDepartment', 'authLoginAt', 'authLastActivityAt', 'authLogoutAt'
+        ];
+
+        const clearStoredAuth = () => {
+            AUTH_KEYS.forEach(key => {
+                localStorage.removeItem(key);
+                sessionStorage.removeItem(key);
+            });
+        };
+
+        const setAuthValue = (key, value) => {
+            if (value === null || value === undefined || value === '') {
+                localStorage.removeItem(key);
+                sessionStorage.removeItem(key);
+                return;
+            }
+            localStorage.setItem(key, String(value));
+            sessionStorage.setItem(key, String(value));
+        };
+
+        const randomCaptchaText = (length = 5) => {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let out = '';
+            for (let i = 0; i < length; i++) {
+                out += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return out;
+        };
+
+        const drawCaptcha = () => {
+            const ctx = captchaCanvas.getContext('2d');
+            const width = captchaCanvas.width;
+            const height = captchaCanvas.height;
+
+            captchaAnswer = randomCaptchaText();
+            ctx.clearRect(0, 0, width, height);
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fillRect(0, 0, width, height);
+
+            for (let i = 0; i < 8; i++) {
+                ctx.strokeStyle = `rgba(59, 130, 246, ${0.2 + Math.random() * 0.2})`;
+                ctx.beginPath();
+                ctx.moveTo(Math.random() * width, Math.random() * height);
+                ctx.lineTo(Math.random() * width, Math.random() * height);
+                ctx.stroke();
+            }
+
+            ctx.font = 'bold 24px Inter';
+            ctx.textBaseline = 'middle';
+            for (let i = 0; i < captchaAnswer.length; i++) {
+                const ch = captchaAnswer[i];
+                const x = 18 + (i * 32);
+                const y = 26 + (Math.random() * 8 - 4);
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate((Math.random() * 0.3) - 0.15);
+                ctx.fillStyle = i % 2 === 0 ? '#60a5fa' : '#93c5fd';
+                ctx.fillText(ch, 0, 0);
+                ctx.restore();
+            }
+        };
+
+        const syncCaptchaVisibility = () => {
+            const shouldShow = emailInput.value.trim() && passwordInput.value.trim() && roleSelect.value;
+            captchaBox.classList.toggle('show', !!shouldShow);
+            if (shouldShow && !captchaAnswer) {
+                drawCaptcha();
+            }
+            if (!shouldShow) {
+                captchaInput.value = '';
+                captchaAnswer = '';
+            }
+        };
+
+        const getRememberedEmails = () => {
+            try {
+                const parsed = JSON.parse(localStorage.getItem('rememberedLoginEmails') || '[]');
+                return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+            } catch (_) {
+                return [];
+            }
+        };
+
+        const persistRememberedEmail = (email) => {
+            if (rememberMe.checked) {
+                const next = [email, ...getRememberedEmails().filter(item => item !== email)].slice(0, 8);
+                localStorage.setItem('rememberedLoginEmails', JSON.stringify(next));
+            } else {
+                const next = getRememberedEmails().filter(item => item !== email);
+                if (next.length) {
+                    localStorage.setItem('rememberedLoginEmails', JSON.stringify(next));
+                } else {
+                    localStorage.removeItem('rememberedLoginEmails');
+                }
+            }
+        };
+
+        const isValidUuid = (value) =>
+            typeof value === 'string' &&
+            /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(value);
+
+        const isMissingJwtUserError = (error) =>
+            typeof error?.message === 'string' &&
+            error.message.toLowerCase().includes('user from sub claim in jwt does not exist');
+
+        const clearBrokenSupabaseSession = async () => {
+            try {
+                await supabaseClient.auth.signOut();
+            } catch (_) {}
+            clearStoredAuth();
+        };
+
+        const classifyAuthError = (error) => {
+            const message = String(error?.message || '').toLowerCase();
+
+            if (isMissingJwtUserError(error)) {
+                return 'Your previous session was invalid. It has been cleared. Please try signing in again.';
+            }
+
+            if (message.includes('failed to fetch') || message.includes('networkerror')) {
+                return 'Unable to connect to the server. Please check your internet connection.';
+            }
+
+            if (message.includes('invalid login credentials')) {
+                return 'Incorrect email or password.';
+            }
+
+            if (message.includes('email not confirmed')) {
+                return 'This email address is not confirmed yet.';
+            }
+
+            return error?.message || 'Login failed. Please try again.';
+        };
+
+        const getResetRedirectUrl = () => {
+            const currentPath = window.location.pathname;
+            const basePath = currentPath.endsWith('/login.html')
+                ? currentPath.slice(0, -'login.html'.length)
+                : currentPath.replace(/[^/]+$/, '');
+            return `${window.location.origin}${basePath}reset-password.html`;
+        };
+
+        const getOrCreateDeviceId = () => {
+            let deviceId = localStorage.getItem('deviceId');
+            if (!deviceId) {
+                deviceId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : `device-${Date.now()}`;
+                localStorage.setItem('deviceId', deviceId);
+            }
+            return deviceId;
+        };
+
+        const getBackendBase = () => {
+            if (window.AppConfig && window.AppConfig.getBackendBase) {
+                return window.AppConfig.getBackendBase();
+            }
+            return `${window.location.protocol}//${window.location.hostname}:5000/api`;
+        };
+
+        const fetchBackend = async (url, options) => {
+            try {
+                return await fetch(url, options);
+            } catch (_) {
+                const fallbackBase = 'http://127.0.0.1:5000/api';
+                if (url.startsWith(fallbackBase)) {
+                    throw _;
+                }
+                const fallbackUrl = url.replace(/^https?:\/\/[^/]+\/api/, fallbackBase);
+                return await fetch(fallbackUrl, options);
+            }
+        };
+
+        const verifyAdminAccess = async (user) => {
+            try {
+                const response = await fetchBackend(`${getBackendBase()}/admin/access-check`, {
+                    method: 'POST',
+                    headers: await window.AppConfig.buildAuthHeaders(supabaseClient, { 'Content-Type': 'application/json' }),
+                    body: JSON.stringify({
+                        email: user.email,
+                        admin_id: user.admin_id || ''
+                    })
+                });
+                if (!response.ok) return false;
+                const data = await response.json();
+                return !!(data && data.success && data.authorized);
+            } catch (_) {
+                return false;
+            }
+        };
+
+        const acquireDeviceSessionLock = async (user) => {
+            if (!['teacher', 'admin'].includes(String(user?.role || '').toLowerCase())) {
+                return true;
+            }
+            const payload = {
+                email: user.email,
+                role: user.role,
+                device_id: getOrCreateDeviceId()
+            };
+
+            let response = await fetchBackend(`${getBackendBase()}/auth/session/acquire`, {
+                method: 'POST',
+                headers: await window.AppConfig.buildAuthHeaders(supabaseClient, { 'Content-Type': 'application/json' }),
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) return true;
+
+            let data = await response.json().catch(() => ({}));
+            const errorMessage = String(data.error || '');
+            if (/another device/i.test(errorMessage)) {
+                response = await fetchBackend(`${getBackendBase()}/auth/session/acquire`, {
+                    method: 'POST',
+                    headers: await window.AppConfig.buildAuthHeaders(supabaseClient, { 'Content-Type': 'application/json' }),
+                    body: JSON.stringify({
+                        ...payload,
+                        force_takeover: true
+                    })
+                });
+                if (response.ok) return true;
+                data = await response.json().catch(() => ({}));
+            }
+
+            throw new Error(data.error || 'This account is already active on another device.');
+        };
+
+        const redirectToDashboard = (role) => {
+            let dashboardUrl;
+            if (role === 'admin') {
+                dashboardUrl = 'dashboard-admin.html';
+            } else if (role === 'teacher') {
+                dashboardUrl = 'dashboard-teacher.html';
+            } else {
+                dashboardUrl = 'dashboard-student.html';
+            }
+            try { history.replaceState(null, null, dashboardUrl); } catch(e) {}
+            window.location.href = dashboardUrl;
+        };
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.classList.add('show');
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            syncCaptchaVisibility();
+            try {
+                const { error } = await supabaseClient.auth.getSession();
+                if (isMissingJwtUserError(error)) {
+                    await clearBrokenSupabaseSession();
+                }
+            } catch (_) {}
+        });
+
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            errorMessage.classList.remove('show');
+            successMessage.classList.remove('show');
+
+            const email = emailInput.value.trim().toLowerCase();
+            const password = passwordInput.value;
+            const role = roleSelect.value;
+
+            if (!email || !password || !role) {
+                showError('Please fill in all fields');
+                return;
+            }
+
+            if (!['student', 'teacher', 'admin'].includes(role)) {
+                showError('Invalid role selected');
+                return;
+            }
+
+            if (!captchaBox.classList.contains('show')) {
+                syncCaptchaVisibility();
+            }
+
+            if (!captchaInput.value.trim() || captchaInput.value.trim().toUpperCase() !== captchaAnswer) {
+                showError('Please enter the verification code correctly.');
+                drawCaptcha();
+                captchaInput.value = '';
+                return;
+            }
+
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Signing in...';
+            submitBtn.disabled = true;
+
+            const lockoutMsg = checkLockout();
+            if (lockoutMsg) {
+                showError(lockoutMsg);
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+
+            try {
+                const { error: authError } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (authError) {
+                    if (isMissingJwtUserError(authError)) {
+                        await clearBrokenSupabaseSession();
+                        throw authError;
+                    }
+                    throw authError;
+                }
+
+                const { data: user, error } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('email', email)
+                    .eq('role', role)
+                    .single();
+
+                if (error || !user) {
+                    await supabaseClient.auth.signOut();
+                    clearStoredAuth();
+                    throw new Error('Invalid email or role. Please check your credentials.');
+                }
+
+                if (user.status !== 'active') {
+                    await supabaseClient.auth.signOut();
+                    clearStoredAuth();
+                    if (user.status === 'pending') {
+                        throw new Error('Your account is pending admin approval. You will be notified once activated.');
+                    } else if (user.status === 'rejected') {
+                        throw new Error('Your registration request was rejected. Please contact administrator.');
+                    } else if (user.status === 'suspended') {
+                        throw new Error('Your account has been suspended. Please contact administrator.');
+                    }
+                    throw new Error('Your account is not active. Please contact administrator.');
+                }
+
+                if (user.role === 'admin' && !(await verifyAdminAccess(user))) {
+                    await supabaseClient.auth.signOut();
+                    clearStoredAuth();
+                    throw new Error('Admin access is restricted to the authorized system administrator.');
+                }
+
+                await acquireDeviceSessionLock(user);
+
+                const candidateIds = [user.id, user.user_id, user.uuid, user.teacher_uuid];
+                const userId = candidateIds.find(isValidUuid);
+
+                if (!userId) {
+                    await supabaseClient.auth.signOut();
+                    clearStoredAuth();
+                    throw new Error('User record has no valid UUID. Please contact administrator.');
+                }
+
+                const now = String(Date.now());
+                clearRateLimit();
+                setAuthValue('isLoggedIn', 'true');
+                setAuthValue('userRole', user.role);
+                setAuthValue('userEmail', user.email);
+                setAuthValue('userId', userId);
+                setAuthValue('userName', `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email);
+                setAuthValue('userFirstName', user.first_name || '');
+                setAuthValue('userLastName', user.last_name || '');
+                setAuthValue('userDepartment', user.department || '');
+                setAuthValue('authLoginAt', now);
+                setAuthValue('authLastActivityAt', now);
+
+                setAuthValue('studentId', user.student_id || '');
+                setAuthValue('teacherId', user.teacher_id || '');
+                setAuthValue('adminId', user.admin_id || '');
+
+                persistRememberedEmail(email);
+                captchaInput.value = '';
+                drawCaptcha();
+
+                showSuccess('Login successful! Redirecting...');
+                setTimeout(() => {
+                    redirectToDashboard(user.role);
+                }, 1000);
+            } catch (error) {
+                console.error('Login error:', error);
+                if (isMissingJwtUserError(error)) {
+                    await clearBrokenSupabaseSession();
+                }
+                const errMsg = String(error?.message || '');
+                const isAccountIssue = errMsg.includes('pending') || errMsg.includes('suspended') || errMsg.includes('not active');
+                if (!isAccountIssue) {
+                    recordFailedAttempt();
+                }
+                drawCaptcha();
+                captchaInput.value = '';
+                showError(classifyAuthError(error));
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        [emailInput, passwordInput, roleSelect].forEach(el => {
+            el.addEventListener('input', syncCaptchaVisibility);
+            el.addEventListener('change', syncCaptchaVisibility);
+        });
+
+        captchaRefreshBtn.addEventListener('click', () => {
+            drawCaptcha();
+            captchaInput.value = '';
+        });
+
+        const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
+        const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+        const closeModal = document.getElementById('closeModal');
+        const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+        const forgotErrorMessage = document.getElementById('forgotErrorMessage');
+        const forgotSuccessMessage = document.getElementById('forgotSuccessMessage');
+        const forgotEmailInput = document.getElementById('forgotEmailInput');
+
+        const resetForgotModal = () => {
+            forgotPasswordForm.reset();
+            forgotErrorMessage.classList.remove('show');
+            forgotSuccessMessage.classList.remove('show');
+        };
+
+        forgotPasswordBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            resetForgotModal();
+            forgotPasswordModal.classList.add('show');
+        });
+
+        closeModal.addEventListener('click', function() {
+            forgotPasswordModal.classList.remove('show');
+            resetForgotModal();
+        });
+
+        forgotPasswordModal.addEventListener('click', function(e) {
+            if (e.target === forgotPasswordModal) {
+                forgotPasswordModal.classList.remove('show');
+                resetForgotModal();
+            }
+        });
+
+        forgotPasswordForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            forgotErrorMessage.classList.remove('show');
+            forgotSuccessMessage.classList.remove('show');
+
+            const email = forgotEmailInput.value.trim().toLowerCase();
+
+            try {
+                if (!email) {
+                    forgotErrorMessage.textContent = 'Please enter your email';
+                    forgotErrorMessage.classList.add('show');
+                    return;
+                }
+
+                const { error: resetError } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                    redirectTo: getResetRedirectUrl()
+                });
+
+                if (resetError) {
+                    forgotErrorMessage.textContent = 'Failed to send reset link. Please try again.';
+                    forgotErrorMessage.classList.add('show');
+                    return;
+                }
+
+                forgotSuccessMessage.textContent = 'Reset link sent! Please check your email.';
+                forgotSuccessMessage.classList.add('show');
+
+                setTimeout(function() {
+                    forgotPasswordModal.classList.remove('show');
+                    resetForgotModal();
+                }, 2000);
+            } catch (error) {
+                console.error('Password reset error:', error);
+                forgotErrorMessage.textContent = 'An error occurred. Please try again.';
+                forgotErrorMessage.classList.add('show');
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.altKey && e.key === 'd') {
+                emailInput.value = 'ali.hyder@student.edu';
+                roleSelect.value = 'student';
+                emailInput.focus();
+            }
+        });
+    </script>
+    <script src="js/ui-feedback.js"></script>
+</body>
+</html>

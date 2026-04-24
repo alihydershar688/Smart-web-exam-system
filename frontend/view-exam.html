@@ -1,0 +1,1031 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Exam | Smart Exam System</title>
+    <script src="js/teacher-shell.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --ink: #f8fafc;
+            --muted: rgba(203, 213, 225, 0.84);
+            --brand: #10b981;
+            --brand-strong: #0f766e;
+            --surface: rgba(15, 44, 82, 0.68);
+            --surface-alt: rgba(12, 36, 66, 0.74);
+            --surface-soft: rgba(13, 30, 52, 0.64);
+            --border: rgba(148, 163, 184, 0.35);
+            --shadow: 0 12px 30px rgba(8, 17, 38, 0.28);
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            min-height: 100vh;
+            color: var(--ink);
+            background: linear-gradient(120deg, #051739 0%, #0b3970 52%, #0f766e 100%);
+            background-image:
+                radial-gradient(circle at 12% 10%, rgba(110, 231, 183, 0.2), transparent 36%),
+                radial-gradient(circle at 88% 12%, rgba(16, 185, 129, 0.16), transparent 34%);
+            background-attachment: fixed;
+            padding: 20px;
+        }
+
+        .navbar {
+            background: var(--surface-alt);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            animation: slideDown 0.55s ease;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(140deg, #1d4ed8, #1e40af);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-name {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(191, 219, 254, 0.8);
+        }
+
+        .brand-page {
+            font-size: 18px;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .paper-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .answer-key-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            color: var(--muted);
+            font-size: 14px;
+            background: #F8FAFF;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 9px 12px;
+        }
+
+        .answer-key-toggle input {
+            accent-color: #10b981;
+        }
+
+        .btn-print {
+            border: none;
+            background: linear-gradient(135deg, #0f766e, #10b981);
+            color: white;
+            border-radius: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.25s ease;
+        }
+
+        .btn-print:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(16, 185, 129, 0.32);
+        }
+
+        .container {
+            max-width: 1150px;
+            margin: 0 auto;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            border-radius: 16px;
+            padding: 22px;
+            animation: fadeUp 0.6s ease;
+        }
+
+        .hero-title {
+            font-size: clamp(1.8rem, 2.4vw, 2.3rem);
+            margin-bottom: 8px;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        #examInfo {
+            margin-bottom: 16px;
+            color: var(--muted);
+        }
+
+        #examInfo h2 {
+            color: #f8fafc;
+            font-size: 1.25rem;
+            margin-bottom: 6px;
+        }
+
+        #examInfo hr {
+            margin-top: 12px;
+            border: none;
+            border-top: 1px solid var(--border);
+        }
+
+        .question {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            margin: 12px 0;
+            box-shadow: var(--shadow);
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .question:hover {
+            border-color: rgba(110, 231, 183, 0.55);
+            transform: translateY(-1px);
+        }
+
+        .question h3 {
+            color: #f8fafc;
+            margin-bottom: 10px;
+            line-height: 1.45;
+        }
+
+        .question p {
+            color: var(--muted);
+            margin-bottom: 10px;
+        }
+
+        .option {
+            padding: 9px 12px;
+            margin: 6px 0;
+            background: var(--surface-soft);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: #1F2937;
+        }
+
+        .correct {
+            background: rgba(16, 185, 129, 0.22);
+            border-color: rgba(110, 231, 183, 0.68);
+            color: #d1fae5;
+            font-weight: 700;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 900px) {
+            body {
+                padding: 12px;
+            }
+
+            .navbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .paper-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .container {
+                padding: 14px;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                color: #111827;
+            }
+
+            .navbar {
+                display: none;
+            }
+
+            .container {
+                background: white;
+                border: none;
+                box-shadow: none;
+                padding: 0 8mm;
+                max-width: 100%;
+            }
+
+            .question {
+                background: white;
+                color: #111827;
+                border: 1px solid #d1d5db;
+                box-shadow: none;
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            .question h3,
+            #examInfo h2 {
+                color: #111827;
+            }
+
+            .option {
+                background: #f9fafb;
+                border-color: #e5e7eb;
+                color: #111827;
+            }
+
+            .correct {
+                background: #dcfce7;
+                border-color: #86efac;
+                color: #14532d;
+            }
+        }
+
+
+        /* Shared Dashboard Shell */
+        body {
+            padding: 0 !important;
+        }
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1200;
+            margin: 0;
+            border-radius: 0 !important;
+            padding: 0;
+            animation: none;
+        }
+
+        .navbar-content {
+            min-height: 82px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.25rem;
+            width: 100%;
+            margin: 0;
+            padding: 0 1.75rem;
+        }
+
+        .brand-wrap { display: flex; align-items: center; }
+
+        .logo {
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.85rem;
+            color: #f8fafc !important;
+        }
+
+        .logo::before {
+            content: 'SE';
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(140deg, #1E3A8A, #3B82F6);
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            box-shadow: 0 8px 18px rgba(59,130,246,0.2);
+            flex-shrink: 0;
+        }
+
+        .brand-copy { display: grid; gap: 0.18rem; }
+
+        .brand-name {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: #3B82F6 !important;
+            font-weight: 800;
+        }
+
+        .brand-page {
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+
+        .user-panel {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.9rem;
+            padding: 0.55rem 0.65rem 0.55rem 1rem;
+            border-radius: 18px;
+            background: rgba(18, 13, 49, 0.72);
+            border: 1px solid rgba(59,130,246,0.2);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+
+        .user-meta { text-align: right; }
+        .user-name { font-weight: 700; color: #f8fafc; }
+        .user-role { color: #6B7280; font-size: 0.88rem; }
+
+        .btn-logout {
+            border: 1px solid rgba(59,130,246,0.18);
+            background: rgba(255,255,255,0.08) !important;
+            color: #f8fafc !important;
+            border-radius: 10px;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .container {
+            max-width: none;
+            width: 100%;
+            margin: 0;
+            padding: 1.5rem 1.75rem 2rem 0.85rem;
+            position: relative;
+            z-index: 1;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            animation: none;
+        }
+
+        .app-shell {
+            display: grid;
+            grid-template-columns: 336px minmax(0, 1fr);
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 92px;
+            min-height: calc(100vh - 112px);
+            max-height: calc(100vh - 112px);
+            display: flex;
+            flex-direction: column;
+            background:
+                linear-gradient(180deg, rgba(9, 19, 39, 0.9), rgba(15, 23, 42, 0.78)),
+                radial-gradient(circle at top right, rgba(59,130,246,0.08), transparent 42%);
+            border: 1px solid rgba(59,130,246,0.2);
+            border-radius: 22px;
+            box-shadow: 0 18px 36px rgba(6, 7, 22, 0.36);
+            padding: 1.1rem;
+            backdrop-filter: blur(14px);
+            overflow: hidden;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(96, 165, 250, 0.06), transparent 30%);
+            pointer-events: none;
+        }
+
+        .sidebar-head,
+        .sidebar-nav,
+        .sidebar-summary {
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar-head {
+            margin-bottom: 1rem;
+            padding: 0.2rem 0.15rem 0.95rem;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+        }
+
+        .sidebar-title {
+            font-size: 0.74rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #3B82F6;
+            font-weight: 800;
+            margin-bottom: 0.9rem;
+            padding: 0 0.35rem;
+        }
+
+        .sidebar-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0 0.35rem;
+        }
+
+        .sidebar-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37, 99, 235, 0.34));
+            border: 1px solid rgba(125, 211, 252, 0.28);
+            color: #f8fafc;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            flex-shrink: 0;
+        }
+
+        .sidebar-profile-copy { min-width: 0; }
+
+        .sidebar-profile-name {
+            display: block;
+            font-size: 1rem;
+            font-weight: 800;
+            color: #f8fafc;
+        }
+
+        .sidebar-profile-meta {
+            display: block;
+            margin-top: 0.18rem;
+            font-size: 0.82rem;
+            color: #6B7280;
+        }
+
+        .sidebar-nav {
+            display: grid;
+            gap: 0.45rem;
+            overflow-y: auto;
+            padding-right: 0.1rem;
+        }
+
+        .sidebar-link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.8rem;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 16px;
+            padding: 0.82rem 0.9rem;
+            text-decoration: none;
+            color: #f8fafc;
+            background: #F8FAFF;
+            transition: all 0.22s ease;
+            overflow: hidden;
+        }
+
+        .sidebar-link::before {
+            content: '';
+            position: absolute;
+            left: -1px;
+            top: 10px;
+            bottom: 10px;
+            width: 3px;
+            border-radius: 999px;
+            background: transparent;
+            transition: background 0.22s ease;
+        }
+
+        .sidebar-link-main {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            min-width: 0;
+        }
+
+        .sidebar-link-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            background: rgba(255, 255, 255, 0.03);
+            color: #374151;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.88rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .sidebar-link-copy { min-width: 0; }
+
+        .sidebar-link-title {
+            display: block;
+            color: #f8fafc;
+            font-size: 0.98rem;
+            font-weight: 800;
+        }
+
+        .sidebar-link-desc {
+            display: block;
+            margin-top: 0.22rem;
+            color: #6B7280;
+            font-size: 0.76rem;
+            line-height: 1.35;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .sidebar-link-meta {
+            color: #6B7280;
+            font-size: 0.73rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .sidebar-link:hover,
+        .sidebar-link.active {
+            background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(30, 41, 59, 0.38));
+            border-color: rgba(59,130,246,0.24);
+            color: #ffffff;
+        }
+
+        .sidebar-link:hover::before,
+        .sidebar-link.active::before {
+            background: linear-gradient(180deg, #3B82F6, #1e40af);
+        }
+
+        .sidebar-link:hover .sidebar-link-icon,
+        .sidebar-link.active .sidebar-link-icon {
+            background: rgba(248, 250, 252, 0.12);
+            border-color: rgba(125, 211, 252, 0.24);
+            color: #ffffff;
+        }
+
+        .sidebar-link:hover .sidebar-link-desc,
+        .sidebar-link.active .sidebar-link-desc,
+        .sidebar-link:hover .sidebar-link-meta,
+        .sidebar-link.active .sidebar-link-meta {
+            color: rgba(226, 232, 240, 0.92);
+        }
+
+        .sidebar-summary {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.16);
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .sidebar-summary-card {
+            background: #F8FAFF;
+            border: 1px solid rgba(148, 163, 184, 0.12);
+            border-radius: 14px;
+            padding: 0.95rem 1rem;
+        }
+
+        .sidebar-summary-label {
+            display: block;
+            color: #6B7280;
+            font-size: 0.74rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .sidebar-summary-value {
+            display: block;
+            color: #f8fafc;
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin-top: 0.32rem;
+        }
+
+        .sidebar-summary-card.accent .sidebar-summary-value {
+            color: rgba(219,234,254,0.9);
+        }
+
+        .content-column {
+            min-width: 0;
+            display: grid;
+            gap: 16px;
+        }
+
+        .paper-shell {
+            background: rgba(18, 13, 49, 0.72);
+            border: 1px solid rgba(59,130,246,0.2);
+            border-radius: 16px;
+            box-shadow: 0 18px 36px rgba(6, 7, 22, 0.36);
+            padding: 22px;
+        }
+
+        @media (max-width: 980px) {
+            .app-shell { grid-template-columns: 1fr; }
+            .sidebar {
+                position: static;
+                min-height: auto;
+                max-height: none;
+            }
+            .sidebar-nav {
+                overflow: visible;
+                padding-right: 0;
+            }
+            .navbar-content {
+                padding: 1rem 1.25rem;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .navbar-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .brand-wrap,
+            .user-panel {
+                justify-content: space-between;
+            }
+
+            .container {
+                padding: 1rem 1rem 1.75rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="css/ui-system.css?v=1776841996">
+    <link rel="stylesheet" href="css/product-theme.css?v=1776841996">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=blue4">
+</head>
+<body class="view-exam-page">
+                    <a href="dashboard-teacher.html" class="logo">
+                        <span class="brand-copy">
+                            <span class="brand-name">Smart Exam System</span>
+                            <span class="brand-page">View Exam</span>
+                        </span>
+                    </a>
+                </div>
+            </div>
+            <div class="header-utility">
+                <button class="btn btn-secondary" onclick="goBack()">Back</button>
+                <a class="header-profile-trigger" href="profile.html" aria-label="Open profile">
+                    <span class="header-profile-avatar" id="headerProfileAvatar">VE</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="app-shell">
+            <aside class="sidebar">
+                <div class="sidebar-head">
+                    <div class="sidebar-title" id="sidebarTitle">Exam Workspace</div>
+                    <div class="sidebar-profile">
+                        <div class="sidebar-avatar" id="sidebarAvatar">VE</div>
+                        <div class="sidebar-profile-copy">
+                            <span class="sidebar-profile-name" id="sidebarProfileName">Exam Viewer</span>
+                            <span class="sidebar-profile-meta" id="sidebarProfileMeta">Paper Review</span>
+                        </div>
+                    </div>
+                </div>
+                <nav class="sidebar-nav" id="sidebarNav" aria-label="Exam Viewer Navigation"></nav>
+                <div class="sidebar-footer">
+                    <a class="sidebar-footer-link" href="profile.html" data-short="PF">
+                        <span>PF</span>
+                        <span>Profile</span>
+                    </a>
+                    <button class="sidebar-footer-button" type="button" onclick="logout()" data-short="LO">
+                        <span>LO</span>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </aside>
+
+            <main class="content-column">
+                <div class="paper-shell">
+                    <div class="paper-actions" style="justify-content: flex-end; margin-bottom: 14px;">
+                        <label class="answer-key-toggle">
+                            <input type="checkbox" id="answerKeyToggle">
+                            Show Answer Key
+                        </label>
+                        <button class="btn-print" onclick="window.print()">Print Paper</button>
+                    </div>
+                    <h1 class="hero-title">Exam Paper</h1>
+                    <p class="muted" style="margin-bottom: 10px;">Preview generated questions with optional answer key.</p>
+                    <div id="examInfo"></div>
+                    <div id="questions"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="js/app-config.js"></script>
+    <script src="js/session-manager.js"></script>
+    <script src="js/user-profile.js"></script>
+    <script src="js/app-shell.js"></script>
+    <script>
+        (function () {
+            var AI_BACKEND_URL = window.AppConfig.getBackendBase();
+            var infoEl = document.getElementById('examInfo');
+            var questionsEl = document.getElementById('questions');
+            var answerKeyToggleEl = document.getElementById('answerKeyToggle');
+            var currentQuestions = [];
+            var showAnswerKey = false;
+            var shellState = { role: (localStorage.getItem('userRole') || 'teacher').toLowerCase() };
+
+            function escapeHtml(str) {
+                if (str === null || str === undefined) return '';
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            }
+
+            function getDisplayName() {
+                var fullName = (localStorage.getItem('userName') || '').trim();
+                if (fullName) return fullName;
+                var first = (localStorage.getItem('userFirstName') || '').trim();
+                var last = (localStorage.getItem('userLastName') || '').trim();
+                return [first, last].filter(Boolean).join(' ').trim() || 'Exam Viewer';
+            }
+
+            function getInitials(name) {
+                var parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+                if (!parts.length) return 'VE';
+                return parts.slice(0, 2).map(function (part) { return part[0].toUpperCase(); }).join('');
+            }
+
+            function initShell() {
+                if (window.AppShell) window.AppShell.init();
+                var profile = window.UserProfile ? window.UserProfile.getStoredProfile() : null;
+                var displayName = (profile && profile.displayName) || getDisplayName();
+                var role = shellState.role === 'admin' ? 'admin' : 'teacher';
+                var roleMeta = role === 'admin' ? 'Administrative Exam Review' : 'Teacher Exam Review';
+                var sidebarMeta = window.UserProfile
+                    ? window.UserProfile.getProfileMeta(profile, roleMeta)
+                    : ((profile && profile.email) || roleMeta);
+                var nav = role === 'admin'
+                    ? [
+                        { href: 'dashboard-admin.html', icon: 'DB', title: 'Dashboard', desc: 'Overview and control center', meta: 'Home' },
+                        { href: 'manage-users.html', icon: 'US', title: 'Manage Users', desc: 'Accounts, roles, and status', meta: 'Access' },
+                        { href: 'analytics.html', icon: 'AN', title: 'Analytics', desc: 'Platform metrics and performance', meta: 'Live' },
+                        { href: 'dashboard-admin.html#transferControlPanel', icon: 'TC', title: 'Transfer Control', desc: 'Admin handover and audit trail', meta: 'Admin' },
+                        { href: 'view-exam.html', icon: 'VE', title: 'View Exam', desc: 'Review generated question papers', meta: 'Paper', active: true }
+                    ]
+                    : [
+                        { href: 'dashboard-teacher.html', icon: 'DB', title: 'Dashboard', desc: 'Overview and live metrics', meta: 'Home' },
+                        { href: 'dashboard-teacher.html#recentExamsSection', icon: 'EX', title: 'Exams', desc: 'Published, draft, and archived', meta: 'List' },
+                        { href: 'create-exam.html', icon: 'CE', title: 'Create Exam', desc: 'Build a new paper from material', meta: 'New' },
+                        { href: 'analytics.html', icon: 'AN', title: 'Analytics', desc: 'Performance and grading insights', meta: 'Live' },
+                        { href: 'view-exam.html', icon: 'VE', title: 'View Exam', desc: 'Review generated question papers', meta: 'Paper', active: true }
+                    ];
+
+                document.getElementById('sidebarProfileName').textContent = displayName;
+                document.getElementById('sidebarProfileMeta').textContent = sidebarMeta;
+                document.getElementById('sidebarAvatar').textContent = (profile && profile.initials) || getInitials(displayName);
+                var headerAvatarEl = document.getElementById('headerProfileAvatar');
+                if (headerAvatarEl) headerAvatarEl.textContent = (profile && profile.initials) || getInitials(displayName);
+                document.getElementById('sidebarTitle').textContent = role === 'admin' ? 'Admin Exam Review' : 'Teacher Exam Review';
+                document.querySelector('.logo').setAttribute('href', role === 'admin' ? 'dashboard-admin.html' : 'dashboard-teacher.html');
+                document.getElementById('sidebarNav').innerHTML = nav.map(function (item) {
+                    return '<a href="' + item.href + '" class="sidebar-link' + (item.active ? ' active' : '') + '">' +
+                        '<span class="sidebar-link-main">' +
+                            '<span class="sidebar-link-icon">' + item.icon + '</span>' +
+                            '<span class="sidebar-link-copy">' +
+                                '<span class="sidebar-link-title">' + item.title + '</span>' +
+                                '<span class="sidebar-link-desc">' + item.desc + '</span>' +
+                            '</span>' +
+                        '</span>' +
+                        '<span>' + item.meta + '</span>' +
+                    '</a>';
+                }).join('');
+            }
+
+            function goBack() {
+                window.location.href = shellState.role === 'admin' ? 'dashboard-admin.html' : 'dashboard-teacher.html';
+            }
+            window.goBack = goBack;
+
+            function logout() {
+                if (window.SessionManager) {
+                    window.SessionManager.logout('manual');
+                    return;
+                }
+                [
+                    'isLoggedIn', 'userRole', 'userEmail', 'userId', 'userName',
+                    'userFirstName', 'userLastName', 'studentId', 'teacherId',
+                    'adminId', 'authLoginAt', 'authLastActivityAt', 'authLogoutAt'
+                ].forEach(function (key) {
+                    localStorage.removeItem(key);
+                    sessionStorage.removeItem(key);
+                });
+                window.location.href = 'login.html';
+            }
+            window.logout = logout;
+
+            function getQueryParam(name) {
+                var params = new URLSearchParams(window.location.search);
+                return params.get(name);
+            }
+
+            function syncSidebar(questionCount) {
+                const sidebarQuestionCountEl = document.getElementById('sidebarQuestionCount');
+                const sidebarAnswerKeyStateEl = document.getElementById('sidebarAnswerKeyState');
+                if (sidebarQuestionCountEl) sidebarQuestionCountEl.textContent = String(questionCount || 0);
+                if (sidebarAnswerKeyStateEl) sidebarAnswerKeyStateEl.textContent = showAnswerKey ? 'Visible' : 'Hidden';
+            }
+
+            function renderExam(exam) {
+                var title = exam.exam_title || exam.title || 'Untitled Exam';
+                var duration = exam.duration_minutes || exam.duration || 'N/A';
+                var marks = (exam.total_marks !== undefined && exam.total_marks !== null) ? exam.total_marks : 'N/A';
+                var created = 'N/A';
+                if (exam.created_at) {
+                    var createdDate = new Date(exam.created_at);
+                    if (!isNaN(createdDate.getTime())) {
+                        created = createdDate.toLocaleString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    }
+                }
+
+                infoEl.innerHTML =
+                    '<h2>' + escapeHtml(title) + '</h2>' +
+                    '<p>Duration: ' + escapeHtml(duration) + ' minutes | Total Marks: ' + escapeHtml(marks) + '</p>' +
+                    '<p>Created: ' + escapeHtml(created) + '</p><hr>';
+            }
+
+            function renderQuestions(questions) {
+                currentQuestions = questions || [];
+                syncSidebar(currentQuestions.length);
+                if (!questions || !questions.length) {
+                    questionsEl.innerHTML = '<p class="muted">No questions found for this exam.</p>';
+                    return;
+                }
+
+                var html = '';
+                for (var i = 0; i < questions.length; i++) {
+                    var q = questions[i] || {};
+                    html += '<div class="question">';
+                    html += '<h3>Q' + (i + 1) + '. ' + escapeHtml(q.question_text || q.question || '') + '</h3>';
+                    html += '<p><strong>Type:</strong> ' + escapeHtml(q.question_type || 'N/A') + ' | ';
+                    html += '<strong>Marks:</strong> ' + escapeHtml(q.marks || 1) + ' | ';
+                    html += '<strong>Difficulty:</strong> ' + escapeHtml(q.difficulty || 'medium') + '</p>';
+
+                    if (q.options && typeof q.options === 'object') {
+                        if (Array.isArray(q.options)) {
+                            for (var j = 0; j < q.options.length; j++) {
+                                var opt = q.options[j] || {};
+                                var isCorrect = !!opt.is_correct;
+                                html += '<div class="option ' + ((showAnswerKey && isCorrect) ? 'correct' : '') + '">';
+                                html += escapeHtml(String.fromCharCode(65 + j) + ') ' + (opt.text || ''));
+                                html += '</div>';
+                            }
+                        } else {
+                            for (var key in q.options) {
+                                if (!Object.prototype.hasOwnProperty.call(q.options, key)) continue;
+                                var cls = (showAnswerKey && q.correct_answer === key) ? 'correct' : '';
+                                html += '<div class="option ' + cls + '">' + escapeHtml(key + ') ' + q.options[key]) + '</div>';
+                            }
+                        }
+                    }
+
+                    if (q.explanation) {
+                        html += '<p><em>Explanation: ' + escapeHtml(q.explanation) + '</em></p>';
+                    }
+                    html += '</div>';
+                }
+
+                questionsEl.innerHTML = html;
+            }
+
+            function fallbackFromStorage(examId) {
+                try {
+                    var exams = JSON.parse(localStorage.getItem('exams') || '[]');
+                    var exam = null;
+                    for (var i = 0; i < exams.length; i++) {
+                        var id = exams[i].exam_id || exams[i].id;
+                        if (id === examId) { exam = exams[i]; break; }
+                    }
+
+                    var q = [];
+                    var cached = localStorage.getItem('exam_questions_' + examId);
+                    if (cached) q = JSON.parse(cached) || [];
+
+                    if (exam) {
+                        renderExam(exam);
+                        renderQuestions(q);
+                        return true;
+                    }
+                } catch (e) {}
+                return false;
+            }
+
+            function load() {
+                var examId = getQueryParam('id');
+                infoEl.innerHTML = '<p class="muted">Loading exam...</p>';
+
+                if (!examId) {
+                    infoEl.innerHTML = '<p class="muted">Missing exam id in URL.</p>';
+                    return;
+                }
+
+                Promise.all([
+                    fetch(AI_BACKEND_URL + '/exam/' + encodeURIComponent(examId)),
+                    fetch(AI_BACKEND_URL + '/exam-questions/' + encodeURIComponent(examId))
+                ]).then(function (responses) {
+                    return Promise.all([responses[0].json(), responses[1].json()]).then(function (data) {
+                        return { examData: data[0], qData: data[1], examOk: responses[0].ok, qOk: responses[1].ok };
+                    });
+                }).then(function (result) {
+                    if (result.examOk && result.examData && result.examData.exam) {
+                        var exam = result.examData.exam;
+                        var questions = (result.qOk && result.qData && result.qData.questions) ? result.qData.questions : [];
+                        renderExam(exam);
+                        renderQuestions(questions);
+                    } else {
+                        var ok = fallbackFromStorage(examId);
+                        if (!ok) {
+                            infoEl.innerHTML = '<p class="muted">Exam not found.</p><p><small>Exam ID: ' + escapeHtml(examId) + '</small></p>';
+                            questionsEl.innerHTML = '';
+                        }
+                    }
+                }).catch(function (err) {
+                    var ok = fallbackFromStorage(examId);
+                    if (!ok) {
+                        infoEl.innerHTML = '<p class="muted">Failed to load exam: ' + escapeHtml(err.message) + '</p>';
+                        questionsEl.innerHTML = '';
+                    }
+                });
+            }
+
+            window.addEventListener('error', function (event) {
+                infoEl.innerHTML = '<p class="muted">Page script error: ' + escapeHtml(event.message) + '</p>';
+            });
+
+            if (answerKeyToggleEl) {
+                answerKeyToggleEl.addEventListener('change', function () {
+                    showAnswerKey = !!answerKeyToggleEl.checked;
+                    syncSidebar(currentQuestions.length);
+                    renderQuestions(currentQuestions);
+                });
+            }
+
+            if (!window.__TEACHER_SHELL_EMBEDDED__ && window.SessionManager) {
+                var ok = window.SessionManager.init({ loginUrl: 'login.html', requireAuth: true });
+                if (!ok) return;
+            }
+            initShell();
+            syncSidebar(0);
+            load();
+        })();
+    </script>
+    <script src="js/ui-feedback.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+

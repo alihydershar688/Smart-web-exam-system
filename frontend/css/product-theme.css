@@ -1,0 +1,79 @@
+html {
+    color-scheme: light;
+}
+
+/* Compatibility layer:
+   ui-system.css owns global tokens and shared primitives.
+   Shell styles own app layout.
+   This file keeps marketing and page accent helpers. */
+
+.nav-login-btn,
+.hero-primary-btn {
+    background: linear-gradient(135deg, #1E3A8A, #3B82F6) !important;
+    color: #ffffff !important;
+    border: 1px solid transparent !important;
+    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.25) !important;
+}
+
+.nav-login-btn:hover,
+.hero-primary-btn:hover {
+    background: linear-gradient(135deg, #1e40af, #2563eb) !important;
+    color: #ffffff !important;
+    box-shadow: 0 6px 16px rgba(30, 58, 138, 0.3) !important;
+}
+
+.hero-outline-btn {
+    background: #FFFFFF !important;
+    color: #1E3A8A !important;
+    border: 1px solid #DBEAFE !important;
+    box-shadow: none !important;
+}
+
+.hero-outline-btn:hover {
+    background: #EFF6FF !important;
+    border-color: #BFDBFE !important;
+    color: #1E3A8A !important;
+}
+
+.hero-kicker,
+.feature-kicker,
+.auth-kicker,
+.brand-name,
+.workspace-brand-name,
+.sidebar-title,
+.workspace-sidebar-title,
+.section-eyebrow {
+    color: #3B82F6 !important;
+}
+
+.hero-subtitle,
+.hero-support-copy,
+.section-subtitle,
+.about-subtitle,
+.about-copy,
+.card-copy,
+.team-role,
+.team-id,
+.supervisor-role,
+.supervisor-department {
+    color: #6B7280 !important;
+}
+
+.feature-icon,
+.role-icon,
+.team-avatar,
+.supervisor-avatar {
+    background: #EFF6FF !important;
+    border: 1px solid #DBEAFE !important;
+    color: #1E3A8A !important;
+}
+
+.glass-panel {
+    backdrop-filter: none;
+    background: #FFFFFF !important;
+    border: 1px solid #E5E7EB !important;
+}
+
+.mobile-nav-overlay {
+    backdrop-filter: blur(3px);
+}

@@ -1,0 +1,33 @@
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="capStroke" x1="24" y1="36" x2="106" y2="118" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#67B6FF"/>
+      <stop offset="1" stop-color="#1CC8E8"/>
+    </linearGradient>
+    <linearGradient id="capFill" x1="34" y1="52" x2="86" y2="104" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#133D7A"/>
+      <stop offset="1" stop-color="#1B5AA9"/>
+    </linearGradient>
+    <linearGradient id="sheetStroke" x1="38" y1="84" x2="110" y2="150" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#244D8C"/>
+      <stop offset="1" stop-color="#1E8EEA"/>
+    </linearGradient>
+    <linearGradient id="checkStroke" x1="38" y1="110" x2="78" y2="140" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4ED7FF"/>
+      <stop offset="1" stop-color="#28B8F6"/>
+    </linearGradient>
+  </defs>
+
+  <path d="M81 26L130 52L81 78L32 52L81 26Z" fill="#173A73" stroke="url(#capStroke)" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M50 57V87C50 94 62 100 81 100C100 100 112 94 112 87V57" fill="url(#capFill)" stroke="url(#capStroke)" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M112 53L130 53V92" stroke="url(#capStroke)" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M126 92H136" stroke="url(#capStroke)" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M128 95L123 112H139L134 95" stroke="#45AAFF" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M53 84H109V132C109 137.523 104.523 142 99 142H63C57.4772 142 53 137.523 53 132V84Z" fill="#15283B" stroke="url(#sheetStroke)" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M53 84L81 97L109 84" stroke="#275EAA" stroke-width="3.5" stroke-linejoin="round"/>
+  <text x="81" y="62" fill="#16D5E5" font-family="Manrope, Arial, sans-serif" font-size="20" font-weight="800" text-anchor="middle">SE</text>
+  <path d="M66 119L76 129L96 107" stroke="url(#checkStroke)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M94 112H115" stroke="#3678C8" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M94 123H114" stroke="#3678C8" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M94 134H108" stroke="#3678C8" stroke-width="4.5" stroke-linecap="round"/>
+</svg>

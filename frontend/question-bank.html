@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Bank | Smart Exam System</title>
+    <script src="js/teacher-shell.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: #F0F4FF;
+            min-height: 100vh;
+            padding: 20px;
+            color: #1F2937;
+        }
+
+        .navbar {
+            background: #1E3A8A;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 8px rgba(30, 58, 138, 0.2);
+            margin-bottom: 30px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: none;
+        }
+
+        .navbar h2 {
+            color: #f8fafc;
+            font-size: 1.5rem;
+        }
+
+        .navbar-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #1E3A8A;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e40af;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 58, 138, 0.3);
+        }
+
+        .btn-secondary {
+            background: #FFFFFF;
+            color: #1E3A8A;
+            border: 1px solid #BFDBFE;
+        }
+
+        .btn-secondary:hover {
+            background: #EFF6FF;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-section {
+            background: rgba(18, 13, 49, 0.92);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 18px 40px rgba(2, 6, 23, 0.28);
+            border: 1px solid rgba(59,130,246,0.18);
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid rgba(59,130,246,0.18);
+            border-radius: 6px;
+            font-size: 14px;
+            background: #F8FAFF;
+            color: #f8fafc;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 10px 15px;
+            border: 1px solid rgba(59,130,246,0.18);
+            background: #F8FAFC;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #f8fafc;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(18, 13, 49, 0.92);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 18px 40px rgba(2, 6, 23, 0.28);
+            text-align: center;
+            border: 1px solid rgba(59,130,246,0.18);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #aeb7d5;
+        }
+
+        .questions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .question-card {
+            background: rgba(18, 13, 49, 0.92);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 18px 40px rgba(2, 6, 23, 0.28);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(59,130,246,0.18);
+        }
+
+        .question-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .question-card-title {
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            font-size: 14px;
+            max-height: 60px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .question-card-meta {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: rgba(59,130,246,0.14);
+            color: rgba(219,234,254,0.9);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge.easy {
+            background: rgba(16, 185, 129, 0.14);
+            color: #6ee7b7;
+        }
+
+        .badge.medium {
+            background: rgba(245, 158, 11, 0.14);
+            color: #fcd34d;
+        }
+
+        .badge.hard {
+            background: rgba(239, 68, 68, 0.12);
+            color: #fca5a5;
+        }
+
+        .question-card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn-view {
+            background: #667eea;
+            color: white;
+        }
+
+        .action-btn-view:hover {
+            background: #5568d3;
+        }
+
+        .action-btn-delete {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .action-btn-delete:hover {
+            background: #ff5252;
+        }
+
+        .action-btn-use {
+            background: #51cf66;
+            color: white;
+        }
+
+        .action-btn-use:hover {
+            background: #40c057;
+        }
+
+        .empty-state {
+            background: white;
+            padding: 60px 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+
+        .empty-state-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .empty-state-text {
+            color: #999;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .pagination-btn {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .pagination-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .pagination-btn:hover:not(.disabled) {
+            border-color: #667eea;
+        }
+
+        .pagination-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .questions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .header-section {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .search-bar {
+                flex-direction: column;
+            }
+        }
+
+
+        :root {
+            --ink: #f8fafc;
+            --muted: rgba(203, 213, 225, 0.84);
+            --surface: rgba(15, 44, 82, 0.68);
+            --surface-alt: rgba(12, 36, 66, 0.74);
+            --border: rgba(148, 163, 184, 0.35);
+            --shadow: 0 12px 30px rgba(8, 17, 38, 0.28);
+        }
+
+        body {
+            color: var(--ink);
+            background: linear-gradient(120deg, #051739 0%, #0b3970 52%, #0f766e 100%) !important;
+            background-attachment: fixed;
+        }
+
+        .navbar, .header-section, .stat-card, .question-card, .empty-state, .modal-content {
+            background: var(--surface-alt) !important;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .navbar h2, .question-card-title, .empty-state-title, .modal-header { color: #f8fafc !important; }
+        .stat-label, .empty-state-text { color: var(--muted) !important; }
+        .stat-value, .badge { color: #99f6e4 !important; }
+        .badge { background: rgba(20,184,166,0.2) !important; border: 1px solid rgba(20,184,166,0.4); }
+        .badge.easy { background: rgba(16,185,129,0.2) !important; color: #99f6e4 !important; }
+        .badge.medium { background: rgba(245,158,11,0.2) !important; color: #fde68a !important; }
+        .badge.hard { background: rgba(239,68,68,0.2) !important; color: #fecaca !important; }
+        .search-input, .filter-btn {
+            background: #F8FAFF !important;
+            color: #f8fafc !important;
+            border: 1px solid var(--border) !important;
+        }
+        .search-input::placeholder { color: rgba(203, 213, 225, 0.62); }
+        .filter-btn.active, .btn-primary, .action-btn-view { background: linear-gradient(135deg, #0f766e, #14b8a6) !important; color: white !important; border-color: transparent !important; }
+        .btn-secondary, .action-btn-use { background: #F8FAFF !important; color: #1F2937 !important; border: 1px solid var(--border); }
+        .action-btn-delete { background: linear-gradient(135deg, #dc2626, #ef4444) !important; color: white !important; }
+
+
+        /* Shared Dashboard Shell */
+        body {
+            padding: 0 !important;
+        }
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1200;
+            margin: 0;
+            border-radius: 0 !important;
+            padding: 0;
+        }
+
+        .navbar-content {
+            min-height: 82px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.25rem;
+            width: 100%;
+            margin: 0;
+            padding: 0 1.75rem;
+        }
+
+        .brand-wrap { display: flex; align-items: center; }
+
+        .logo {
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.85rem;
+            color: #f8fafc !important;
+        }
+
+        .logo::before {
+            content: 'SE';
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(140deg, #1E3A8A, #3B82F6);
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            box-shadow: 0 8px 18px rgba(59,130,246,0.28);
+            flex-shrink: 0;
+        }
+
+        .brand-copy { display: grid; gap: 0.18rem; }
+
+        .brand-name {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: #3B82F6 !important;
+            font-weight: 800;
+        }
+
+        .brand-page {
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+
+        .user-panel {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.9rem;
+            padding: 0.55rem 0.65rem 0.55rem 1rem;
+            border-radius: 18px;
+            background: rgba(18, 13, 49, 0.72);
+            border: 1px solid rgba(59,130,246,0.2);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+
+        .user-meta { text-align: right; }
+        .user-name { font-weight: 700; color: #f8fafc; }
+        .user-role { color: #6B7280; font-size: 0.88rem; }
+
+        .btn-logout {
+            background: rgba(255,255,255,0.08) !important;
+            color: #f8fafc !important;
+            border: 1px solid rgba(59,130,246,0.18) !important;
+        }
+
+        .container {
+            max-width: none;
+            width: 100%;
+            margin: 0;
+            padding: 1.5rem 1.75rem 2rem 0.85rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .app-shell {
+            display: grid;
+            grid-template-columns: 336px minmax(0, 1fr);
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 92px;
+            min-height: calc(100vh - 112px);
+            max-height: calc(100vh - 112px);
+            display: flex;
+            flex-direction: column;
+            background:
+                linear-gradient(180deg, rgba(9, 19, 39, 0.9), rgba(15, 23, 42, 0.78)),
+                radial-gradient(circle at top right, rgba(59,130,246,0.18), transparent 42%);
+            border: 1px solid rgba(59,130,246,0.22);
+            border-radius: 22px;
+            box-shadow: 0 18px 36px rgba(6, 7, 22, 0.36);
+            padding: 1.1rem;
+            backdrop-filter: blur(14px);
+            overflow: hidden;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(96, 165, 250, 0.06), transparent 30%);
+            pointer-events: none;
+        }
+
+        .sidebar-head,
+        .sidebar-nav,
+        .sidebar-summary {
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar-head {
+            margin-bottom: 1rem;
+            padding: 0.2rem 0.15rem 0.95rem;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+        }
+
+        .sidebar-title {
+            font-size: 0.74rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #3B82F6;
+            font-weight: 800;
+            margin-bottom: 0.9rem;
+            padding: 0 0.35rem;
+        }
+
+        .sidebar-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0 0.35rem;
+        }
+
+        .sidebar-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, rgba(59,130,246,0.28), rgba(37, 99, 235, 0.34));
+            border: 1px solid rgba(125, 211, 252, 0.28);
+            color: #f8fafc;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            flex-shrink: 0;
+        }
+
+        .sidebar-profile-copy { min-width: 0; }
+
+        .sidebar-profile-name {
+            display: block;
+            font-size: 1rem;
+            font-weight: 800;
+            color: #f8fafc;
+        }
+
+        .sidebar-profile-meta {
+            display: block;
+            margin-top: 0.18rem;
+            font-size: 0.82rem;
+            color: #6B7280;
+        }
+
+        .sidebar-nav {
+            display: grid;
+            gap: 0.45rem;
+            overflow-y: auto;
+            padding-right: 0.1rem;
+        }
+
+        .sidebar-link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.8rem;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 16px;
+            padding: 0.82rem 0.9rem;
+            text-decoration: none;
+            color: #f8fafc;
+            background: #F8FAFF;
+            transition: all 0.22s ease;
+            overflow: hidden;
+        }
+
+        .sidebar-link::before {
+            content: '';
+            position: absolute;
+            left: -1px;
+            top: 10px;
+            bottom: 10px;
+            width: 3px;
+            border-radius: 999px;
+            background: transparent;
+            transition: background 0.22s ease;
+        }
+
+        .sidebar-link-main {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            min-width: 0;
+        }
+
+        .sidebar-link-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            background: rgba(255, 255, 255, 0.03);
+            color: #374151;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.88rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .sidebar-link-copy { min-width: 0; }
+
+        .sidebar-link-title {
+            display: block;
+            color: #f8fafc;
+            font-size: 0.98rem;
+            font-weight: 800;
+        }
+
+        .sidebar-link-desc {
+            display: block;
+            margin-top: 0.22rem;
+            color: #6B7280;
+            font-size: 0.76rem;
+            line-height: 1.35;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .sidebar-link-meta {
+            color: #6B7280;
+            font-size: 0.73rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .sidebar-link:hover,
+        .sidebar-link.active {
+            background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(30, 41, 59, 0.38));
+            border-color: rgba(59,130,246,0.24);
+            color: #ffffff;
+        }
+
+        .sidebar-link:hover::before,
+        .sidebar-link.active::before {
+            background: linear-gradient(180deg, #3B82F6, #1e40af);
+        }
+
+        .sidebar-link:hover .sidebar-link-icon,
+        .sidebar-link.active .sidebar-link-icon {
+            background: rgba(248, 250, 252, 0.12);
+            border-color: rgba(125, 211, 252, 0.24);
+            color: #ffffff;
+        }
+
+        .sidebar-link:hover .sidebar-link-desc,
+        .sidebar-link.active .sidebar-link-desc,
+        .sidebar-link:hover .sidebar-link-meta,
+        .sidebar-link.active .sidebar-link-meta {
+            color: rgba(226, 232, 240, 0.92);
+        }
+
+        .sidebar-summary {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.16);
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .sidebar-summary-card {
+            background: #F8FAFF;
+            border: 1px solid rgba(148, 163, 184, 0.12);
+            border-radius: 14px;
+            padding: 0.95rem 1rem;
+        }
+
+        .sidebar-summary-label {
+            display: block;
+            color: #6B7280;
+            font-size: 0.74rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .sidebar-summary-value {
+            display: block;
+            color: #f8fafc;
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin-top: 0.32rem;
+        }
+
+        .sidebar-summary-card.accent .sidebar-summary-value {
+            color: rgba(219,234,254,0.9);
+        }
+
+        .content-column { min-width: 0; }
+
+        @media (max-width: 980px) {
+            .app-shell { grid-template-columns: 1fr; }
+            .sidebar {
+                position: static;
+                min-height: auto;
+                max-height: none;
+            }
+            .sidebar-nav {
+                overflow: visible;
+                padding-right: 0;
+            }
+            .navbar-content {
+                padding: 1rem 1.25rem;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .navbar-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .brand-wrap,
+            .user-panel {
+                justify-content: space-between;
+            }
+            .container {
+                padding: 1rem 1rem 1.75rem;
+            }
+        }
+
+        /* Final Question Bank Alignment */
+        .navbar-content {
+            min-height: 84px !important;
+            gap: 18px !important;
+        }
+
+        .user-panel {
+            min-width: 320px;
+            justify-content: flex-end;
+            background: rgba(18, 13, 49, 0.84) !important;
+            border: 1px solid rgba(59,130,246,0.22) !important;
+            box-shadow: 0 16px 34px rgba(2, 6, 23, 0.24) !important;
+        }
+
+        .user-meta {
+            display: grid;
+            gap: 2px;
+        }
+
+        .user-name,
+        .user-role {
+            white-space: nowrap;
+        }
+
+        .header-section {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) auto !important;
+            gap: 16px !important;
+            align-items: center !important;
+            padding: 18px 20px !important;
+            border-radius: 20px !important;
+            background: linear-gradient(180deg, rgba(22, 17, 58, 0.94), rgba(10, 8, 35, 0.96)) !important;
+        }
+
+        .search-bar {
+            min-width: 0;
+        }
+
+        .search-input {
+            min-height: 46px !important;
+            padding: 12px 16px !important;
+            border-radius: 14px !important;
+            background: rgba(7, 10, 30, 0.78) !important;
+            border: 1px solid rgba(59,130,246,0.18) !important;
+            color: #f8fafc !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03) !important;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .filter-btn {
+            min-height: 44px;
+            padding: 10px 16px !important;
+            border-radius: 14px !important;
+            background: rgba(12, 18, 38, 0.74) !important;
+            border: 1px solid rgba(59,130,246,0.18) !important;
+            color: #1F2937 !important;
+            box-shadow: none !important;
+        }
+
+        .filter-btn:hover {
+            background: rgba(79, 70, 229, 0.12) !important;
+            border-color: rgba(59,130,246,0.3) !important;
+            color: #ffffff !important;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #3B82F6, #1e40af) !important;
+            box-shadow: 0 12px 24px rgba(79, 70, 229, 0.24) !important;
+        }
+
+        .stats-row {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+            gap: 16px !important;
+            margin-bottom: 24px !important;
+        }
+
+        .stat-card {
+            min-height: 110px;
+            padding: 22px 20px !important;
+            border-radius: 20px !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .stat-value {
+            font-size: 38px !important;
+            line-height: 1 !important;
+            font-weight: 800 !important;
+            color: #f8fafc !important;
+        }
+
+        .stat-label {
+            font-size: 13px !important;
+            letter-spacing: 0 !important;
+            color: #aeb7d5 !important;
+        }
+
+        .questions-grid {
+            gap: 18px !important;
+        }
+
+        .question-card {
+            border-radius: 20px !important;
+            padding: 22px 20px !important;
+            background: linear-gradient(180deg, rgba(22, 17, 58, 0.94), rgba(10, 8, 35, 0.96)) !important;
+        }
+
+        .question-card-title {
+            color: #f8fafc !important;
+            font-size: 15px !important;
+            line-height: 1.45 !important;
+            max-height: none !important;
+        }
+
+        .question-card-meta {
+            gap: 10px !important;
+            margin-bottom: 16px !important;
+        }
+
+        .badge {
+            padding: 6px 12px !important;
+            border-radius: 999px !important;
+            font-size: 12px !important;
+            font-weight: 700 !important;
+            color: #dbeafe !important;
+            background: rgba(79, 70, 229, 0.16) !important;
+            border: 1px solid rgba(59,130,246,0.24) !important;
+        }
+
+        .badge.easy {
+            background: rgba(16, 185, 129, 0.16) !important;
+            color: #a7f3d0 !important;
+            border-color: rgba(16, 185, 129, 0.24) !important;
+        }
+
+        .badge.medium {
+            background: rgba(245, 158, 11, 0.16) !important;
+            color: #fde68a !important;
+            border-color: rgba(245, 158, 11, 0.24) !important;
+        }
+
+        .badge.hard {
+            background: rgba(239, 68, 68, 0.16) !important;
+            color: #fecaca !important;
+            border-color: rgba(239, 68, 68, 0.24) !important;
+        }
+
+        .question-card-actions {
+            gap: 10px !important;
+            margin-top: 16px !important;
+            padding-top: 16px !important;
+            border-top: 1px solid rgba(59,130,246,0.14) !important;
+        }
+
+        .action-btn {
+            min-height: 40px;
+            border-radius: 12px !important;
+            border: 1px solid rgba(59,130,246,0.16) !important;
+            background: #F8FAFC !important;
+            color: #1F2937 !important;
+            font-size: 13px !important;
+            font-weight: 700 !important;
+        }
+
+        .action-btn:hover {
+            background: rgba(79, 70, 229, 0.12) !important;
+            border-color: rgba(59,130,246,0.3) !important;
+            color: #ffffff !important;
+            transform: none !important;
+        }
+
+        .action-btn-view {
+            background: linear-gradient(135deg, #3B82F6, #1e40af) !important;
+            color: #ffffff !important;
+            border-color: transparent !important;
+        }
+
+        .action-btn-use {
+            background: rgba(20, 184, 166, 0.12) !important;
+            color: #99f6e4 !important;
+            border-color: rgba(20, 184, 166, 0.22) !important;
+        }
+
+        .action-btn-delete {
+            background: rgba(239, 68, 68, 0.12) !important;
+            color: #fecaca !important;
+            border-color: rgba(239, 68, 68, 0.22) !important;
+        }
+
+        .empty-state {
+            border-radius: 20px !important;
+            padding: 36px 24px !important;
+        }
+
+        .modal-content {
+            max-width: 640px;
+            border-radius: 24px !important;
+            padding: 24px !important;
+            background: linear-gradient(180deg, rgba(22, 17, 58, 0.98), rgba(10, 8, 35, 0.99)) !important;
+        }
+
+        .modal-body {
+            color: #e5e7eb !important;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .pagination-btn {
+            min-width: 42px;
+            min-height: 42px;
+            border-radius: 12px !important;
+            background: #F8FAFC !important;
+            border: 1px solid rgba(59,130,246,0.16) !important;
+            color: #dbeafe !important;
+        }
+
+        .pagination-btn.active {
+            background: linear-gradient(135deg, #3B82F6, #1e40af) !important;
+            color: #ffffff !important;
+            border-color: transparent !important;
+        }
+
+        @media (max-width: 980px) {
+            .header-section {
+                grid-template-columns: 1fr !important;
+            }
+
+            .filter-group {
+                justify-content: flex-start;
+            }
+
+            .user-panel {
+                min-width: 0;
+                width: 100%;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="css/ui-system.css?v=1776841996">
+    <link rel="stylesheet" href="css/product-theme.css?v=1776841996">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=blue4">
+</head>
+<body class="question-bank-page">
+                        <span class="brand-copy">
+                            <span class="brand-name">Smart Exam System</span>
+                            <span class="brand-page">Question Bank</span>
+                        </span>
+                    </a>
+                </div>
+            </div>
+            <div class="header-utility">
+                <a class="header-profile-trigger" href="profile.html" aria-label="Open profile">
+                    <span class="header-profile-avatar" id="headerProfileAvatar">QB</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="app-shell">
+            <aside class="sidebar">
+                <div class="sidebar-head">
+                    <div class="sidebar-title" id="sidebarTitle">Question Workspace</div>
+                    <div class="sidebar-profile">
+                        <div class="sidebar-avatar" id="sidebarAvatar">QB</div>
+                        <div class="sidebar-profile-copy">
+                            <span class="sidebar-profile-name" id="sidebarProfileName">Question Bank</span>
+                            <span class="sidebar-profile-meta" id="sidebarProfileMeta">Reusable Question Library</span>
+                        </div>
+                    </div>
+                </div>
+                <nav class="sidebar-nav" id="sidebarNav" aria-label="Question Bank Navigation"></nav>
+                <div class="sidebar-footer">
+                    <a class="sidebar-footer-link" href="profile.html" data-short="PF">
+                        <span>PF</span>
+                        <span>Profile</span>
+                    </a>
+                    <button class="sidebar-footer-button" type="button" onclick="logout()" data-short="LO">
+                        <span>LO</span>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </aside>
+
+            <main class="content-column">
+                <div class="header-section">
+                    <div class="search-bar">
+                        <input type="text" class="search-input" id="searchInput" placeholder="Search questions..." onkeyup="searchQuestions()">
+                    </div>
+                    <div class="filter-group">
+                        <button class="filter-btn active" onclick="filterByType('all')">All</button>
+                        <button class="filter-btn" onclick="filterByType('MCQ')">MCQ</button>
+                        <button class="filter-btn" onclick="filterByType('Short Answer')">Short Answer</button>
+                        <button class="filter-btn" onclick="filterByType('Code')">Code</button>
+                    </div>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalQuestions">0</div>
+                        <div class="stat-label">Total Questions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="sidebarVisibleCount">0</div>
+                        <div class="stat-label">Visible Results</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="easyCount">0</div>
+                        <div class="stat-label">Easy</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="mediumCount">0</div>
+                        <div class="stat-label">Medium</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="hardCount">0</div>
+                        <div class="stat-label">Hard</div>
+                    </div>
+                </div>
+
+                <div class="questions-grid" id="questionsGrid">
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-state-icon">QB</div>
+                        <div class="empty-state-title">No Questions Yet</div>
+                        <div class="empty-state-text">Your question bank is empty. Questions will appear here after you create exams.</div>
+                    </div>
+                </div>
+
+                <div class="pagination" id="pagination"></div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Question View Modal -->
+    <div class="modal" id="viewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Question Details</span>
+                <button class="modal-close" onclick="closeModal()">x</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" style="flex: 1;" onclick="useQuestion()">Use in New Exam</button>
+                <button class="btn btn-secondary" style="flex: 1;" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/supabase.min.js"></script>
+    <script src="js/app-config.js"></script>
+    <script src="js/session-manager.js"></script>
+    <script src="js/user-profile.js"></script>
+    <script src="js/app-shell.js"></script>
+    <script>
+        const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.AppConfig;
+
+        let allQuestions = [];
+        let filteredQuestions = [];
+        let currentFilter = 'all';
+        let currentPage = 1;
+        const itemsPerPage = 12;
+        const shellState = { role: (localStorage.getItem('userRole') || 'teacher').toLowerCase() };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.__TEACHER_SHELL_EMBEDDED__ && window.SessionManager) {
+                const ok = window.SessionManager.init({ loginUrl: 'login.html', requireAuth: true });
+                if (!ok) return;
+            }
+            initShell();
+            loadQuestions();
+            const modal = document.getElementById('viewModal');
+            if (modal) {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) closeModal();
+                });
+            }
+        });
+
+        function getDisplayName() {
+            const fullName = (localStorage.getItem('userName') || '').trim();
+            if (fullName) return fullName;
+            const first = (localStorage.getItem('userFirstName') || '').trim();
+            const last = (localStorage.getItem('userLastName') || '').trim();
+            return [first, last].filter(Boolean).join(' ').trim() || 'Question Bank';
+        }
+
+        function getInitials(name) {
+            const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+            if (!parts.length) return 'QB';
+            return parts.slice(0, 2).map((part) => part[0].toUpperCase()).join('');
+        }
+
+        function initShell() {
+            if (window.AppShell) window.AppShell.init();
+            const profile = window.UserProfile ? window.UserProfile.getStoredProfile() : null;
+            const displayName = profile?.displayName || getDisplayName();
+            const role = shellState.role === 'admin' ? 'admin' : 'teacher';
+            const roleMeta = role === 'admin' ? 'Administrative Question Library' : 'Teaching Question Library';
+            const sidebarMeta = window.UserProfile
+                ? window.UserProfile.getProfileMeta(profile, roleMeta)
+                : (profile?.email || roleMeta);
+            const nav = role === 'admin'
+                ? [
+                    { href: 'dashboard-admin.html', icon: 'DB', title: 'Dashboard', desc: 'Overview and control center', meta: 'Home' },
+                    { href: 'manage-users.html', icon: 'US', title: 'Manage Users', desc: 'Accounts, roles, and status', meta: 'Access' },
+                    { href: 'analytics.html', icon: 'AN', title: 'Analytics', desc: 'Platform metrics and performance', meta: 'Live' },
+                    { href: 'dashboard-admin.html#transferControlPanel', icon: 'TC', title: 'Transfer Control', desc: 'Admin handover and audit trail', meta: 'Admin' },
+                    { href: 'question-bank.html', icon: 'QB', title: 'Question Bank', desc: 'Reusable saved questions', meta: 'Bank', active: true }
+                ]
+                : [
+                    { href: 'dashboard-teacher.html', icon: 'DB', title: 'Dashboard', desc: 'Overview and live metrics', meta: 'Home' },
+                    { href: 'dashboard-teacher.html#recentExamsSection', icon: 'EX', title: 'Exams', desc: 'Published, draft, and archived', meta: 'List' },
+                    { href: 'create-exam.html', icon: 'CE', title: 'Create Exam', desc: 'Build a new paper from material', meta: 'New' },
+                    { href: 'analytics.html', icon: 'AN', title: 'Analytics', desc: 'Performance and grading insights', meta: 'Live' },
+                    { href: 'question-bank.html', icon: 'QB', title: 'Question Bank', desc: 'Reusable saved questions', meta: 'Bank', active: true }
+                ];
+
+            document.getElementById('sidebarProfileName').textContent = displayName;
+            document.getElementById('sidebarProfileMeta').textContent = sidebarMeta;
+            document.getElementById('sidebarAvatar').textContent = profile?.initials || getInitials(displayName);
+            const headerAvatarEl = document.getElementById('headerProfileAvatar');
+            if (headerAvatarEl) headerAvatarEl.textContent = profile?.initials || getInitials(displayName);
+            document.getElementById('sidebarTitle').textContent = role === 'admin' ? 'Admin Question Bank' : 'Teacher Question Bank';
+            document.querySelector('.logo').setAttribute('href', role === 'admin' ? 'dashboard-admin.html' : 'dashboard-teacher.html');
+            document.getElementById('sidebarNav').innerHTML = nav.map((item) => `
+                <a href="${item.href}" class="sidebar-link${item.active ? ' active' : ''}">
+                    <span class="sidebar-link-main">
+                        <span class="sidebar-link-icon">${item.icon}</span>
+                        <span class="sidebar-link-copy">
+                            <span class="sidebar-link-title">${item.title}</span>
+                            <span class="sidebar-link-desc">${item.desc}</span>
+                        </span>
+                    </span>
+                    <span>${item.meta}</span>
+                </a>
+            `).join('');
+        }
+
+        function loadQuestions() {
+            const savedQuestions = localStorage.getItem('questionBank');
+            allQuestions = savedQuestions ? JSON.parse(savedQuestions) : getDefaultQuestions();
+            filteredQuestions = allQuestions.slice();
+            updateStats();
+            renderQuestions();
+        }
+
+        function getDefaultQuestions() {
+            return [
+                {
+                    id: 1,
+                    question: 'What is the time complexity of binary search?',
+                    type: 'MCQ',
+                    difficulty: 'easy',
+                    subject: 'Algorithms',
+                    marks: 1,
+                    options: [
+                        { text: 'O(n)', is_correct: false },
+                        { text: 'O(log n)', is_correct: true },
+                        { text: 'O(n^2)', is_correct: false },
+                        { text: 'O(n!)', is_correct: false }
+                    ]
+                },
+                {
+                    id: 2,
+                    question: 'Write a function to check if a number is prime.',
+                    type: 'Code',
+                    difficulty: 'medium',
+                    subject: 'Algorithms',
+                    marks: 2,
+                    modelAnswer: 'function isPrime(n) { for (let i = 2; i < n; i++) if (n % i === 0) return false; return true; }'
+                },
+                {
+                    id: 3,
+                    question: 'What is a linked list?',
+                    type: 'Short Answer',
+                    difficulty: 'easy',
+                    subject: 'Data Structures',
+                    marks: 2,
+                    modelAnswer: 'A data structure consisting of nodes where each node contains data and a reference to the next node.'
+                }
+            ];
+        }
+
+        function updateStats() {
+            const easy = allQuestions.filter(q => q.difficulty === 'easy').length;
+            const medium = allQuestions.filter(q => q.difficulty === 'medium').length;
+            const hard = allQuestions.filter(q => q.difficulty === 'hard').length;
+
+            document.getElementById('totalQuestions').textContent = allQuestions.length;
+            document.getElementById('easyCount').textContent = easy;
+            document.getElementById('mediumCount').textContent = medium;
+            document.getElementById('hardCount').textContent = hard;
+        }
+
+        function syncFilterButtons(type) {
+            document.querySelectorAll('.filter-btn').forEach((btn) => {
+                const label = btn.textContent.trim().toLowerCase();
+                btn.classList.toggle('active', (type === 'all' && label === 'all') || label === String(type).toLowerCase());
+            });
+        }
+
+        function filterByType(type) {
+            currentFilter = type;
+            currentPage = 1;
+            syncFilterButtons(type);
+            filteredQuestions = type === 'all' ? allQuestions.slice() : allQuestions.filter(q => q.type === type);
+            renderQuestions();
+        }
+
+        function searchQuestions() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            currentPage = 1;
+            filteredQuestions = allQuestions.filter(q =>
+                q.question.toLowerCase().includes(query) ||
+                (q.subject && q.subject.toLowerCase().includes(query))
+            );
+            if (currentFilter !== 'all') {
+                filteredQuestions = filteredQuestions.filter(q => q.type === currentFilter);
+            }
+            renderQuestions();
+        }
+
+        function renderQuestions() {
+            const grid = document.getElementById('questionsGrid');
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageQuestions = filteredQuestions.slice(start, end);
+
+            if (!pageQuestions.length) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-state-icon">SR</div>
+                        <div class="empty-state-title">No Questions Found</div>
+                        <div class="empty-state-text">Try adjusting your search or filters.</div>
+                    </div>
+                `;
+                document.getElementById('sidebarVisibleCount').textContent = 0;
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+
+            grid.innerHTML = pageQuestions.map(q => `
+                <div class="question-card">
+                    <div class="question-card-title">${q.question}</div>
+                    <div class="question-card-meta">
+                        <span class="badge">${q.type}</span>
+                        <span class="badge ${q.difficulty}">${q.difficulty}</span>
+                        <span class="badge">${q.marks || 1} marks</span>
+                        ${q.subject ? `<span class="badge">${q.subject}</span>` : ''}
+                    </div>
+                    <div class="question-card-actions">
+                        <button class="action-btn action-btn-view" onclick="viewQuestion(${q.id})">View</button>
+                        <button class="action-btn action-btn-use" onclick="addToExam(${q.id})">Use</button>
+                        <button class="action-btn action-btn-delete" onclick="deleteQuestion(${q.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('sidebarVisibleCount').textContent = filteredQuestions.length;
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const pagination = document.getElementById('pagination');
+            const totalPages = Math.ceil(filteredQuestions.length / itemsPerPage);
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+            let html = '';
+            for (let i = 1; i <= totalPages; i++) {
+                html += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+            }
+            pagination.innerHTML = html;
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            renderQuestions();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function viewQuestion(id) {
+            const question = allQuestions.find(q => q.id === id);
+            if (!question) return;
+
+            let details = `
+                <div style="margin-bottom: 15px;">
+                    <strong>Question:</strong>
+                    <p style="margin-top: 8px; color: #e5e7eb; line-height: 1.55;">${question.question}</p>
+                </div>
+                <div style="margin-bottom: 15px;"><strong>Type:</strong> ${question.type}</div>
+                <div style="margin-bottom: 15px;"><strong>Difficulty:</strong> <span class="badge ${question.difficulty}">${question.difficulty}</span></div>
+                <div style="margin-bottom: 15px;"><strong>Marks:</strong> ${question.marks || 1}</div>
+                ${question.subject ? `<div style="margin-bottom: 15px;"><strong>Subject:</strong> ${question.subject}</div>` : ''}
+            `;
+
+            if (question.options) {
+                details += `<div style="margin-bottom: 15px;">
+                    <strong>Options:</strong>
+                    <ul style="margin-top: 8px; margin-left: 20px;">
+                        ${question.options.map(opt => `<li style="color: #e5e7eb; margin-bottom: 6px;">${opt.text} ${opt.is_correct ? '(Correct)' : ''}</li>`).join('')}
+                    </ul>
+                </div>`;
+            }
+
+            if (question.modelAnswer) {
+                details += `<div><strong>Model Answer:</strong><p style="margin-top: 8px; color: #e5e7eb; background: #F8FAFC; border: 1px solid rgba(59,130,246,0.14); padding: 12px; border-radius: 12px;">${question.modelAnswer}</p></div>`;
+            }
+
+            document.getElementById('modalBody').innerHTML = details;
+            document.getElementById('viewModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('viewModal').classList.remove('active');
+        }
+
+        function addToExam(id) {
+            const question = allQuestions.find(q => q.id === id);
+            const examQuestions = JSON.parse(sessionStorage.getItem('editedQuestions') || '[]');
+            examQuestions.push(question);
+            sessionStorage.setItem('editedQuestions', JSON.stringify(examQuestions));
+            alert('Question added to exam.');
+            closeModal();
+        }
+
+        function deleteQuestion(id) {
+            if (confirm('Delete this question? This action cannot be undone.')) {
+                allQuestions = allQuestions.filter(q => q.id !== id);
+                localStorage.setItem('questionBank', JSON.stringify(allQuestions));
+                loadQuestions();
+            }
+        }
+
+        function goBack() {
+            window.location.href = shellState.role === 'admin' ? 'dashboard-admin.html' : 'dashboard-teacher.html';
+        }
+
+        function logout() {
+            if (window.SessionManager) {
+                window.SessionManager.logout('manual');
+                return;
+            }
+            [
+                'isLoggedIn', 'userRole', 'userEmail', 'userId', 'userName',
+                'userFirstName', 'userLastName', 'studentId', 'teacherId',
+                'adminId', 'authLoginAt', 'authLastActivityAt', 'authLogoutAt'
+            ].forEach((key) => {
+                localStorage.removeItem(key);
+                sessionStorage.removeItem(key);
+            });
+            window.location.href = 'login.html';
+        }
+    </script>
+    <script src="js/ui-feedback.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
