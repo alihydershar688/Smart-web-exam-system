@@ -935,7 +935,7 @@
         <div class="app-shell">
             <aside class="sidebar">
                 <nav class="sidebar-nav">
-                    <a href="#" class="sidebar-link active" data-nav="dashboard" onclick="setSidebarActive('dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); return false;">
+                    <a href="#" class="sidebar-link active" data-nav="dashboard" onclick="navigateToAdminSection('dashboardSection'); return false;">
                         <span class="sidebar-link-main">
                             <span class="sidebar-link-icon" aria-hidden="true">
                                 <i class="bi bi-grid-1x2-fill"></i>
@@ -1092,7 +1092,12 @@
             if (map[sectionId]) setSidebarActive(map[sectionId])
             const target = document.getElementById(sectionId)
             if (!target) return
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            // Close mobile sidebar drawer if open
+            document.body.classList.remove('sidebar-drawer-open')
+            // Scroll with navbar offset so section isn't hidden under sticky nav
+            const navbarHeight = document.querySelector('.navbar')?.offsetHeight || 80
+            const targetTop = target.getBoundingClientRect().top + window.pageYOffset - navbarHeight - 8
+            window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' })
         }
         async function requireActiveAdminAccess() {
             // Try to restore session from Supabase if localStorage is empty
