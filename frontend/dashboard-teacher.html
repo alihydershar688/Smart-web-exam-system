@@ -2577,7 +2577,7 @@ body.teacher-dashboard-page .toast.info { border-left-color: #185FA5 !important;
 
                 const courseIds = courses.map(c => c.id || c.course_id).filter(Boolean)
 
-                // -- Step 2: Get enrollments — try multiple table/column schemas --
+                // -- Step 2: Get enrollments ï¿½ try multiple table/column schemas --
                 let enrollments = []
 
                 // Try primary enrollments table
@@ -2702,7 +2702,7 @@ body.teacher-dashboard-page .toast.info { border-left-color: #185FA5 !important;
                                                 <div style="display:flex;flex-wrap:wrap;gap:4px;">
                                                     ${courseList.length
                                                         ? courseList.map(c => `<span style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);padding:2px 8px;border-radius:999px;font-size:0.76rem;font-weight:700;color:#1E3A8A;">${c.split(' - ')[0] || c}</span>`).join('')
-                                                        : '<span style="color:#94a3b8;font-size:0.82rem;">—</span>'
+                                                        : '<span style="color:#94a3b8;font-size:0.82rem;">ï¿½</span>'
                                                     }
                                                 </div>
                                             </td>
@@ -3571,7 +3571,12 @@ body.teacher-dashboard-page .toast.info { border-left-color: #185FA5 !important;
             const target = document.getElementById(sectionId)
             if (!target) return
             setSidebarActiveBySection(sectionId)
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            // Close mobile sidebar
+            document.body.classList.remove('sidebar-drawer-open')
+            // Scroll with navbar offset
+            const navbarHeight = document.querySelector('.navbar')?.offsetHeight || 80
+            const targetTop = target.getBoundingClientRect().top + window.pageYOffset - navbarHeight - 8
+            window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' })
             target.classList.add('section-focus')
             setTimeout(() => target.classList.remove('section-focus'), 1400)
         }

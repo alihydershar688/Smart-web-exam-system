@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -22,17 +22,26 @@
         };
         
         // Essential functions for HTML onclick handlers (must be defined early)
+
+        // Unified scroll helper with navbar offset + mobile sidebar close
+        function _scrollToEl(el) {
+            if (!el) return
+            document.body.classList.remove('sidebar-drawer-open')
+            const navbarHeight = document.querySelector('.navbar')?.offsetHeight || 80
+            const targetTop = el.getBoundingClientRect().top + window.pageYOffset - navbarHeight - 8
+            window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' })
+        }
+
         function scrollToSection(sectionId) {
             const section = document.getElementById(sectionId)
             if (!section) return
-            section.scrollIntoView({ behavior: 'smooth', block: 'start' })
-            // Also update sidebar active state
             const navMap = {
                 'coursesSection':   'courses',
                 'availableSection': 'exams',
                 'completedSection': 'results'
             }
             if (navMap[sectionId]) setStudentSidebarActive(navMap[sectionId])
+            _scrollToEl(section)
         }
 
         function setStudentSidebarActive(navKey) {
@@ -42,30 +51,32 @@
         }
 
         function hideAllSections() {
-            // Don't hide — just scroll to the right section
+            // Don't hide ï¿½ just scroll to the right section
         }
 
         function openCoursesSection() {
-            setStudentSidebarActive('courses');
-            const el = document.getElementById('coursesSection');
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setStudentSidebarActive('courses')
+            _scrollToEl(document.getElementById('coursesSection'))
+        });
         }
 
         function openUpcomingSection() {
-            setStudentSidebarActive('exams');
-            const el = document.getElementById('availableSection');
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setStudentSidebarActive('exams')
+            _scrollToEl(document.getElementById('availableSection'))
+        });
         }
 
         function openCompletedSection() {
-            setStudentSidebarActive('results');
-            const el = document.getElementById('completedSection');
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setStudentSidebarActive('results')
+            _scrollToEl(document.getElementById('completedSection'))
+        });
         }
 
         function openTopSection() {
-            setStudentSidebarActive('dashboard');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setStudentSidebarActive('dashboard')
+            document.body.classList.remove('sidebar-drawer-open')
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+        });
         }
 
         // Ensure functions are globally accessible for inline handlers and module scopes.
@@ -476,7 +487,7 @@
             border-top: 1px solid rgba(148, 163, 184, 0.16);
         }
 
-        /* -- Logout button — standardized red across all dashboards -- */
+        /* -- Logout button ï¿½ standardized red across all dashboards -- */
         .sidebar-footer-button {
             width: 100%;
             display: flex;
@@ -930,7 +941,7 @@
 .stat-card, .section, .course-card, .exam-card { border-radius: 14px !important; }
 .exam-badge, .score-badge { border-radius: 999px !important; }
 
-/* -- Clean shadow override — remove dark/heavy shadows -- */
+/* -- Clean shadow override ï¿½ remove dark/heavy shadows -- */
 html body.student-dashboard-page .section,
 html body.student-dashboard-page .card,
 html body.student-dashboard-page .panel,
@@ -2548,11 +2559,11 @@ html body.student-dashboard-page .sidebar-footer-button:hover {
             const userRole   = localStorage.getItem('userRole')
 
             if (isLoggedIn && userRole === 'student') {
-                // Already have session in localStorage — proceed
+                // Already have session in localStorage ï¿½ proceed
                 if (window.SessionManager && !window.SessionManager.init({ loginUrl: 'login.html' })) return
                 initDashboard()
             } else {
-                // localStorage cleared (e.g. refresh) — check Supabase session
+                // localStorage cleared (e.g. refresh) ï¿½ check Supabase session
                 try {
                     const { data: { session } } = await supabaseClient.auth.getSession()
                     if (!session) {
@@ -2920,7 +2931,7 @@ html body.student-dashboard-page .sidebar-footer-button:hover {
         }
 
         function dedupeStudentAttempts(attempts) {
-            // Show ALL attempts (full history) — sorted newest first
+            // Show ALL attempts (full history) ï¿½ sorted newest first
             const seen = new Map()
             ;(attempts || []).forEach((attempt) => {
                 const id = String(attempt?.attempt_id || '').trim()

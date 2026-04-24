@@ -939,6 +939,7 @@
         })
 
         function filterToPending() {
+            document.body.classList.remove('sidebar-drawer-open')
             const statusFilter = document.getElementById('statusFilter')
             if (statusFilter) {
                 statusFilter.value = 'pending'
@@ -949,6 +950,7 @@
         }
 
         function filterToActive() {
+            document.body.classList.remove('sidebar-drawer-open')
             const statusFilter = document.getElementById('statusFilter')
             if (statusFilter) {
                 statusFilter.value = 'active'
@@ -959,6 +961,7 @@
         }
 
         function filterToAll() {
+            document.body.classList.remove('sidebar-drawer-open')
             const statusFilter = document.getElementById('statusFilter')
             const roleFilter   = document.getElementById('roleFilter')
             if (statusFilter) statusFilter.value = 'all'

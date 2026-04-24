@@ -1480,3 +1480,21 @@ body.teacher-dashboard-page .table td {
 body.teacher-dashboard-page .table tr:hover td {
     background: #F0F4FF !important;
 }
+
+/* ── Mobile scroll fix: prevent sticky navbar from covering sections ── */
+section[id],
+.hero[id],
+.stats-grid[id],
+.card[id],
+#dashboardSection,
+#examsSection,
+#submissionsSection,
+#studentsSection,
+#resultsSection,
+#coursesSection,
+#availableSection,
+#completedSection,
+#controlSection,
+#quickActionsSection {
+    scroll-margin-top: 90px;
+}
