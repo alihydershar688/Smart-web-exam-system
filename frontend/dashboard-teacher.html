@@ -1759,6 +1759,37 @@ body.teacher-dashboard-page .toast.info { border-left-color: #185FA5 !important;
                 <div class="loading">Loading results...</div>
             </div>
                     </div>
+
+                    <!-- Per-Course Analytics -->
+                    <div class="card" id="courseAnalyticsSection">
+                        <div class="card-header">
+                            <h3>Per-Course Analytics</h3>
+                            <span class="badge badge-info">Live</span>
+                        </div>
+                        <div id="courseAnalyticsContainer">
+                            <div class="loading" style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;padding:2rem;">
+                                <div style="width:28px;height:28px;border:3px solid rgba(59,130,246,0.15);border-top:3px solid #3b82f6;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+                                <p style="color:#64748b;font-size:0.85rem;">Loading course analytics...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Exam Leaderboard -->
+                    <div class="card" id="leaderboardSection">
+                        <div class="card-header">
+                            <h3>Exam Leaderboard</h3>
+                            <div style="display:flex;align-items:center;gap:0.75rem;">
+                                <select id="leaderboardExamSelect" onchange="loadLeaderboard(this.value)"
+                                    style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:5px 10px;color:#1E3A8A;font-size:0.82rem;font-family:inherit;outline:none;">
+                                    <option value="">Select an exam...</option>
+                                </select>
+                                <span class="badge badge-warning">Top 10</span>
+                            </div>
+                        </div>
+                        <div id="leaderboardContainer">
+                            <div class="empty-state"><p style="color:#64748b;">Select an exam above to view its leaderboard.</p></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1777,6 +1808,7 @@ body.teacher-dashboard-page .toast.info { border-left-color: #185FA5 !important;
     </div>
 
     <script src="js/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="js/app-config.js"></script>
     <script src="js/error-handler.js"></script>
     <script src="js/session-manager.js"></script>
@@ -2485,6 +2517,7 @@ body.teacher-dashboard-page .toast.info { border-left-color: #185FA5 !important;
                 }
                 loadEnrolledStudents(userId)
                 loadRecentResults(userId)
+                loadCourseAnalytics()
                 setLastUpdated()
             } catch (error) {
                 console.error('Dashboard error:', error)
@@ -3172,6 +3205,9 @@ body.teacher-dashboard-page .toast.info { border-left-color: #185FA5 !important;
                 return
             }
 
+            // Populate leaderboard exam selector
+            populateLeaderboardSelector(exams)
+
             container.innerHTML = `
                 <table class="table">
                     <thead>
@@ -3593,6 +3629,113 @@ body.teacher-dashboard-page .toast.info { border-left-color: #185FA5 !important;
                 clearAuthSession()
                 window.location.href = 'login.html'
             }
+        }
+
+        // ── Per-Course Analytics ──────────────────────────────
+        async function loadCourseAnalytics() {
+            const container = document.getElementById('courseAnalyticsContainer')
+            if (!container) return
+            try {
+                const result = await fetchBackendJson('/teacher/course-analytics')
+                if (!result.ok || !result.data?.success) {
+                    container.innerHTML = '<div class="empty-state"><p>Unable to load course analytics.</p></div>'
+                    return
+                }
+                const courses = result.data.courses || []
+                if (!courses.length) {
+                    container.innerHTML = '<div class="empty-state"><p>No course data available yet.</p></div>'
+                    return
+                }
+                let html = '<div style="display:grid;gap:0.75rem;">'
+                courses.forEach(c => {
+                    const passColor = c.pass_rate >= 70 ? '#10b981' : c.pass_rate >= 50 ? '#f59e0b' : '#ef4444'
+                    const avgColor  = c.avg_score  >= 70 ? '#10b981' : c.avg_score  >= 50 ? '#f59e0b' : '#ef4444'
+                    html += '<div style="background:#F8FAFC;border:1px solid #DBEAFE;border-radius:12px;padding:1rem 1.25rem;">'
+                        + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">'
+                        + '<div><span style="font-weight:800;color:#1E3A8A;font-size:0.95rem;">' + (c.course_code || '') + '</span>'
+                        + '<span style="color:#64748b;font-size:0.82rem;margin-left:8px;">' + (c.course_name || '') + '</span></div>'
+                        + '<span style="background:#EFF6FF;border:1px solid #BFDBFE;padding:2px 10px;border-radius:999px;font-size:0.76rem;font-weight:700;color:#1E3A8A;">'
+                        + c.enrolled_students + ' students enrolled</span>'
+                        + '</div>'
+                        + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:0.6rem;">'
+                        + _caStat('Exams', c.total_exams, '#6366f1')
+                        + _caStat('Attempts', c.total_attempts, '#3b82f6')
+                        + _caStat('Avg Score', c.avg_score + '%', avgColor)
+                        + _caStat('Pass Rate', c.pass_rate + '%', passColor)
+                        + _caStat('Highest', c.highest_score + '%', '#10b981')
+                        + '</div>'
+                        + '<div style="margin-top:0.75rem;background:rgba(255,255,255,0.5);border-radius:999px;height:6px;overflow:hidden;">'
+                        + '<div style="width:' + Math.min(c.avg_score, 100) + '%;height:100%;background:' + avgColor + ';border-radius:999px;transition:width 0.7s;"></div>'
+                        + '</div>'
+                        + '</div>'
+                })
+                html += '</div>'
+                container.innerHTML = html
+            } catch (e) {
+                if (container) container.innerHTML = '<div class="empty-state"><p>Unable to load course analytics.</p></div>'
+            }
+        }
+
+        function _caStat(label, value, color) {
+            return '<div style="background:#fff;border:1px solid #DBEAFE;border-radius:8px;padding:0.5rem 0.75rem;text-align:center;">'
+                + '<div style="font-size:0.7rem;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">' + label + '</div>'
+                + '<div style="font-size:1rem;font-weight:800;color:' + color + ';margin-top:2px;">' + value + '</div>'
+                + '</div>'
+        }
+
+        // ── Exam Leaderboard ──────────────────────────────────
+        async function loadLeaderboard(examId) {
+            const container = document.getElementById('leaderboardContainer')
+            if (!container || !examId) return
+            container.innerHTML = '<div class="loading" style="display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:2rem;"><div style="width:24px;height:24px;border:3px solid rgba(59,130,246,0.15);border-top:3px solid #3b82f6;border-radius:50%;animation:spin 0.8s linear infinite;"></div><span style="color:#64748b;font-size:0.85rem;">Loading leaderboard...</span></div>'
+            try {
+                const result = await fetchBackendJson('/exams/' + encodeURIComponent(examId) + '/leaderboard?limit=10')
+                if (!result.ok || !result.data?.success) {
+                    container.innerHTML = '<div class="empty-state"><p>Unable to load leaderboard.</p></div>'
+                    return
+                }
+                const board = result.data.leaderboard || []
+                const stats = result.data.stats || {}
+                if (!board.length) {
+                    container.innerHTML = '<div class="empty-state"><p>No graded submissions yet for this exam.</p></div>'
+                    return
+                }
+                const medals = ['🥇', '🥈', '🥉']
+                let html = '<div style="display:flex;flex-wrap:wrap;gap:0.6rem;margin-bottom:1rem;padding:0.75rem;background:#F8FAFC;border-radius:10px;border:1px solid #DBEAFE;">'
+                    + _caStat('Submissions', stats.total_submissions, '#3b82f6')
+                    + _caStat('Avg Score', stats.avg_score + '%', '#6366f1')
+                    + _caStat('Pass Rate', stats.pass_rate + '%', stats.pass_rate >= 60 ? '#10b981' : '#ef4444')
+                    + _caStat('Highest', stats.highest + '%', '#10b981')
+                    + '</div>'
+                html += '<table class="table"><thead><tr><th>Rank</th><th>Student</th><th>Reg. No</th><th class="col-center">Score</th><th class="col-center">%</th></tr></thead><tbody>'
+                board.forEach(entry => {
+                    const medal = medals[entry.rank - 1] || ('#' + entry.rank)
+                    const pctColor = entry.percentage >= 80 ? '#10b981' : entry.percentage >= 50 ? '#f59e0b' : '#ef4444'
+                    html += '<tr>'
+                        + '<td style="font-weight:800;font-size:1rem;">' + medal + '</td>'
+                        + '<td><span style="font-weight:700;color:#1E3A8A;">' + entry.name + '</span></td>'
+                        + '<td><span style="background:#EFF6FF;border:1px solid #BFDBFE;padding:2px 8px;border-radius:6px;font-size:0.78rem;font-weight:700;color:#1E3A8A;">' + (entry.student_id || 'N/A') + '</span></td>'
+                        + '<td class="col-center" style="font-weight:700;">' + entry.score + ' / ' + entry.total_marks + '</td>'
+                        + '<td class="col-center"><span style="background:' + pctColor + '18;border:1px solid ' + pctColor + '44;padding:3px 10px;border-radius:999px;font-size:0.8rem;font-weight:800;color:' + pctColor + ';">' + entry.percentage + '%</span></td>'
+                        + '</tr>'
+                })
+                html += '</tbody></table>'
+                container.innerHTML = html
+            } catch (e) {
+                container.innerHTML = '<div class="empty-state"><p>Unable to load leaderboard.</p></div>'
+            }
+        }
+
+        // Populate leaderboard exam selector when exams load
+        function populateLeaderboardSelector(exams) {
+            const sel = document.getElementById('leaderboardExamSelect')
+            if (!sel || !exams || !exams.length) return
+            const current = sel.value
+            sel.innerHTML = '<option value="">Select an exam...</option>'
+                + exams.filter(e => e.status === 'published' || e.status === 'archived' || e.status === 'completed')
+                    .map(e => '<option value="' + (e.exam_id || e.id) + '">' + (e.exam_title || 'Exam') + '</option>')
+                    .join('')
+            if (current) sel.value = current
         }
     </script>
     <script src="js/ui-feedback.js"></script>

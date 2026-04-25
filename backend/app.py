@@ -5932,9 +5932,272 @@ def teacher_enrolled_students():
     except Exception as e:
         logger.error('[teacher/students] Error: %s', e)
         return jsonify({'success': False, 'error': str(e), 'students': []}), 500
+
+
 # ==========================================
-# CLEANUP - Delete exams without questions
+# ROUTE: Student Performance Trend
 # ==========================================
+@app.route('/api/student/performance', methods=['GET'])
+def student_performance():
+    """Get a student's score trend across all their exam attempts."""
+    try:
+        user_ctx, auth_error = _require_authenticated_roles('student', 'teacher', 'admin')
+        if auth_error:
+            return auth_error
+
+        supabase = get_supabase()
+        student_id = _user_ctx_profile_id(user_ctx)
+
+        # Teachers/admins can query any student via ?student_id=
+        target_id = request.args.get('student_id') or student_id
+        if user_ctx.get('role') == 'student':
+            target_id = student_id  # students can only see their own
+
+        # Get all completed attempts with scores
+        attempts_resp = db_exec(lambda: supabase.table('exam_attempts')
+            .select('attempt_id,exam_id,score,total_marks,percentage,submitted_at,status')
+            .eq('student_id', target_id)
+            .in_('status', ['graded', 'completed', 'submitted', 'pending_grading'])
+            .order('submitted_at', desc=False)
+            .limit(50)
+            .execute())
+        attempts = attempts_resp.data or []
+
+        if not attempts:
+            return jsonify({'success': True, 'trend': [], 'stats': {
+                'total_attempts': 0, 'avg_score': 0, 'best_score': 0, 'latest_score': 0
+            }}), 200
+
+        # Enrich with exam titles
+        exam_ids = list({a['exam_id'] for a in attempts if a.get('exam_id')})
+        exam_map = {}
+        if exam_ids:
+            exams_resp = db_exec(lambda: supabase.table('exams')
+                .select('exam_id,exam_title,subject')
+                .in_('exam_id', exam_ids)
+                .execute())
+            for e in (exams_resp.data or []):
+                exam_map[e['exam_id']] = e
+
+        trend = []
+        for a in attempts:
+            pct = a.get('percentage')
+            if pct is None and a.get('total_marks') and float(a.get('total_marks', 0)) > 0:
+                pct = round(float(a.get('score', 0)) / float(a['total_marks']) * 100, 1)
+            exam_info = exam_map.get(a.get('exam_id'), {})
+            trend.append({
+                'attempt_id': a.get('attempt_id'),
+                'exam_id': a.get('exam_id'),
+                'exam_title': exam_info.get('exam_title', 'Exam'),
+                'subject': exam_info.get('subject', ''),
+                'score': a.get('score', 0),
+                'total_marks': a.get('total_marks', 0),
+                'percentage': round(float(pct), 1) if pct is not None else None,
+                'submitted_at': a.get('submitted_at'),
+                'status': a.get('status'),
+            })
+
+        percentages = [t['percentage'] for t in trend if t['percentage'] is not None]
+        stats = {
+            'total_attempts': len(trend),
+            'avg_score': round(sum(percentages) / len(percentages), 1) if percentages else 0,
+            'best_score': max(percentages) if percentages else 0,
+            'latest_score': percentages[-1] if percentages else 0,
+            'improvement': round(percentages[-1] - percentages[0], 1) if len(percentages) >= 2 else 0,
+        }
+        return jsonify({'success': True, 'trend': trend, 'stats': stats}), 200
+    except Exception as e:
+        logger.error('[student/performance] Error: %s', e)
+        return jsonify({'success': False, 'error': str(e), 'trend': []}), 500
+
+
+# ==========================================
+# ROUTE: Exam Leaderboard
+# ==========================================
+@app.route('/api/exams/<exam_id>/leaderboard', methods=['GET'])
+def exam_leaderboard(exam_id):
+    """Get top students for an exam (teacher/admin only)."""
+    try:
+        user_ctx, auth_error = _require_authenticated_roles('teacher', 'admin')
+        if auth_error:
+            return auth_error
+
+        supabase = get_supabase()
+        limit = min(int(request.args.get('limit', 10)), 50)
+
+        # Get all graded attempts for this exam
+        attempts_resp = db_exec(lambda: supabase.table('exam_attempts')
+            .select('attempt_id,student_id,score,total_marks,percentage,submitted_at,status')
+            .eq('exam_id', exam_id)
+            .in_('status', ['graded', 'completed', 'submitted', 'pending_grading'])
+            .execute())
+        attempts = attempts_resp.data or []
+
+        if not attempts:
+            return jsonify({'success': True, 'leaderboard': [], 'exam_id': exam_id, 'total': 0}), 200
+
+        # Get student profiles
+        student_ids = list({a['student_id'] for a in attempts if a.get('student_id')})
+        student_map = {}
+        if student_ids:
+            students_resp = db_exec(lambda: supabase.table('users')
+                .select('id,first_name,last_name,email,student_id')
+                .in_('id', student_ids)
+                .execute())
+            for s in (students_resp.data or []):
+                student_map[s['id']] = s
+
+        # Build leaderboard — best attempt per student
+        best_per_student = {}
+        for a in attempts:
+            sid = a.get('student_id')
+            if not sid:
+                continue
+            pct = a.get('percentage')
+            if pct is None and a.get('total_marks') and float(a.get('total_marks', 0)) > 0:
+                pct = round(float(a.get('score', 0)) / float(a['total_marks']) * 100, 1)
+            if pct is None:
+                continue
+            if sid not in best_per_student or float(pct) > float(best_per_student[sid]['percentage']):
+                best_per_student[sid] = {**a, 'percentage': float(pct)}
+
+        ranked = sorted(best_per_student.values(), key=lambda x: -x['percentage'])[:limit]
+
+        leaderboard = []
+        for rank, entry in enumerate(ranked, 1):
+            sid = entry.get('student_id')
+            student = student_map.get(sid, {})
+            full_name = f"{student.get('first_name','')} {student.get('last_name','')}".strip() or student.get('email', 'Student')
+            leaderboard.append({
+                'rank': rank,
+                'student_id': student.get('student_id', ''),
+                'name': full_name,
+                'email': student.get('email', ''),
+                'score': entry.get('score', 0),
+                'total_marks': entry.get('total_marks', 0),
+                'percentage': entry['percentage'],
+                'submitted_at': entry.get('submitted_at'),
+                'attempt_id': entry.get('attempt_id'),
+            })
+
+        # Compute stats
+        all_pcts = [e['percentage'] for e in best_per_student.values()]
+        stats = {
+            'total_submissions': len(attempts),
+            'unique_students': len(best_per_student),
+            'avg_score': round(sum(all_pcts) / len(all_pcts), 1) if all_pcts else 0,
+            'pass_rate': round(100 * sum(1 for p in all_pcts if p >= 50) / len(all_pcts), 1) if all_pcts else 0,
+            'highest': max(all_pcts) if all_pcts else 0,
+            'lowest': min(all_pcts) if all_pcts else 0,
+        }
+        return jsonify({'success': True, 'leaderboard': leaderboard, 'stats': stats, 'exam_id': exam_id}), 200
+    except Exception as e:
+        logger.error('[exam/leaderboard] Error: %s', e)
+        return jsonify({'success': False, 'error': str(e), 'leaderboard': []}), 500
+
+
+# ==========================================
+# ROUTE: Teacher Per-Course Analytics
+# ==========================================
+@app.route('/api/teacher/course-analytics', methods=['GET'])
+def teacher_course_analytics():
+    """Per-course stats for a teacher: avg score, attempts, pass rate."""
+    try:
+        user_ctx, auth_error = _require_authenticated_roles('teacher', 'admin')
+        if auth_error:
+            return auth_error
+
+        supabase = get_supabase()
+        teacher_id = _user_ctx_profile_id(user_ctx)
+
+        # Get teacher's courses
+        courses_resp = db_exec(lambda: supabase.table('courses')
+            .select('id,course_code,course_name')
+            .eq('teacher_id', teacher_id)
+            .execute())
+        courses = courses_resp.data or []
+
+        if not courses:
+            return jsonify({'success': True, 'courses': []}), 200
+
+        course_ids = [c['id'] for c in courses if c.get('id')]
+
+        # Get exams for these courses
+        exams_resp = db_exec(lambda: supabase.table('exams')
+            .select('exam_id,course_id,exam_title,status')
+            .in_('course_id', course_ids)
+            .execute())
+        exams = exams_resp.data or []
+
+        exam_ids = [e['exam_id'] for e in exams if e.get('exam_id')]
+        exam_to_course = {e['exam_id']: e['course_id'] for e in exams}
+
+        # Get all attempts for these exams
+        attempts_data = []
+        if exam_ids:
+            attempts_resp = db_exec(lambda: supabase.table('exam_attempts')
+                .select('exam_id,percentage,status,student_id')
+                .in_('exam_id', exam_ids)
+                .in_('status', ['graded', 'completed', 'submitted', 'pending_grading'])
+                .execute())
+            attempts_data = attempts_resp.data or []
+
+        # Get enrollment counts per course
+        enr_resp = db_exec(lambda: supabase.table('enrollments')
+            .select('course_id,student_id')
+            .in_('course_id', course_ids)
+            .execute())
+        enrollments = enr_resp.data or []
+        enr_count = {}
+        for e in enrollments:
+            cid = e.get('course_id')
+            if cid:
+                enr_count[cid] = enr_count.get(cid, 0) + 1
+
+        # Aggregate per course
+        course_stats = {c['id']: {
+            'course_id': c['id'],
+            'course_code': c.get('course_code', ''),
+            'course_name': c.get('course_name', ''),
+            'enrolled_students': enr_count.get(c['id'], 0),
+            'total_exams': 0,
+            'total_attempts': 0,
+            'avg_score': 0,
+            'pass_rate': 0,
+            'highest_score': 0,
+            '_scores': [],
+        } for c in courses}
+
+        for e in exams:
+            cid = e.get('course_id')
+            if cid in course_stats:
+                course_stats[cid]['total_exams'] += 1
+
+        for a in attempts_data:
+            cid = exam_to_course.get(a.get('exam_id'))
+            if cid and cid in course_stats:
+                pct = a.get('percentage')
+                if pct is not None:
+                    course_stats[cid]['_scores'].append(float(pct))
+                course_stats[cid]['total_attempts'] += 1
+
+        result = []
+        for cs in course_stats.values():
+            scores = cs.pop('_scores')
+            if scores:
+                cs['avg_score'] = round(sum(scores) / len(scores), 1)
+                cs['pass_rate'] = round(100 * sum(1 for s in scores if s >= 50) / len(scores), 1)
+                cs['highest_score'] = round(max(scores), 1)
+            result.append(cs)
+
+        result.sort(key=lambda x: -x['total_attempts'])
+        return jsonify({'success': True, 'courses': result}), 200
+    except Exception as e:
+        logger.error('[teacher/course-analytics] Error: %s', e)
+        return jsonify({'success': False, 'error': str(e), 'courses': []}), 500
+
+
+
 @app.route('/api/admin/cleanup-empty-exams', methods=['DELETE'])
 def cleanup_empty_exams():
     """Delete exams that don't have questions (dangerous - use with caution)"""

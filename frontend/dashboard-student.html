@@ -2365,11 +2365,26 @@ html body.student-dashboard-page .sidebar-footer-button:hover {
                         <div class="loading">Loading completed exams...</div>
                     </div>
                 </div>
+
+                <!-- Performance Trend Chart -->
+                <div class="section" id="performanceTrendSection">
+                    <div class="section-header">
+                        <h2 class="section-title">Performance Trend</h2>
+                        <span style="font-size:0.8rem;color:#64748b;">Your score progression over time</span>
+                    </div>
+                    <div id="performanceTrendContainer" style="background:#fff;border:1px solid #DBEAFE;border-radius:14px;padding:1.25rem;">
+                        <div class="loading" style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;padding:2rem;">
+                            <div style="width:28px;height:28px;border:3px solid rgba(59,130,246,0.15);border-top:3px solid #3b82f6;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+                            <p style="color:#64748b;font-size:0.85rem;">Loading performance data...</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="js/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="js/app-config.js?v=20260314-admin-student-fix"></script>
     <script src="js/error-handler.js"></script>
     <script src="js/session-manager.js?v=20260314-admin-student-fix"></script>
@@ -2758,7 +2773,8 @@ html body.student-dashboard-page .sidebar-footer-button:hover {
                     loadEnrolledCourses(userId),
                     loadUpcomingExams(userId),
                     loadRecentResults(userId),
-                    loadStatistics(userId)
+                    loadStatistics(userId),
+                    loadPerformanceTrend()
                 ])
             } catch (error) {
                 console.error('Dashboard error:', error)
@@ -3215,6 +3231,92 @@ html body.student-dashboard-page .sidebar-footer-button:hover {
             }
             clearAuthSession()
             window.location.href = 'login.html'
+        }
+
+        async function loadPerformanceTrend() {
+            const container = document.getElementById('performanceTrendContainer')
+            if (!container) return
+            try {
+                const result = await fetchBackendJson('/student/performance')
+                if (!result.ok || !result.data?.success) {
+                    container.innerHTML = '<div style="text-align:center;padding:2rem;color:#64748b;font-size:0.88rem;">No performance data available yet.</div>'
+                    return
+                }
+                const trend = result.data.trend || []
+                const stats = result.data.stats || {}
+
+                if (trend.length === 0) {
+                    container.innerHTML = '<div style="text-align:center;padding:2rem;color:#64748b;font-size:0.88rem;">Complete your first exam to see your performance trend.</div>'
+                    return
+                }
+
+                // Stat pills
+                const improvColor = (stats.improvement || 0) >= 0 ? '#10b981' : '#ef4444'
+                const improvSign  = (stats.improvement || 0) >= 0 ? '+' : ''
+                container.innerHTML =
+                    '<div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.25rem;">'
+                    + _trendPill('Attempts', stats.total_attempts, '#3b82f6')
+                    + _trendPill('Avg Score', stats.avg_score + '%', '#6366f1')
+                    + _trendPill('Best Score', stats.best_score + '%', '#10b981')
+                    + _trendPill('Trend', improvSign + stats.improvement + '%', improvColor)
+                    + '</div>'
+                    + '<canvas id="trendLineChart" height="90"></canvas>'
+
+                if (window.Chart) {
+                    const labels = trend.map((t, i) => t.exam_title ? t.exam_title.slice(0, 18) : ('Exam ' + (i + 1)))
+                    const data   = trend.map(t => t.percentage)
+                    if (window._trendChart) window._trendChart.destroy()
+                    const ctx = document.getElementById('trendLineChart').getContext('2d')
+                    window._trendChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels,
+                            datasets: [{
+                                label: 'Score %',
+                                data,
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59,130,246,0.08)',
+                                pointBackgroundColor: data.map(v => v >= 80 ? '#10b981' : v >= 50 ? '#f59e0b' : '#ef4444'),
+                                pointRadius: 5,
+                                pointHoverRadius: 7,
+                                tension: 0.35,
+                                fill: true,
+                                borderWidth: 2.5
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: { callbacks: {
+                                    label: ctx => ' Score: ' + ctx.raw + '%',
+                                    title: (items) => trend[items[0].dataIndex]?.exam_title || items[0].label
+                                }}
+                            },
+                            scales: {
+                                y: {
+                                    min: 0, max: 100,
+                                    ticks: { color: '#94a3b8', callback: v => v + '%' },
+                                    grid: { color: 'rgba(148,163,184,0.1)' }
+                                },
+                                x: {
+                                    ticks: { color: '#94a3b8', maxRotation: 30, font: { size: 11 } },
+                                    grid: { display: false }
+                                }
+                            }
+                        }
+                    })
+                }
+            } catch (e) {
+                if (container) container.innerHTML = '<div style="text-align:center;padding:2rem;color:#64748b;font-size:0.85rem;">Unable to load performance trend.</div>'
+            }
+        }
+
+        function _trendPill(label, value, color) {
+            return '<div style="background:' + color + '18;border:1px solid ' + color + '33;border-radius:10px;padding:0.5rem 0.9rem;min-width:90px;">'
+                + '<div style="font-size:0.72rem;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">' + label + '</div>'
+                + '<div style="font-size:1.1rem;font-weight:800;color:' + color + ';margin-top:2px;">' + value + '</div>'
+                + '</div>'
         }
     </script>
     <script src="js/ui-feedback.js?v=20260314-admin-student-fix"></script>

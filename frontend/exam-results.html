@@ -1243,7 +1243,21 @@
                 <div class="answer-item ${statusClass}">
                     <div class="question-header">
                         <span class="question-number">Question ${index + 1}</span>
-                        <span class="answer-badge ${badgeClass}">${badgeText}</span>
+                        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+                            ${(function() {
+                                const diff = (question.difficulty_level || question.difficulty || '').toLowerCase()
+                                if (!diff) return ''
+                                const dMap = { easy: ['#10b981','rgba(16,185,129,0.12)','Easy'], medium: ['#f59e0b','rgba(245,158,11,0.12)','Medium'], hard: ['#ef4444','rgba(239,68,68,0.12)','Hard'] }
+                                const [dc, dbg, dl] = dMap[diff] || ['#94a3b8','rgba(148,163,184,0.12)', diff.charAt(0).toUpperCase()+diff.slice(1)]
+                                return '<span style="background:'+dbg+';border:1px solid '+dc+'44;color:'+dc+';padding:2px 8px;border-radius:999px;font-size:0.72rem;font-weight:700;">'+dl+'</span>'
+                            })()}
+                            ${(function() {
+                                const qt = (question.question_type || '').replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase())
+                                return qt ? '<span style="background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);color:#a5b4fc;padding:2px 8px;border-radius:999px;font-size:0.72rem;font-weight:700;">'+qt+'</span>' : ''
+                            })()}
+                            ${aiFeedback && aiFeedback.graded_by ? '<span style="background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.2);color:#7dd3fc;padding:2px 8px;border-radius:999px;font-size:0.72rem;font-weight:600;">🤖 '+aiFeedback.graded_by+'</span>' : (aiFeedback ? '<span style="background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.2);color:#7dd3fc;padding:2px 8px;border-radius:999px;font-size:0.72rem;font-weight:600;">🤖 AI Graded</span>' : '')}
+                            <span class="answer-badge ${badgeClass}">${badgeText}</span>
+                        </div>
                     </div>
                     <div class="question-text">${question.question_text || question.question || 'Question text unavailable'}</div>
                     ${answerDisplay}
