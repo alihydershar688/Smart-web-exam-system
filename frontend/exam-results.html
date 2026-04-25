@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -516,6 +516,7 @@
     <link rel="stylesheet" href="css/workspace-shell.css">
 </head>
 <body class="workspace-theme sidebar-simple">
+<style>html,body{overflow-x:hidden!important;touch-action:manipulation;}button,.btn{touch-action:manipulation!important;min-height:44px;}</style>
     <header class="workspace-topbar">
         <div class="workspace-topbar-content">
             <div class="header-brand-group">
@@ -1295,7 +1296,7 @@
             const attemptId = window.currentAttempt?.attempt_id || new URLSearchParams(window.location.search).get('attempt')
             if (!attemptId) { alert('No attempt loaded.'); return }
             const backendBase = window.AppConfig.getBackendBase()
-            // Open the PDF export page in a new tab — user can print/save as PDF
+            // Open the PDF export page in a new tab ï¿½ user can print/save as PDF
             window.open(`${backendBase}/attempt-results/${encodeURIComponent(attemptId)}/export-pdf`, '_blank')
         }
 

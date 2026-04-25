@@ -843,3 +843,18 @@ body.auth-signup-page {
     height: auto !important;
     min-height: 100dvh !important;
 }
+
+/* ── Mobile touch targets for auth pages ── */
+body.auth-login-page .btn,
+body.auth-signup-page .btn,
+body.auth-login-page .password-toggle,
+body.auth-signup-page .password-toggle,
+body.auth-login-page .role-card,
+body.auth-signup-page .role-card,
+body.auth-login-page .checkbox-label,
+body.auth-signup-page .checkbox-label {
+    min-height: 44px !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: rgba(30,58,138,0.12) !important;
+    cursor: pointer !important;
+}
