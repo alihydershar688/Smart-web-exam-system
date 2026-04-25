@@ -1215,6 +1215,8 @@
                             ${suggested !== null ? `<div style="margin-top:0.45rem;font-size:0.84rem;">Suggested marks: <strong style="color:#e2e8f0;">${suggested} / ${Number(question.marks || 0)}</strong></div>` : ''}
                         </div>
                     `
+                }  // end if (aiFeedback)
+
                 if (canEdit) {
                     const maxMarks = question.marks || 10
                     const suggestedMarks = aiFeedback && aiFeedback.suggested_marks !== undefined

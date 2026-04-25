@@ -2856,7 +2856,7 @@ body.teacher-dashboard-page .toast.info { border-left-color: #185FA5 !important;
                 container.innerHTML = `
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
                         <span style="color:#94a3b8;font-size:0.88rem;" id="pendingGradeCount">${uniqueAttempts.length} pending submission${uniqueAttempts.length !== 1 ? 's' : ''}</span>
-                        <button class="btn btn-primary" onclick="gradeAllPendingWithAI()" id="gradeAllBtn">
+                        <button class="btn btn-primary" onclick="gradeAllPendingWithAI()" id="gradeAllBtnDynamic">
                             Grade All Pending with AI
                         </button>
                     </div>
@@ -3018,7 +3018,7 @@ body.teacher-dashboard-page .toast.info { border-left-color: #185FA5 !important;
         }
 
         async function gradeAllPendingWithAI() {
-            const btn = document.getElementById('gradeAllBtn')
+            const btn = document.getElementById('gradeAllBtnDynamic') || document.getElementById('gradeAllBtn')
             const countEl = document.getElementById('pendingGradeCount')
             try {
                 const submissionsResult = await fetchBackendJson('/submissions?status=submitted,pending_grading')
