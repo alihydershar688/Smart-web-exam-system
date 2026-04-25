@@ -5853,6 +5853,85 @@ def teacher_list_courses():
         return jsonify({'success': True, 'count': len(courses), 'courses': courses}), 200
     except Exception as e:
         return jsonify({'success': False, 'error': str(e), 'courses': []}), 500
+
+
+@app.route('/api/teacher/students', methods=['GET'])
+def teacher_enrolled_students():
+    """Get all students enrolled in this teacher's courses."""
+    try:
+        user_ctx, auth_error = _require_authenticated_roles('teacher')
+        if auth_error:
+            return auth_error
+
+        supabase = get_supabase()
+        teacher_id = _user_ctx_profile_id(user_ctx)
+
+        # Get teacher's courses
+        courses_resp = db_exec(lambda: supabase.table('courses')
+            .select('id,course_code,course_name')
+            .eq('teacher_id', teacher_id)
+            .execute())
+        courses = courses_resp.data or []
+
+        if not courses:
+            return jsonify({'success': True, 'students': [], 'courses': [], 'count': 0}), 200
+
+        course_ids = [c['id'] for c in courses if c.get('id')]
+        course_map = {c['id']: f"{c.get('course_code','')} - {c.get('course_name','')}" for c in courses}
+
+        # Get enrollments
+        enr_resp = db_exec(lambda: supabase.table('enrollments')
+            .select('student_id,course_id,status')
+            .in_('course_id', course_ids)
+            .execute())
+        enrollments = enr_resp.data or []
+
+        # Get unique student IDs
+        student_ids = list(set(e['student_id'] for e in enrollments if e.get('student_id')))
+
+        if not student_ids:
+            return jsonify({'success': True, 'students': [], 'courses': courses, 'count': 0}), 200
+
+        # Get student profiles
+        students_resp = db_exec(lambda: supabase.table('users')
+            .select('id,first_name,last_name,email,student_id,status,department,batch')
+            .in_('id', student_ids)
+            .execute())
+        students_data = students_resp.data or []
+
+        # Build student → courses map
+        student_courses = {}
+        for e in enrollments:
+            sid = e.get('student_id')
+            cid = e.get('course_id')
+            if sid and cid:
+                if sid not in student_courses:
+                    student_courses[sid] = []
+                label = course_map.get(cid, cid)
+                if label not in student_courses[sid]:
+                    student_courses[sid].append(label)
+
+        # Build response
+        result = []
+        for s in students_data:
+            sid = s.get('id', '')
+            result.append({
+                'id': sid,
+                'first_name': s.get('first_name', ''),
+                'last_name': s.get('last_name', ''),
+                'full_name': f"{s.get('first_name','')} {s.get('last_name','')}".strip() or s.get('email',''),
+                'email': s.get('email', ''),
+                'student_id': s.get('student_id', ''),
+                'status': s.get('status', 'active'),
+                'department': s.get('department', ''),
+                'batch': s.get('batch', ''),
+                'enrolled_courses': student_courses.get(sid, []),
+            })
+
+        return jsonify({'success': True, 'students': result, 'courses': courses, 'count': len(result)}), 200
+    except Exception as e:
+        logger.error('[teacher/students] Error: %s', e)
+        return jsonify({'success': False, 'error': str(e), 'students': []}), 500
 # ==========================================
 # CLEANUP - Delete exams without questions
 # ==========================================

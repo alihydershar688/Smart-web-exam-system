@@ -2531,200 +2531,70 @@ body.teacher-dashboard-page .toast.info { border-left-color: #185FA5 !important;
         async function loadEnrolledStudents(teacherId) {
             const container = document.getElementById('studentsTableContainer')
             try {
-                if (!teacherId) {
-                    if (container) container.innerHTML = '<div class="empty-state"><p>Teacher ID missing</p></div>'
-                    return
+                if (container) container.innerHTML = '<div class="loading"><p>Loading students...</p></div>'
+
+                // Use backend API -- bypasses RLS, resolves all ID variants server-side
+                const result = await fetchBackendJson('/teacher/students')
+                if (!result.ok || !result.data?.success) {
+                    throw new Error(result.data?.error || result.error || 'Failed to load students')
                 }
 
-                // -- Step 1: Get teacher's courses via backend API (handles all ID resolution) --
-                let courses = []
-                try {
-                    const result = await fetchBackendJson('/teacher/courses')
-                    if (result.ok && result.data?.success && result.data?.courses?.length > 0) {
-                        courses = result.data.courses
-                    }
-                } catch (_) {}
+                const students = result.data.students || []
+                const courses  = result.data.courses  || []
 
-                // -- Fallback: direct Supabase query with multiple ID candidates --
-                if (courses.length === 0) {
-                    const idCandidates = [
-                        teacherId,
-                        localStorage.getItem('teacherId'),
-                        localStorage.getItem('userId')
-                    ].filter((v, i, a) => v && isValidUuid(v) && a.indexOf(v) === i)
-
-                    for (const tid of idCandidates) {
-                        const { data, error } = await supabaseClient
-                            .from('courses')
-                            .select('id, course_code, course_name')
-                            .eq('teacher_id', tid)
-                        if (!error && data && data.length > 0) {
-                            courses = data
-                            break
-                        }
-                    }
-                }
-
-                if (courses.length === 0) {
-                    document.getElementById('totalStudents').textContent = '0'
-                    if (container) container.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon">Info</div>
-                            <p>No courses assigned to this teacher yet</p>
-                        </div>`
-                    return
-                }
-
-                const courseIds = courses.map(c => c.id || c.course_id).filter(Boolean)
-
-                // -- Step 2: Get enrollments � try multiple table/column schemas --
-                let enrollments = []
-
-                // Try primary enrollments table
-                const { data: enr1, error: enrErr1 } = await supabaseClient
-                    .from('enrollments')
-                    .select('student_id, course_id')
-                    .in('course_id', courseIds)
-                if (!enrErr1 && enr1) enrollments = enr1
-
-                // Fallback: course_enrollments table
-                if (enrollments.length === 0) {
-                    const courseCodes = courses.map(c => c.course_code).filter(Boolean)
-                    if (courseCodes.length > 0) {
-                        const { data: enr2 } = await supabaseClient
-                            .from('course_enrollments')
-                            .select('user_id, course_code')
-                            .in('course_code', courseCodes)
-                            .eq('enrollment_role', 'student')
-                        if (enr2 && enr2.length > 0) {
-                            enrollments = enr2.map(e => ({ student_id: e.user_id, course_id: e.course_code }))
-                        }
-                    }
-                }
-
-                const uniqueStudentIds = [...new Set(enrollments.map(e => e.student_id).filter(Boolean))]
-                document.getElementById('totalStudents').textContent = uniqueStudentIds.length
+                // Update stat counters
+                document.getElementById('totalStudents').textContent = students.length
                 const badge = document.getElementById('studentCountBadge')
-                if (badge) badge.textContent = `${uniqueStudentIds.length} student${uniqueStudentIds.length !== 1 ? 's' : ''}`
-
-                if (uniqueStudentIds.length === 0) {
-                    if (container) container.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon">Info</div>
-                            <p>No enrolled students yet</p>
-                        </div>`
-                    return
-                }
-
-                // -- Step 3: Fetch student profiles --
-                let students = []
-                const { data: s1, error: sErr1 } = await supabaseClient
-                    .from('users')
-                    .select('id, first_name, last_name, email, student_id, status')
-                    .in('id', uniqueStudentIds)
-                if (!sErr1 && s1 && s1.length > 0) {
-                    students = s1.map(s => ({ ...s, _key: s.id }))
-                } else {
-                    // Fallback: user_id column
-                    const { data: s2 } = await supabaseClient
-                        .from('users')
-                        .select('user_id, first_name, last_name, email, student_id, status')
-                        .in('user_id', uniqueStudentIds)
-                    if (s2 && s2.length > 0) students = s2.map(s => ({ ...s, id: s.user_id, _key: s.user_id }))
-                }
+                if (badge) badge.textContent = students.length + ' student' + (students.length !== 1 ? 's' : '')
 
                 if (students.length === 0) {
-                    if (container) container.innerHTML = '<div class="empty-state"><p>Unable to load student profiles</p></div>'
+                    if (container) container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">Info</div><p>No enrolled students yet</p></div>'
                     return
                 }
 
-                // -- Step 4: Build course map --
-                const courseMap = {}
-                courses.forEach(c => {
-                    const cid = c.id || c.course_id
-                    courseMap[cid] = `${c.course_code || 'N/A'} - ${c.course_name || 'Course'}`
-                    if (c.course_code) courseMap[c.course_code] = courseMap[cid]
+                // Render table
+                let rows = ''
+                students.forEach(function(student, idx) {
+                    const fullName = [student.first_name, student.last_name].filter(Boolean).join(' ') || student.name || 'Unknown Student'
+                    const initials = fullName.split(' ').map(function(p){ return p[0] || '' }).join('').toUpperCase().slice(0, 2) || 'ST'
+                    const enrolledCourses = student.enrolled_courses || []
+                    const isActive = (student.status || 'active') === 'active'
+                    const statusColor = isActive
+                        ? 'background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);color:#059669;'
+                        : 'background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#ef4444;'
+                    const statusLabel = (student.status || 'active').charAt(0).toUpperCase() + (student.status || 'active').slice(1)
+                    const regNo = student.student_id || student.reg_no || 'N/A'
+                    const email = student.email || 'N/A'
+                    let coursePills = '<span style="color:#94a3b8;font-size:0.82rem;">&mdash;</span>'
+                    if (enrolledCourses.length > 0) {
+                        coursePills = enrolledCourses.map(function(c){
+                            return '<span style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);padding:2px 8px;border-radius:999px;font-size:0.76rem;font-weight:700;color:#1E3A8A;">' + (c.course_code || c) + '</span>'
+                        }).join('')
+                    }
+                    rows += '<tr>'
+                    rows += '<td style="color:#64748b;font-size:0.82rem;">' + (idx+1) + '</td>'
+                    rows += '<td><div style="display:flex;align-items:center;gap:0.65rem;"><div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(59,130,246,0.15));border:1px solid rgba(59,130,246,0.2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.72rem;color:#1E3A8A;flex-shrink:0;">' + initials + '</div><span style="font-weight:700;color:#1E3A8A;">' + fullName + '</span></div></td>'
+                    rows += '<td style="color:#64748b;font-size:0.88rem;">' + email + '</td>'
+                    rows += '<td><span style="background:#EFF6FF;border:1px solid #BFDBFE;padding:3px 8px;border-radius:6px;font-size:0.8rem;font-weight:700;color:#1E3A8A;">' + regNo + '</span></td>'
+                    rows += '<td><div style="display:flex;flex-wrap:wrap;gap:4px;">' + coursePills + '</div></td>'
+                    rows += '<td class="col-center"><span style="' + statusColor + 'padding:3px 10px;border-radius:999px;font-size:0.76rem;font-weight:700;">' + statusLabel + '</span></td>'
+                    rows += '</tr>'
                 })
 
-                const studentCoursesMap = {}
-                enrollments.forEach(e => {
-                    const sid = e.student_id
-                    if (!sid) return
-                    if (!studentCoursesMap[sid]) studentCoursesMap[sid] = new Set()
-                    studentCoursesMap[sid].add(courseMap[e.course_id] || e.course_id || 'Unknown Course')
-                })
-
-                // -- Step 5: Render table --
                 if (container) {
-                    container.innerHTML = `
-                        <div style="margin-bottom:1rem;padding:0.75rem 1rem;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;display:flex;align-items:center;gap:0.75rem;">
-                            <span style="font-size:0.82rem;color:#1E3A8A;font-weight:700;">
-                                ${students.length} student${students.length !== 1 ? 's' : ''} enrolled across ${courses.length} course${courses.length !== 1 ? 's' : ''}
-                            </span>
-                        </div>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Student Name</th>
-                                    <th>Email</th>
-                                    <th>Reg. No</th>
-                                    <th>Enrolled Courses</th>
-                                    <th class="col-center">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${students.map((student, idx) => {
-                                    const fullName = [student.first_name, student.last_name].filter(Boolean).join(' ') || 'Unknown Student'
-                                    const sid = student._key || student.id || student.user_id
-                                    const courseSet = studentCoursesMap[sid] || new Set()
-                                    const courseList = [...courseSet]
-                                    const initials = fullName.split(' ').map(p => p[0] || '').join('').toUpperCase().slice(0, 2) || 'ST'
-                                    const statusColor = (student.status || 'active') === 'active'
-                                        ? 'background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);color:#059669;'
-                                        : 'background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#ef4444;'
-                                    return `
-                                        <tr>
-                                            <td style="color:#64748b;font-size:0.82rem;">${idx + 1}</td>
-                                            <td>
-                                                <div style="display:flex;align-items:center;gap:0.65rem;">
-                                                    <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(59,130,246,0.15));border:1px solid rgba(59,130,246,0.2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.72rem;color:#1E3A8A;flex-shrink:0;">${initials}</div>
-                                                    <span style="font-weight:700;color:#1E3A8A;">${fullName}</span>
-                                                </div>
-                                            </td>
-                                            <td style="color:#64748b;font-size:0.88rem;">${student.email || 'N/A'}</td>
-                                            <td>
-                                                <span style="background:#EFF6FF;border:1px solid #BFDBFE;padding:3px 8px;border-radius:6px;font-size:0.8rem;font-weight:700;color:#1E3A8A;">
-                                                    ${student.student_id || 'N/A'}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div style="display:flex;flex-wrap:wrap;gap:4px;">
-                                                    ${courseList.length
-                                                        ? courseList.map(c => `<span style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);padding:2px 8px;border-radius:999px;font-size:0.76rem;font-weight:700;color:#1E3A8A;">${c.split(' - ')[0] || c}</span>`).join('')
-                                                        : '<span style="color:#94a3b8;font-size:0.82rem;">�</span>'
-                                                    }
-                                                </div>
-                                            </td>
-                                            <td class="col-center">
-                                                <span style="${statusColor}padding:3px 10px;border-radius:999px;font-size:0.76rem;font-weight:700;">
-                                                    ${(student.status || 'active').charAt(0).toUpperCase() + (student.status || 'active').slice(1)}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    `
-                                }).join('')}
-                            </tbody>
-                        </table>
-                    `
+                    container.innerHTML =
+                        '<div style="margin-bottom:1rem;padding:0.75rem 1rem;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;">'
+                        + '<span style="font-size:0.82rem;color:#1E3A8A;font-weight:700;">'
+                        + students.length + ' student' + (students.length !== 1 ? 's' : '') + ' enrolled across ' + courses.length + ' course' + (courses.length !== 1 ? 's' : '')
+                        + '</span></div>'
+                        + '<table class="table"><thead><tr><th>#</th><th>Student Name</th><th>Email</th><th>Reg. No</th><th>Enrolled Courses</th><th class="col-center">Status</th></tr></thead><tbody>' + rows + '</tbody></table>'
                 }
             } catch (error) {
                 console.error('Error loading students overview:', error)
-                if (container) container.innerHTML = '<div class="empty-state"><p>Unable to load students overview</p></div>'
+                if (container) container.innerHTML = '<div class="empty-state"><p>Unable to load students: ' + error.message + '</p></div>'
                 document.getElementById('totalStudents').textContent = '0'
             }
         }
-
 
 
         async function loadTeacherExams(userId) {
