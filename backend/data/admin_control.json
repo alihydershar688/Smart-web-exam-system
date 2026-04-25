@@ -5,12 +5,16 @@
   },
   "authorized_admins": [
     {
-      "email": "audit.admin-1773510931020@smart-exam.test",
-      "admin_id": "A0931020"
+      "email": "alihydershar688@gmail.com",
+      "admin_id": "A-00001"
     },
     {
-      "email": "alihydershar688@gmail.com",
-      "admin_id": "A2024001"
+      "email": "kashansardar2002@gmail.com",
+      "admin_id": "A-00002"
+    },
+    {
+      "email": "bader.qureshi360@gmail.com",
+      "admin_id": "A-00003"
     }
   ],
   "transfer_log": []

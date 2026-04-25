@@ -229,10 +229,9 @@ def _require_active_admin(payload=None):
         'auth_id': user_ctx.get('auth_id'),
     }
     state = load_admin_control()
+    # Any active admin in the database has full access
     if user_ctx.get('role') != 'admin' or user_ctx.get('status') != 'active':
         return None, identity, (jsonify({'success': False, 'error': 'Forbidden: active admin account required'}), 403)
-    if not is_active_admin(state, identity.get('email'), identity.get('admin_id')):
-        return None, None, (jsonify({'success': False, 'error': 'Forbidden: active admin access required'}), 403)
     return state, identity, None
 
 
@@ -247,10 +246,9 @@ def _require_authorized_admin(payload=None):
         'auth_id': user_ctx.get('auth_id'),
     }
     state = load_admin_control()
+    # Any active admin in the database has full access — no JSON file check needed
     if user_ctx.get('role') != 'admin' or user_ctx.get('status') != 'active':
         return None, identity, (jsonify({'success': False, 'error': 'Forbidden: active admin account required'}), 403)
-    if not is_authorized_admin(state, identity.get('email'), identity.get('admin_id')):
-        return None, identity, (jsonify({'success': False, 'error': 'Forbidden: authorized admin access required'}), 403)
     return state, identity, None
 
 
@@ -5876,20 +5874,18 @@ def admin_access_check():
         state = load_admin_control()
         email = user_ctx.get('email')
         admin_id = user_ctx.get('admin_id')
-        # Check if user is authorized as an admin (email-based check is primary)
-        is_auth = is_authorized_admin(state, email, admin_id)
-        # Allow login if authorized, even if status/role isn't perfectly set in DB
-        # The system will auto-correct these after first login
-        allowed = is_auth
-        active = allowed and is_active_admin(state, email, admin_id)
+        role   = str(user_ctx.get('role') or '').strip().lower()
+        status = str(user_ctx.get('status') or '').strip().lower()
+
+        # Any active admin in the database is authorized — no JSON file check
+        allowed = (role == 'admin' and status == 'active')
+        active  = allowed and is_active_admin(state, email, admin_id)
+
         return jsonify({
             'success': True,
             'authorized': allowed,
             'active_admin': active,
-            'identity': {
-                'email': email,
-                'admin_id': admin_id,
-            },
+            'identity': {'email': email, 'admin_id': admin_id},
             'summary': public_summary(state)
         }), 200
     except Exception as e:
