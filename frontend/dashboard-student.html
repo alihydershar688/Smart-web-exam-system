@@ -2207,8 +2207,13 @@ html body.student-dashboard-page .sidebar-footer-button:hover {
     </style>
 </head>
 <body class="student-dashboard-page">
+    <!-- Cold-start / connecting banner -->
+    <div id="coldStartBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#1e3a8a,#1d4ed8);color:#e0f2fe;font-size:0.82rem;font-weight:600;padding:9px 16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
+        <span>⏳ Connecting to server — this may take up to 30 seconds on first load</span><span id="coldStartDots"></span>
+        <button onclick="document.getElementById('coldStartBanner').style.display='none'" style="margin-left:16px;background:rgba(255,255,255,0.15);border:none;color:#e0f2fe;border-radius:6px;padding:2px 10px;cursor:pointer;font-size:0.78rem;">✕</button>
+    </div>
     <!-- Navbar -->
-    <nav class="navbar">
+    <nav class="navbar" id="mainNavbar">
         <div class="navbar-content">
             <div class="header-brand-group">
                 <button class="shell-toggle" type="button" data-sidebar-toggle aria-label="Toggle sidebar">
@@ -2388,10 +2393,43 @@ html body.student-dashboard-page .sidebar-footer-button:hover {
         let dashboardBroadcast = null
         let lastInteractionAt = Date.now()
         let isAutoRefreshing = false
+        let _coldStartTimer = null
+        let _coldStartDotsTimer = null
+        let _coldStartShown = false
+
+        function showColdStartBanner() {
+            if (_coldStartShown) return
+            _coldStartShown = true
+            const banner = document.getElementById('coldStartBanner')
+            if (banner) {
+                banner.style.display = 'block'
+                const nav = document.getElementById('mainNavbar')
+                if (nav) nav.style.marginTop = '38px'
+                let dots = 0
+                _coldStartDotsTimer = setInterval(() => {
+                    dots = (dots + 1) % 4
+                    const el = document.getElementById('coldStartDots')
+                    if (el) el.textContent = '.'.repeat(dots)
+                }, 500)
+            }
+        }
+        function hideColdStartBanner() {
+            clearTimeout(_coldStartTimer)
+            clearInterval(_coldStartDotsTimer)
+            _coldStartShown = false
+            const banner = document.getElementById('coldStartBanner')
+            if (banner) {
+                banner.style.display = 'none'
+                const nav = document.getElementById('mainNavbar')
+                if (nav) nav.style.marginTop = '0'
+            }
+        }
 
         async function fetchBackendJson(path, options = {}, timeoutMs = 9000) {
             const controller = new AbortController()
             const timer = setTimeout(() => controller.abort(), timeoutMs)
+            // Show cold-start banner if request takes >2s (Render free tier spin-up)
+            _coldStartTimer = setTimeout(showColdStartBanner, 2000)
             try {
                 const headers = await window.AppConfig.buildAuthHeaders(supabaseClient, options.headers)
                 const response = await fetch(`${AI_BACKEND_URL}${path}`, {
@@ -2418,6 +2456,7 @@ html body.student-dashboard-page .sidebar-footer-button:hover {
                 return { ok: false, data: null, error: error?.message || 'Network error' }
             } finally {
                 clearTimeout(timer)
+                hideColdStartBanner()
             }
         }
 

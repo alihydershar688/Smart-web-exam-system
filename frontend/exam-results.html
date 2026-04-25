@@ -419,12 +419,37 @@
 
         .ai-hint {
             margin-top: 0.65rem;
-            padding: 0.7rem;
-            border-radius: 8px;
+            padding: 0.85rem 1rem;
+            border-radius: 10px;
             border: 1px solid rgba(56, 189, 248, 0.35);
-            background: rgba(59, 130, 246, 0.16);
+            background: rgba(59, 130, 246, 0.10);
             color: #bfdbfe;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
+        }
+        .ai-confidence-bar-wrap {
+            margin-top: 0.55rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .ai-confidence-track {
+            flex: 1;
+            height: 8px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .ai-confidence-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.6s ease;
+        }
+        .ai-confidence-badge {
+            font-size: 0.78rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 999px;
+            white-space: nowrap;
         }
 
         .loading {
@@ -1166,15 +1191,30 @@
                 if (aiFeedback && (aiFeedback.suggested_marks !== undefined || aiFeedback.confidence !== undefined)) {
                     const suggested = aiFeedback.suggested_marks !== undefined ? Number(aiFeedback.suggested_marks) : null
                     const confidence = aiFeedback.confidence !== undefined ? Number(aiFeedback.confidence) : null
+                    const confPct = confidence !== null ? Math.round(confidence * 100) : null
+                    let confColor = '#60a5fa'; let confBg = 'rgba(59,130,246,0.18)'; let confLabel = 'Low'
+                    if (confPct !== null) {
+                        if (confPct >= 80) { confColor = '#34d399'; confBg = 'rgba(52,211,153,0.18)'; confLabel = 'High' }
+                        else if (confPct >= 55) { confColor = '#fbbf24'; confBg = 'rgba(251,191,36,0.18)'; confLabel = 'Medium' }
+                        else { confColor = '#f87171'; confBg = 'rgba(248,113,113,0.18)'; confLabel = 'Low' }
+                    }
                     answerDisplay += `
                         <div class="ai-hint">
-                            <strong>Auto Suggestion:</strong>
-                            ${suggested !== null ? `Suggested marks ${suggested}/${Number(question.marks || 0)}.` : 'No marks suggestion.'}
-                            ${confidence !== null ? ` Confidence ${(confidence * 100).toFixed(1)}%.` : ''}
+                            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.45rem;">
+                                <span style="font-weight:700;font-size:0.85rem;">🤖 AI Auto-Grading</span>
+                                ${confPct !== null ? `<span class="ai-confidence-badge" style="background:${confBg};color:${confColor};border:1px solid ${confColor}33;">${confLabel} Confidence · ${confPct}%</span>` : ''}
+                            </div>
+                            ${confPct !== null ? `
+                            <div class="ai-confidence-bar-wrap">
+                                <span style="font-size:0.75rem;color:#94a3b8;width:80px;">Confidence</span>
+                                <div class="ai-confidence-track">
+                                    <div class="ai-confidence-fill" style="width:${confPct}%;background:${confColor};"></div>
+                                </div>
+                                <span style="font-size:0.78rem;font-weight:700;color:${confColor};width:36px;text-align:right;">${confPct}%</span>
+                            </div>` : ''}
+                            ${suggested !== null ? `<div style="margin-top:0.45rem;font-size:0.84rem;">Suggested marks: <strong style="color:#e2e8f0;">${suggested} / ${Number(question.marks || 0)}</strong></div>` : ''}
                         </div>
                     `
-                }
-
                 if (canEdit) {
                     const maxMarks = question.marks || 10
                     const suggestedMarks = aiFeedback && aiFeedback.suggested_marks !== undefined

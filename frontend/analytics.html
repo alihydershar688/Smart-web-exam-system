@@ -676,13 +676,26 @@
                         <h3>Score Distribution</h3>
                         <span class="badge badge-info">Bands</span>
                     </div>
-                    <div id="scoreDistChart" style="display:grid;gap:8px;margin-top:12px;"></div>
+                    <div id="scoreDistChart" style="display:grid;gap:10px;margin-top:12px;"></div>
+                </section>
+
+                <!-- Role Breakdown Chart -->
+                <section class="card" id="roleChartPanel" style="margin-top:1rem;">
+                    <div class="card-header">
+                        <h3>User Role Breakdown</h3>
+                        <span class="badge badge-info">Live</span>
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:center;gap:2rem;flex-wrap:wrap;padding:1rem 0;">
+                        <canvas id="roleDonutChart" width="160" height="160" style="max-width:160px;"></canvas>
+                        <div id="roleChartLegend" style="display:grid;gap:0.5rem;"></div>
+                    </div>
                 </section>
             </main>
         </div>
     </div>
 
     <script src="js/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="js/app-config.js?v=20260314-sidebar-fix"></script>
     <script src="js/session-manager.js?v=20260314-sidebar-fix"></script>
     <script src="js/user-profile.js?v=20260314-sidebar-fix"></script>
@@ -946,29 +959,73 @@
                 document.getElementById('rbAuto').textContent = breakdown.auto;
                 document.getElementById('rbTeacher').textContent = breakdown.teacher;
 
-                // Score distribution
-                const bands = [
-                    { label: '0�20%',  min: 0,  max: 20,  color: '#ef4444' },
-                    { label: '20�40%', min: 20, max: 40,  color: '#f97316' },
-                    { label: '40�60%', min: 40, max: 60,  color: '#f59e0b' },
-                    { label: '60�80%', min: 60, max: 80,  color: '#3b82f6' },
-                    { label: '80�100%',min: 80, max: 101, color: '#10b981' },
+                // Score distribution (improved with labels + counts)
+                const scoreBands = [
+                    { label: '0-20%',   min: 0,  max: 20,  color: '#ef4444' },
+                    { label: '20-40%',  min: 20, max: 40,  color: '#f97316' },
+                    { label: '40-60%',  min: 40, max: 60,  color: '#f59e0b' },
+                    { label: '60-80%',  min: 60, max: 80,  color: '#3b82f6' },
+                    { label: '80-100%', min: 80, max: 101, color: '#10b981' },
                 ];
-                const allAttempts = attemptsRes.data || [];
-                const total = allAttempts.filter(a => a.percentage !== null).length || 1;
+                const scoredAttempts = allAttempts.filter(a => a.percentage !== null && a.percentage !== undefined);
+                const scoreTotal = scoredAttempts.length || 1;
                 const distEl = document.getElementById('scoreDistChart');
                 if (distEl) {
-                    distEl.innerHTML = bands.map(b => {
-                        const count = allAttempts.filter(a => a.percentage !== null && a.percentage >= b.min && a.percentage < b.max).length;
-                        const pct = Math.round((count / total) * 100);
-                        return `<div style="display:grid;grid-template-columns:70px 1fr 40px;align-items:center;gap:10px;">
-                            <span style="font-size:0.8rem;color:#94a3b8;">${b.label}</span>
-                            <div style="background:rgba(255,255,255,0.06);border-radius:999px;height:10px;overflow:hidden;">
-                                <div style="width:${pct}%;height:100%;background:${b.color};border-radius:999px;transition:width 0.5s;"></div>
-                            </div>
-                            <span style="font-size:0.82rem;font-weight:700;color:#f8fafc;">${count}</span>
-                        </div>`;
+                    distEl.innerHTML = scoreBands.map(b => {
+                        const count = scoredAttempts.filter(a => Number(a.percentage) >= b.min && Number(a.percentage) < b.max).length;
+                        const pct = Math.round((count / scoreTotal) * 100);
+                        return '<div style="display:grid;grid-template-columns:72px 1fr 52px 36px;align-items:center;gap:10px;padding:4px 0;">'
+                            + '<span style="font-size:0.8rem;color:#94a3b8;font-weight:600;">' + b.label + '</span>'
+                            + '<div style="background:rgba(255,255,255,0.06);border-radius:999px;height:10px;overflow:hidden;">'
+                            + '<div style="width:' + pct + '%;height:100%;background:' + b.color + ';border-radius:999px;transition:width 0.7s ease;"></div>'
+                            + '</div>'
+                            + '<span style="font-size:0.78rem;color:#94a3b8;text-align:right;">' + pct + '%</span>'
+                            + '<span style="font-size:0.82rem;font-weight:700;color:#f8fafc;text-align:right;">' + count + '</span>'
+                            + '</div>';
                     }).join('');
+                }
+
+                // Role breakdown donut chart
+                if (window.Chart) {
+                    const canvas = document.getElementById('roleDonutChart');
+                    const legend = document.getElementById('roleChartLegend');
+                    if (canvas) {
+                        const roleData = [
+                            { label: 'Students', count: roleCount.student || 0, color: '#3b82f6' },
+                            { label: 'Teachers', count: roleCount.teacher || 0, color: '#10b981' },
+                            { label: 'Admins',   count: roleCount.admin   || 0, color: '#f59e0b' },
+                        ];
+                        if (window._roleChart) window._roleChart.destroy();
+                        window._roleChart = new Chart(canvas, {
+                            type: 'doughnut',
+                            data: {
+                                labels: roleData.map(r => r.label),
+                                datasets: [{
+                                    data: roleData.map(r => r.count),
+                                    backgroundColor: roleData.map(r => r.color),
+                                    borderColor: '#0f172a',
+                                    borderWidth: 3,
+                                    hoverOffset: 6
+                                }]
+                            },
+                            options: {
+                                cutout: '68%',
+                                plugins: { legend: { display: false }, tooltip: { callbacks: {
+                                    label: ctx => ' ' + ctx.label + ': ' + ctx.raw + ' users'
+                                }}},
+                                animation: { animateRotate: true, duration: 800 }
+                            }
+                        });
+                        if (legend) {
+                            legend.innerHTML = roleData.map(r =>
+                                '<div style="display:flex;align-items:center;gap:8px;">'
+                                + '<span style="width:12px;height:12px;border-radius:3px;background:' + r.color + ';flex-shrink:0;"></span>'
+                                + '<span style="font-size:0.84rem;color:#cbd5e1;">' + r.label + '</span>'
+                                + '<span style="font-size:0.84rem;font-weight:700;color:#f8fafc;margin-left:auto;padding-left:16px;">' + r.count + '</span>'
+                                + '</div>'
+                            ).join('');
+                        }
+                    }
                 }
 
                 const recent = document.getElementById('recentAttempts');

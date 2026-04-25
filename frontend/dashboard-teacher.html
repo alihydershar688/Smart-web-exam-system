@@ -995,6 +995,10 @@
             color: var(--muted);
         }
 
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         .empty-state {
             text-align: center;
             padding: 3rem;
@@ -1470,8 +1474,14 @@ body.teacher-dashboard-page .toast.info { border-left-color: #185FA5 !important;
     </style>
 </head>
 <body class="teacher-dashboard-page">
+    <!-- Cold-start / connecting banner -->
+    <div id="coldStartBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#1e3a8a,#1d4ed8);color:#e0f2fe;font-size:0.82rem;font-weight:600;padding:9px 16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);letter-spacing:0.01em;">
+        <span id="coldStartMsg">⏳ Connecting to server — this may take up to 30 seconds on first load...</span>
+        <span id="coldStartDots"></span>
+        <button onclick="document.getElementById('coldStartBanner').style.display='none'" style="margin-left:16px;background:rgba(255,255,255,0.15);border:none;color:#e0f2fe;border-radius:6px;padding:2px 10px;cursor:pointer;font-size:0.78rem;">✕</button>
+    </div>
     <!-- Navigation -->
-    <nav class="navbar">
+    <nav class="navbar" style="margin-top:0;" id="mainNavbar">
         <div class="navbar-content">
             <div class="header-brand-group">
                 <button class="shell-toggle" type="button" data-sidebar-toggle aria-label="Toggle sidebar">
@@ -1732,7 +1742,10 @@ body.teacher-dashboard-page .toast.info { border-left-color: #185FA5 !important;
             </div>
 
             <div id="studentsTableContainer">
-                <div class="loading">Loading students...</div>
+                <div class="loading" style="display:flex;flex-direction:column;align-items:center;gap:1rem;padding:3rem;">
+                    <div style="width:36px;height:36px;border:3px solid rgba(59,130,246,0.15);border-top:3px solid #3b82f6;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+                    <p style="color:#64748b;font-size:0.88rem;">Loading enrolled students...</p>
+                </div>
             </div>
                     </div>
 
@@ -1818,6 +1831,33 @@ body.teacher-dashboard-page .toast.info { border-left-color: #185FA5 !important;
             backendUnavailableUntil = Date.now() + ms
         }
 
+        // Cold-start banner: shown when first health check takes >2s (Render free tier spin-up)
+        let _coldStartTimer = null
+        let _coldStartDotsTimer = null
+        function showColdStartBanner() {
+            const banner = document.getElementById('coldStartBanner')
+            if (banner) {
+                banner.style.display = 'block'
+                document.getElementById('mainNavbar').style.marginTop = '38px'
+                let dots = 0
+                _coldStartDotsTimer = setInterval(() => {
+                    dots = (dots + 1) % 4
+                    const el = document.getElementById('coldStartDots')
+                    if (el) el.textContent = '.'.repeat(dots)
+                }, 500)
+            }
+        }
+        function hideColdStartBanner() {
+            clearTimeout(_coldStartTimer)
+            clearInterval(_coldStartDotsTimer)
+            const banner = document.getElementById('coldStartBanner')
+            if (banner) {
+                banner.style.display = 'none'
+                const nav = document.getElementById('mainNavbar')
+                if (nav) nav.style.marginTop = '0'
+            }
+        }
+
         async function checkBackendHealth(force = false) {
             const now = Date.now()
             if (!force && backendHealthy !== null && (now - backendLastCheckedAt) < 15000) {
@@ -1825,8 +1865,11 @@ body.teacher-dashboard-page .toast.info { border-left-color: #185FA5 !important;
             }
             backendLastCheckedAt = now
 
+            // Show cold-start banner after 2s if health check hasn't returned
+            _coldStartTimer = setTimeout(showColdStartBanner, 2000)
+
             const controller = new AbortController()
-            const timer = setTimeout(() => controller.abort(), 3500)
+            const timer = setTimeout(() => controller.abort(), 35000) // 35s for Render cold start
             try {
                 const response = await fetch(`${AI_BACKEND_URL}/health`, { signal: controller.signal })
                 backendHealthy = response.ok
@@ -1836,6 +1879,7 @@ body.teacher-dashboard-page .toast.info { border-left-color: #185FA5 !important;
                 markBackendUnavailable(45000)
             } finally {
                 clearTimeout(timer)
+                hideColdStartBanner()
             }
             return backendHealthy
         }
