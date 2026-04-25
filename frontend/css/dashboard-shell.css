@@ -1498,3 +1498,51 @@ section[id],
 #quickActionsSection {
     scroll-margin-top: 90px;
 }
+
+/* ── Mobile touch & overlay fixes ─────────────────────────── */
+
+/* Ensure all clickable cards have proper touch target size */
+@media (max-width: 1024px) {
+    .stat-card.clickable,
+    .filter-chip,
+    .btn,
+    .sidebar-link,
+    .sidebar-footer-button,
+    .sidebar-footer-link {
+        min-height: 44px !important;
+        cursor: pointer !important;
+        -webkit-tap-highlight-color: rgba(30,58,138,0.12) !important;
+        touch-action: manipulation !important;
+    }
+
+    /* Remove hover-only shadows that look like overlays on mobile */
+    .stat-card:hover,
+    .card:hover,
+    .panel:hover {
+        transform: none !important;
+        box-shadow: var(--dashboard-shadow) !important;
+    }
+
+    /* Fix overlay z-index so it doesn't cover content */
+    .app-shell-overlay {
+        z-index: 1199 !important;
+    }
+
+    /* Sidebar above overlay above navbar */
+    .sidebar {
+        z-index: 1300 !important;
+    }
+
+    .navbar, .topbar {
+        z-index: 1200 !important;
+    }
+}
+
+/* ── Profile avatar always visible ─────────────────────────── */
+.header-profile-avatar,
+.header-profile-trigger,
+#headerProfileAvatar {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}

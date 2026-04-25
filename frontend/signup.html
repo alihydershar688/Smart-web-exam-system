@@ -771,8 +771,12 @@
                 <div class="role-specific-fields" id="studentFields" style="display: none;">
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Student ID</label>
-                            <input type="text" class="form-control" id="studentId" placeholder="B22F1501SE151">
+                            <label class="form-label">Student ID <span style="font-size:10px;color:#6B9FD4;font-weight:400;text-transform:none;">(auto-generated)</span></label>
+                            <div style="display:flex;gap:6px;align-items:center;">
+                                <input type="text" class="form-control" id="studentId" placeholder="S-12345" readonly style="flex:1;background:#F0F4FF;color:#1E3A8A;font-weight:600;">
+                                <button type="button" onclick="document.getElementById('studentId').value=generateUniqueId('S')" style="padding:9px 12px;background:#1E3A8A;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px;white-space:nowrap;flex-shrink:0;" title="Generate new ID">&#8635;</button>
+                            </div>
+                        </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Batch</label>
@@ -795,8 +799,11 @@
                 <!-- Teacher Fields -->
                 <div class="role-specific-fields" id="teacherFields" style="display: none;">
                     <div class="form-group">
-                        <label class="form-label">Teacher ID</label>
-                        <input type="text" class="form-control" id="teacherId" placeholder="T2024001">
+                        <label class="form-label">Teacher ID <span style="font-size:10px;color:#6B9FD4;font-weight:400;text-transform:none;">(auto-generated)</span></label>
+                        <div style="display:flex;gap:6px;align-items:center;">
+                            <input type="text" class="form-control" id="teacherId" placeholder="T-12345" readonly style="flex:1;background:#F0F4FF;color:#1E3A8A;font-weight:600;">
+                            <button type="button" onclick="document.getElementById('teacherId').value=generateUniqueId('T')" style="padding:9px 12px;background:#1E3A8A;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px;white-space:nowrap;flex-shrink:0;" title="Generate new ID">&#8635;</button>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Department</label>
@@ -879,6 +886,12 @@
             })
         })
 
+        function generateUniqueId(prefix) {
+            // Format: S-12345 or T-12345 (prefix + 5 random digits)
+            const digits = Math.floor(10000 + Math.random() * 90000) // always 5 digits
+            return `${prefix}-${digits}`
+        }
+
         function showRegistrationForm(role) {
             if (!ALLOWED_SIGNUP_ROLES.has(role)) {
                 showAlert('Only student and teacher self-registration is allowed.', 'error')
@@ -893,8 +906,20 @@
 
             if (role === 'student') {
                 document.getElementById('studentFields').style.display = 'block'
+                // Auto-generate unique student ID
+                const autoId = generateUniqueId('S')
+                const studentIdEl = document.getElementById('studentId')
+                if (studentIdEl && !studentIdEl.value) {
+                    studentIdEl.value = autoId
+                }
             } else if (role === 'teacher') {
                 document.getElementById('teacherFields').style.display = 'block'
+                // Auto-generate unique teacher ID
+                const autoId = generateUniqueId('T')
+                const teacherIdEl = document.getElementById('teacherId')
+                if (teacherIdEl && !teacherIdEl.value) {
+                    teacherIdEl.value = autoId
+                }
             }
 
             const card = document.querySelector('.auth-card')

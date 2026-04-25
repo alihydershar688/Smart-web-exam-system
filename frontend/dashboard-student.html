@@ -2165,6 +2165,45 @@ html body.student-dashboard-page .sidebar-footer-button:hover {
         width: 100% !important;
     }
 }
+
+/* ── Mobile: sidebar hidden until drawer opened ── */
+@media (max-width: 1024px) {
+    html body.student-dashboard-page .sidebar {
+        position: fixed !important;
+        left: 16px !important;
+        top: 104px !important;
+        bottom: 16px !important;
+        width: min(320px, calc(100vw - 32px)) !important;
+        height: auto !important;
+        z-index: 1300 !important;
+        transform: translateX(calc(-100% - 24px)) !important;
+        transition: transform 220ms ease !important;
+        pointer-events: none !important;
+        border-radius: 16px !important;
+    }
+
+    html body.student-dashboard-page.sidebar-drawer-open .sidebar {
+        transform: translateX(0) !important;
+        pointer-events: auto !important;
+    }
+
+    html body.student-dashboard-page .content-column {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    html body.student-dashboard-page .app-shell {
+        display: block !important;
+    }
+
+    /* Ensure buttons are tappable */
+    html body.student-dashboard-page .btn,
+    html body.student-dashboard-page .stat-card.clickable {
+        min-height: 44px !important;
+        touch-action: manipulation !important;
+        -webkit-tap-highlight-color: rgba(30,58,138,0.15) !important;
+    }
+}
     </style>
 </head>
 <body class="student-dashboard-page">
