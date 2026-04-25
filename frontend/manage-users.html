@@ -1062,7 +1062,7 @@
                 .map((user) => {
                     const userId = getUserRecordId(user)
                     const roleLabel = String(user.role || '').toLowerCase() === 'teacher' ? 'Teacher' : 'Student'
-                    return `<option value="${escapeHtml(userId)}">${escapeHtml(getUserDisplayName(user))} � ${escapeHtml(roleLabel)} � ${escapeHtml(user.email || 'No email')}</option>`
+                    return `<option value="${escapeHtml(userId)}">${escapeHtml(getUserDisplayName(user))}) — ${escapeHtml(roleLabel)} — ${escapeHtml(user.email || 'No email')}</option>`
                 })
                 .join('')
             select.innerHTML = `<option value="">Select a user</option>${userOptions}`
