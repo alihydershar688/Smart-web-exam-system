@@ -2,6 +2,14 @@
 AI-Based Smart Exam Web System - Backend API
 Integrates Question Generation, Essay Grading, and Topic Extraction
 """
+import sys
+import os
+# Ensure the backend directory is in Python path so 'models' package is found
+# This is needed when running from a parent directory (e.g., Render deployment)
+_backend_dir = os.path.dirname(os.path.abspath(__file__))
+if _backend_dir not in sys.path:
+    sys.path.insert(0, _backend_dir)
+
 import logging
 logging.basicConfig(
     level=logging.INFO,
@@ -84,7 +92,16 @@ _TOPIC_EXTRACTOR_MODULE = None
 def _load_question_generator_module():
     global _QUESTION_GENERATOR_MODULE
     if _QUESTION_GENERATOR_MODULE is None:
-        from models import question_generator as module
+        try:
+            from models import question_generator as module
+        except ImportError:
+            import importlib.util, os
+            spec = importlib.util.spec_from_file_location(
+                'question_generator',
+                os.path.join(os.path.dirname(__file__), 'models', 'question_generator.py')
+            )
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
         _QUESTION_GENERATOR_MODULE = module
     return _QUESTION_GENERATOR_MODULE
 
@@ -92,7 +109,16 @@ def _load_question_generator_module():
 def _load_essay_grader_module():
     global _ESSAY_GRADER_MODULE
     if _ESSAY_GRADER_MODULE is None:
-        from models import essay_grader as module
+        try:
+            from models import essay_grader as module
+        except ImportError:
+            import importlib.util, os
+            spec = importlib.util.spec_from_file_location(
+                'essay_grader',
+                os.path.join(os.path.dirname(__file__), 'models', 'essay_grader.py')
+            )
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
         _ESSAY_GRADER_MODULE = module
     return _ESSAY_GRADER_MODULE
 
@@ -100,7 +126,16 @@ def _load_essay_grader_module():
 def _load_topic_extractor_module():
     global _TOPIC_EXTRACTOR_MODULE
     if _TOPIC_EXTRACTOR_MODULE is None:
-        from models import topic_extractor as module
+        try:
+            from models import topic_extractor as module
+        except ImportError:
+            import importlib.util, os
+            spec = importlib.util.spec_from_file_location(
+                'topic_extractor',
+                os.path.join(os.path.dirname(__file__), 'models', 'topic_extractor.py')
+            )
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
         _TOPIC_EXTRACTOR_MODULE = module
     return _TOPIC_EXTRACTOR_MODULE
 
