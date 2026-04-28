@@ -565,6 +565,96 @@
         }
 
     </style>
+    <!-- Light theme override for embedded shell context -->
+    <style>
+        /* When loaded inside teacher shell iframe — override dark theme with light */
+        body {
+            background: #F0F4FF !important;
+            background-image: none !important;
+            color: #1F2937 !important;
+        }
+        :root {
+            --ink: #1F2937;
+            --muted: #6B7280;
+            --surface: #FFFFFF;
+            --surface-alt: #F8FAFC;
+            --border: #DBEAFE;
+            --shadow: 0 4px 16px rgba(30,58,138,0.08);
+        }
+        .results-header {
+            background: #FFFFFF !important;
+            border: 1px solid #DBEAFE !important;
+            box-shadow: 0 4px 16px rgba(30,58,138,0.08) !important;
+        }
+        .results-header h1 { color: #1E3A8A !important; }
+        .success-icon { color: #6B7280 !important; }
+        .exam-title { color: #1F2937 !important; font-size: 1.5rem !important; font-weight: 700 !important; }
+        .exam-subject { color: #6B7280 !important; }
+
+        /* Score circle — keep colored */
+        .score-circle { color: white !important; }
+
+        /* Stat boxes */
+        .stat-box {
+            background: #FFFFFF !important;
+            border: 1px solid #DBEAFE !important;
+        }
+        .stat-value { color: #1E3A8A !important; font-size: 1.8rem !important; font-weight: 800 !important; }
+        .stat-label { color: #6B7280 !important; }
+
+        /* Section cards */
+        .section {
+            background: #FFFFFF !important;
+            border: 1px solid #DBEAFE !important;
+        }
+        .section h2 { color: #1E3A8A !important; }
+
+        /* Question cards */
+        .answer-item { background: #FFFFFF !important; border-color: #DBEAFE !important; }
+        .answer-item.correct { background: rgba(16,185,129,0.06) !important; border-color: #86efac !important; }
+        .answer-item.incorrect { background: rgba(239,68,68,0.06) !important; border-color: #fca5a5 !important; }
+        .answer-item.pending { background: rgba(245,158,11,0.06) !important; border-color: #fcd34d !important; }
+        .answer-item.graded { background: rgba(20,184,166,0.06) !important; border-color: #99f6e4 !important; }
+
+        /* Question text — must be dark and readable */
+        .question-number { color: #1E3A8A !important; font-weight: 700 !important; }
+        .question-text { color: #1F2937 !important; font-size: 1rem !important; }
+
+        /* Answer section */
+        .answer-section { background: #F8FAFC !important; border: 1px solid #DBEAFE !important; }
+        .answer-label { color: #6B7280 !important; font-weight: 700 !important; }
+        .answer-text { color: #1F2937 !important; }
+
+        /* Correct answer */
+        .correct-answer { background: rgba(16,185,129,0.08) !important; border-left-color: #10b981 !important; color: #065f46 !important; }
+        .correct-answer strong { color: #065f46 !important; }
+
+        /* Badges */
+        .badge-correct { background: #dcfce7 !important; color: #14532d !important; border: 1px solid #86efac !important; }
+        .badge-incorrect { background: #fee2e2 !important; color: #7f1d1d !important; border: 1px solid #fca5a5 !important; }
+        .badge-pending { background: #fef3c7 !important; color: #92400e !important; border: 1px solid #fcd34d !important; }
+        .badge-graded { background: #ccfbf1 !important; color: #134e4a !important; border: 1px solid #99f6e4 !important; }
+
+        /* AI hint */
+        .ai-hint { background: #eff6ff !important; border-color: #bfdbfe !important; color: #1e3a8a !important; }
+        .ai-hint span, .ai-hint div, .ai-hint p { color: #1e3a8a !important; }
+        .ai-confidence-badge { color: inherit !important; }
+
+        /* Grade input */
+        .grade-input { background: #F8FAFC !important; border: 1px solid #DBEAFE !important; color: #1F2937 !important; }
+
+        /* Buttons */
+        .btn-primary { background: #1E3A8A !important; color: #fff !important; }
+        .btn-secondary { background: #F0F4FF !important; color: #1E3A8A !important; border: 1px solid #DBEAFE !important; }
+
+        /* Performance message */
+        .performance-message { color: inherit !important; }
+
+        /* Topbar */
+        .topbar { background: #FFFFFF !important; border-bottom: 1px solid #DBEAFE !important; }
+        .brand-page { color: #1E3A8A !important; }
+        .brand-name { color: #6B7280 !important; }
+    </style>
     <link rel="stylesheet" href="css/ui-system.css">
     <link rel="stylesheet" href="css/product-theme.css">
     <link rel="stylesheet" href="css/workspace-shell.css">
