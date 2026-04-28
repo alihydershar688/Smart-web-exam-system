@@ -1318,5 +1318,133 @@
         });
     </script>
     <script src="js/ui-feedback.js"></script>
+
+    <!-- FAQ Floating Button (shared component) -->
+    <style>
+        #faqFloatBtn{position:fixed;bottom:24px;right:24px;z-index:8000;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1d4ed8,#0f766e);color:#fff;border:none;cursor:pointer;box-shadow:0 8px 28px rgba(29,78,216,0.45);display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;transition:transform .2s,box-shadow .2s;animation:faqPulse 3s ease-in-out infinite;}
+        #faqFloatBtn:hover{transform:scale(1.1) translateY(-2px);box-shadow:0 14px 36px rgba(29,78,216,0.55);animation:none;}
+        #faqFloatBtn::after{content:'How to Use';position:absolute;right:62px;top:50%;transform:translateY(-50%);background:#0f172a;color:#e0f2fe;font-size:.73rem;font-weight:700;padding:4px 9px;border-radius:7px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;border:1px solid rgba(255,255,255,.1);}
+        #faqFloatBtn:hover::after{opacity:1;}
+        @keyframes faqPulse{0%,100%{box-shadow:0 8px 28px rgba(29,78,216,.45)}50%{box-shadow:0 8px 36px rgba(29,78,216,.7),0 0 0 8px rgba(29,78,216,.12)}}
+        #faqModal{display:none;position:fixed;inset:0;z-index:9000;background:rgba(2,6,23,.72);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px;}
+        #faqModal.open{display:flex;}
+        .faq-card{background:linear-gradient(160deg,#0d1b3e 0%,#0a2540 60%,#0d2d3a 100%);border:1px solid rgba(96,165,250,.2);border-radius:20px;width:100%;max-width:660px;max-height:88vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.6);animation:faqSlideUp .3s ease;}
+        @keyframes faqSlideUp{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+        .faq-card::-webkit-scrollbar{width:5px}.faq-card::-webkit-scrollbar-thumb{background:rgba(96,165,250,.3);border-radius:999px}
+        .faq-header{display:flex;align-items:center;justify-content:space-between;padding:1.3rem 1.5rem .9rem;border-bottom:1px solid rgba(96,165,250,.15);position:sticky;top:0;background:linear-gradient(160deg,#0d1b3e,#0a2540);z-index:1;border-radius:20px 20px 0 0;}
+        .faq-header-left{display:flex;align-items:center;gap:.7rem}
+        .faq-header-icon{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#1d4ed8,#0f766e);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+        .faq-header h2{font-size:1.05rem;font-weight:800;color:#e0f2fe;margin:0}
+        .faq-header p{font-size:.76rem;color:#64748b;margin:2px 0 0}
+        .faq-close{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#94a3b8;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+        .faq-close:hover{background:rgba(239,68,68,.15);color:#fca5a5;border-color:rgba(239,68,68,.3)}
+        .faq-tabs{display:flex;gap:.35rem;padding:.9rem 1.5rem 0;border-bottom:1px solid rgba(96,165,250,.1);flex-wrap:wrap}
+        .faq-tab{padding:.45rem .9rem;border-radius:8px 8px 0 0;font-size:.8rem;font-weight:700;cursor:pointer;border:1px solid transparent;border-bottom:none;color:#64748b;background:transparent;transition:all .2s;font-family:inherit}
+        .faq-tab.active{background:rgba(59,130,246,.12);border-color:rgba(96,165,250,.25);color:#93c5fd}
+        .faq-tab:hover:not(.active){color:#cbd5e1;background:rgba(255,255,255,.04)}
+        .faq-panel{display:none;padding:1.3rem 1.5rem 1.5rem}
+        .faq-panel.active{display:block}
+        .faq-role-grid{display:grid;gap:.8rem}
+        .faq-role-card{background:rgba(255,255,255,.04);border:1px solid rgba(96,165,250,.15);border-radius:13px;padding:.9rem 1rem;display:flex;gap:.85rem;align-items:flex-start}
+        .faq-role-icon{width:38px;height:38px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1rem}
+        .faq-role-card h4{font-size:.88rem;font-weight:800;color:#e0f2fe;margin:0 0 3px}
+        .faq-role-card p{font-size:.78rem;color:#94a3b8;margin:0;line-height:1.55}
+        .faq-creds{margin-top:5px;font-size:.74rem;color:#7dd3fc;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);border-radius:5px;padding:3px 7px;display:inline-block}
+        .faq-steps{display:grid;gap:.7rem}
+        .faq-step{display:flex;gap:.8rem;align-items:flex-start;background:rgba(255,255,255,.03);border:1px solid rgba(96,165,250,.1);border-radius:11px;padding:.8rem .95rem}
+        .faq-step-num{width:26px;height:26px;border-radius:7px;flex-shrink:0;background:linear-gradient(135deg,#1d4ed8,#0f766e);color:#fff;font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center}
+        .faq-step h4{font-size:.83rem;font-weight:700;color:#e0f2fe;margin:0 0 2px}
+        .faq-step p{font-size:.76rem;color:#94a3b8;margin:0;line-height:1.5}
+        .faq-item{border-bottom:1px solid rgba(96,165,250,.1)}
+        .faq-question{width:100%;text-align:left;background:none;border:none;padding:.85rem 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:.7rem;color:#cbd5e1;font-size:.86rem;font-weight:700;font-family:inherit;transition:color .2s}
+        .faq-question:hover{color:#93c5fd}
+        .faq-arrow{font-size:.68rem;color:#475569;transition:transform .25s ease;flex-shrink:0}
+        .faq-item.open .faq-question{color:#93c5fd}
+        .faq-item.open .faq-arrow{transform:rotate(180deg);color:#60a5fa}
+        .faq-answer{max-height:0;overflow:hidden;transition:max-height .3s ease}
+        .faq-item.open .faq-answer{max-height:300px}
+        .faq-answer p{font-size:.8rem;color:#94a3b8;line-height:1.65;padding:0 0 .85rem;margin:0}
+        .faq-links{display:grid;gap:.55rem}
+        .faq-link-row{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.04);border:1px solid rgba(96,165,250,.15);border-radius:9px;padding:.65rem .95rem;gap:.7rem}
+        .faq-link-row span{font-size:.8rem;color:#cbd5e1;font-weight:600}
+        .faq-link-row a{font-size:.74rem;color:#60a5fa;text-decoration:none;font-weight:700;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);padding:3px 9px;border-radius:5px;white-space:nowrap;transition:all .2s}
+        .faq-link-row a:hover{background:rgba(59,130,246,.2);color:#93c5fd}
+    </style>
+
+    <button id="faqFloatBtn" onclick="openFaqModal()" aria-label="How to use">?</button>
+
+    <div id="faqModal" role="dialog" aria-modal="true" onclick="if(event.target===this)closeFaqModal()">
+        <div class="faq-card">
+            <div class="faq-header">
+                <div class="faq-header-left">
+                    <div class="faq-header-icon">📖</div>
+                    <div><h2>How to Use Smart Exam System</h2><p>Quick guide for all users</p></div>
+                </div>
+                <button class="faq-close" onclick="closeFaqModal()">✕</button>
+            </div>
+            <div class="faq-tabs">
+                <button class="faq-tab active" onclick="switchFaqTab('login')">🔑 Login</button>
+                <button class="faq-tab" onclick="switchFaqTab('student')">🎓 Student</button>
+                <button class="faq-tab" onclick="switchFaqTab('teacher')">👨‍🏫 Teacher</button>
+                <button class="faq-tab" onclick="switchFaqTab('faq')">❓ FAQ</button>
+            </div>
+            <div class="faq-panel active" id="faqPanel-login">
+                <div class="faq-role-grid">
+                    <div class="faq-role-card">
+                        <div class="faq-role-icon" style="background:rgba(59,130,246,.15)">🎓</div>
+                        <div><h4>Student</h4><p>Register on Sign Up page with role <strong>Student</strong>. Wait for admin approval, then log in to access your exam dashboard.</p><span class="faq-creds">Role → Student &nbsp;|&nbsp; Needs admin approval</span></div>
+                    </div>
+                    <div class="faq-role-card">
+                        <div class="faq-role-icon" style="background:rgba(16,185,129,.15)">👨‍🏫</div>
+                        <div><h4>Teacher</h4><p>Register with role <strong>Teacher</strong>. Admin approves your account. Then log in to create exams and grade submissions.</p><span class="faq-creds">Role → Teacher &nbsp;|&nbsp; Needs admin approval</span></div>
+                    </div>
+                    <div class="faq-role-card">
+                        <div class="faq-role-icon" style="background:rgba(245,158,11,.15)">🛡️</div>
+                        <div><h4>Administrator</h4><p>Admin accounts are pre-created. Log in directly — no sign-up needed. Manage users and approve registrations.</p><span class="faq-creds">Pre-registered &nbsp;|&nbsp; No sign-up needed</span></div>
+                    </div>
+                    <div class="faq-role-card" style="border-color:rgba(99,102,241,.25);background:rgba(99,102,241,.06)">
+                        <div class="faq-role-icon" style="background:rgba(99,102,241,.15)">ℹ️</div>
+                        <div><h4>New User Steps</h4><p>1. Click <strong>Create Account</strong> below &nbsp;→&nbsp; 2. Fill details &nbsp;→&nbsp; 3. Wait for approval email &nbsp;→&nbsp; 4. Log in here!</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="faq-panel" id="faqPanel-student">
+                <div class="faq-steps">
+                    <div class="faq-step"><div class="faq-step-num">1</div><div><h4>Log In &amp; View Dashboard</h4><p>After approval, log in as Student. See enrolled courses, upcoming exams, and completed results.</p></div></div>
+                    <div class="faq-step"><div class="faq-step-num">2</div><div><h4>Attempt an Exam</h4><p>Click <strong>Available Exams</strong>. Start any published exam — answer MCQs, True/False, and essays within the time limit.</p></div></div>
+                    <div class="faq-step"><div class="faq-step-num">3</div><div><h4>View Results</h4><p>After grading, go to <strong>Completed Exams</strong> to see your score, percentage, and per-question AI feedback.</p></div></div>
+                    <div class="faq-step"><div class="faq-step-num">4</div><div><h4>Track Progress</h4><p>The <strong>Performance Trend</strong> chart shows your score history across all exams over time.</p></div></div>
+                </div>
+            </div>
+            <div class="faq-panel" id="faqPanel-teacher">
+                <div class="faq-steps">
+                    <div class="faq-step"><div class="faq-step-num">1</div><div><h4>Create an Exam</h4><p>Click <strong>Create Exam</strong>. Upload a PDF/DOCX file, select subject and difficulty — AI generates the paper automatically.</p></div></div>
+                    <div class="faq-step"><div class="faq-step-num">2</div><div><h4>Review &amp; Publish</h4><p>Preview questions in the editor. Edit or delete as needed. Click <strong>Publish</strong> so students can attempt it.</p></div></div>
+                    <div class="faq-step"><div class="faq-step-num">3</div><div><h4>Grade Submissions</h4><p>MCQs are auto-graded. Review essay answers in <strong>Pending Grading</strong>. Use <strong>Grade All with AI</strong> for bulk grading.</p></div></div>
+                    <div class="faq-step"><div class="faq-step-num">4</div><div><h4>Analytics &amp; Leaderboard</h4><p>Check <strong>Per-Course Analytics</strong> for pass rates. Use the <strong>Leaderboard</strong> to see top students per exam.</p></div></div>
+                </div>
+            </div>
+            <div class="faq-panel" id="faqPanel-faq">
+                <div>
+                    <div class="faq-item"><button class="faq-question" onclick="toggleFaq(this)">Why is the server slow on first load? <span class="faq-arrow">▼</span></button><div class="faq-answer"><p>The backend runs on Render's free tier which spins down after inactivity. First request can take ~30 seconds. A blue banner appears while connecting.</p></div></div>
+                    <div class="faq-item"><button class="faq-question" onclick="toggleFaq(this)">I registered but can't log in — why? <span class="faq-arrow">▼</span></button><div class="faq-answer"><p>New accounts start as <strong>Pending</strong>. An admin must approve your account first. You'll get an email once approved.</p></div></div>
+                    <div class="faq-item"><button class="faq-question" onclick="toggleFaq(this)">How does AI question generation work? <span class="faq-arrow">▼</span></button><div class="faq-answer"><p>Upload a PDF/DOCX. The system extracts text and uses an AI model (Ollama/Flan-T5) to generate MCQ, True/False, and essay questions. You review and edit before publishing.</p></div></div>
+                    <div class="faq-item"><button class="faq-question" onclick="toggleFaq(this)">How are essay answers graded? <span class="faq-arrow">▼</span></button><div class="faq-answer"><p>SBERT (Sentence-BERT) compares the student's answer to the model answer using semantic similarity. Answers below 75% confidence are flagged for teacher review.</p></div></div>
+                    <div class="faq-item" style="border-bottom:none"><button class="faq-question" onclick="toggleFaq(this)">Can I use this on mobile? <span class="faq-arrow">▼</span></button><div class="faq-answer"><p>Yes! Fully responsive. Students can attempt exams on mobile. The sidebar collapses automatically on small screens.</p></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function openFaqModal(){document.getElementById('faqModal').classList.add('open');document.body.style.overflow='hidden'}
+        function closeFaqModal(){document.getElementById('faqModal').classList.remove('open');document.body.style.overflow=''}
+        function switchFaqTab(tab){
+            const tabs=['login','student','teacher','faq']
+            document.querySelectorAll('.faq-tab').forEach((t,i)=>t.classList.toggle('active',tabs[i]===tab))
+            document.querySelectorAll('.faq-panel').forEach(p=>p.classList.toggle('active',p.id==='faqPanel-'+tab))
+        }
+        function toggleFaq(btn){const item=btn.closest('.faq-item');const was=item.classList.contains('open');document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));if(!was)item.classList.add('open')}
+        document.addEventListener('keydown',e=>{if(e.key==='Escape')closeFaqModal()})
+    </script>
 </body>
 </html>
