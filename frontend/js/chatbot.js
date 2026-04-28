@@ -3,6 +3,23 @@
  * Floating chat button on all dashboards.
  * Communicates via /api/chatbot (backend proxy — API key stays on server).
  */
+// CHATBOT DISABLED — remove this line to re-enable
+(function () {
+    'use strict';
+    // Remove any previously injected chatbot elements from DOM
+    function cleanup() {
+        ['chatbot-fab', 'chatbot-window', 'chatbot-styles'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) el.parentNode.removeChild(el);
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', cleanup);
+    } else {
+        cleanup();
+    }
+    return;
+})();
 (function () {
     'use strict';
 
