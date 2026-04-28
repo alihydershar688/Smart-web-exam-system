@@ -59,13 +59,17 @@ from utils.session_lock import (
     release_session_lock,
 )
 from utils.exam_operations import exam_bp
-app = Flask(__name__)
-# Enable CORS for all origins
+
+# Serve frontend from parent directory
+frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../frontend'))
+app = Flask(__name__, static_folder=frontend_dir, static_url_path='')
+
+# Enable CORS for all origins with credentials support
 CORS(app,
-     origins="*",
+     origins=["http://localhost:5000", "http://127.0.0.1:5000", "http://localhost", "http://127.0.0.1"],
      allow_headers=["*"],
      expose_headers=["*"],
-     supports_credentials=False,
+     supports_credentials=True,
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 # Register exam operations blueprint for RBAC
 app.register_blueprint(exam_bp)
@@ -649,12 +653,53 @@ def _create_active_enrollment_record(supabase, student_id, course_id):
 
 @app.route('/', methods=['GET'])
 def root():
-    """Simple root route to avoid confusion when opening backend URL directly."""
+    """Serve the frontend index.html for SPA routing."""
+    index_path = os.path.join(frontend_dir, 'index.html')
+    if os.path.exists(index_path):
+        with open(index_path, 'r', encoding='utf-8') as f:
+            return f.read(), 200, {'Content-Type': 'text/html; charset=utf-8'}
     return jsonify({
         'message': 'Smart Exam backend is running',
         'api_base': '/api',
         'health': '/api/health'
     }), 200
+
+# Catch-all route for SPA - serve index.html for any non-API route
+@app.route('/<path:path>', methods=['GET'])
+def serve_spa(path):
+    """Serve static files or fallback to index.html for SPA routing."""
+    # Don't intercept API routes
+    if path.startswith('api/'):
+        return jsonify({'error': 'Endpoint not found'}), 404
+    
+    # Try to serve the requested file
+    file_path = os.path.join(frontend_dir, path)
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        try:
+            with open(file_path, 'rb') as f:
+                content = f.read()
+            # Determine content type
+            if file_path.endswith('.html'):
+                content_type = 'text/html; charset=utf-8'
+            elif file_path.endswith('.css'):
+                content_type = 'text/css'
+            elif file_path.endswith('.js'):
+                content_type = 'application/javascript'
+            elif file_path.endswith('.json'):
+                content_type = 'application/json'
+            else:
+                content_type = 'application/octet-stream'
+            return content, 200, {'Content-Type': content_type}
+        except Exception:
+            pass
+    
+    # Fallback to index.html for SPA routing
+    index_path = os.path.join(frontend_dir, 'index.html')
+    if os.path.exists(index_path):
+        with open(index_path, 'r', encoding='utf-8') as f:
+            return f.read(), 200, {'Content-Type': 'text/html; charset=utf-8'}
+    
+    return jsonify({'error': 'Endpoint not found'}), 404
 # Add response headers for CORS
 @app.after_request
 def after_request(response):
@@ -2408,6 +2453,96 @@ def health_check():
         'model_runtime': model_status,
         'version': '1.0.0'
     }), 200
+
+# ==========================================
+# LEGACY ENDPOINT: Teacher Courses
+# ==========================================
+@app.route('/api/teacher/courses', methods=['GET'])
+def get_teacher_courses():
+    """Get courses for authenticated teacher"""
+    try:
+        user_ctx, auth_error = _require_authenticated_roles('teacher')
+        if auth_error:
+            return auth_error
+        
+        supabase = get_supabase()
+        teacher_id = _user_ctx_profile_id(user_ctx)
+        
+        # Load courses for this teacher
+        try:
+            response = db_exec(
+                lambda: supabase.table('courses')
+                .select('id, course_code, course_name, semester, academic_year')
+                .eq('teacher_id', teacher_id)
+                .execute()
+            )
+            courses = [dict(row or {}) for row in (response.data or [])]
+        except Exception:
+            courses = []
+        
+        return jsonify({
+            'success': True,
+            'courses': courses
+        }), 200
+    except Exception as e:
+        logger.error(f"Error getting teacher courses: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# ==========================================
+# ==========================================
+# LEGACY ENDPOINT: Get Exam Details
+# ==========================================
+@app.route('/api/exam/<exam_id>', methods=['GET'])
+def get_exam_details(exam_id):
+    """Get exam details (legacy endpoint for backward compatibility)"""
+    try:
+        user_ctx, auth_error = _require_authenticated_user()
+        if auth_error:
+            return auth_error
+        
+        supabase = get_supabase()
+        
+        # Load exam
+        exam_row = _load_exam_row(supabase, exam_id)
+        if not exam_row:
+            return jsonify({
+                'success': False,
+                'error': 'Exam not found'
+            }), 404
+        
+        # Check access
+        user_id = _user_ctx_profile_id(user_ctx)
+        role = user_ctx.get('role', '').lower()
+        
+        if role == 'teacher':
+            if exam_row.get('teacher_id') != user_id:
+                return jsonify({
+                    'success': False,
+                    'error': 'Access denied'
+                }), 403
+        elif role == 'student':
+            if not _student_can_access_exam(supabase, user_ctx, exam_row):
+                return jsonify({
+                    'success': False,
+                    'error': 'Access denied'
+                }), 403
+        
+        exam_data = dict(exam_row)
+        return jsonify({
+            'success': True,
+            'exam': exam_data
+        }), 200
+    except Exception as e:
+        logger.error(f"Error getting exam: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# ==========================================
 # ==========================================
 # ROUTE 2: Upload File & Generate Questions
 # ==========================================
@@ -7187,7 +7322,55 @@ def chatbot():
         return jsonify({'error': str(e)}), 500
 
 
-if __name__ == '__main__':
+# ==========================================
+# ROUTE: Submit Feedback / Complaint
+# ==========================================
+@app.route('/api/feedback', methods=['POST'])
+def submit_feedback():
+    """
+    Submit user feedback, suggestion, or complaint.
+    Stores in the 'feedback' table in Supabase.
+    No auth required — open to all users.
+    """
+    try:
+        data = request.get_json(silent=True) or {}
+        feedback_type = str(data.get('type') or 'feedback').strip().lower()
+        message      = str(data.get('message') or '').strip()
+        name         = str(data.get('name') or 'Anonymous').strip()
+        email        = str(data.get('email') or '').strip()
+        page         = str(data.get('page') or '').strip()
+
+        if not message:
+            return jsonify({'success': False, 'error': 'Message is required'}), 400
+        if len(message) > 2000:
+            return jsonify({'success': False, 'error': 'Message too long (max 2000 chars)'}), 400
+        if feedback_type not in ('feedback', 'suggestion', 'complaint'):
+            feedback_type = 'feedback'
+
+        supabase = get_supabase()
+        payload = {
+            'type':       feedback_type,
+            'message':    _sanitize_text(message),
+            'name':       _sanitize_text(name)[:100],
+            'email':      _sanitize_text(email)[:200],
+            'page':       _sanitize_text(page)[:200],
+            'status':     'new',
+            'created_at': time.strftime('%Y-%m-%dT%H:%M:%SZ'),
+        }
+        try:
+            db_exec(lambda: supabase.table('feedback').insert(payload).execute())
+            logger.info('[feedback] Saved %s from %s', feedback_type, email or name)
+        except Exception as db_err:
+            # Table may not exist yet — log but don't crash
+            logger.warning('[feedback] DB insert failed (table may not exist): %s', db_err)
+            # Still return success so UX isn't broken
+        return jsonify({'success': True, 'message': 'Thank you for your feedback!'}), 200
+    except Exception as e:
+        logger.error('[feedback] Error: %s', e)
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+
     port = int(os.getenv('PORT', 5000))
    
     print("\n" + "=" * 70)

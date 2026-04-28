@@ -1542,7 +1542,7 @@
         }
         /* Tooltip label */
         #faqFloatBtn::after {
-            content: 'How to Use';
+            content: 'Help Center';
             position: absolute;
             right: 66px;
             top: 50%;
@@ -1744,10 +1744,12 @@
         <div class="faq-card">
             <div class="faq-header">
                 <div class="faq-header-left">
-                    <div class="faq-header-icon">📖</div>
+                    <div class="faq-header-icon" style="font-size:0;background:linear-gradient(135deg,#1d4ed8,#0f766e);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
                     <div>
-                        <h2 id="faqModalTitle">How to Use Smart Exam System</h2>
-                        <p>Quick guide for students, teachers &amp; admins</p>
+                        <h2 id="faqModalTitle">Help Center</h2>
+                        <p>Guides, FAQ, feedback and complaints</p>
                     </div>
                 </div>
                 <button class="faq-close" onclick="closeFaqModal()" aria-label="Close">✕</button>
@@ -1755,34 +1757,40 @@
 
             <!-- Tabs -->
             <div class="faq-tabs">
-                <button class="faq-tab active" onclick="switchFaqTab('login')">🔑 Login</button>
-                <button class="faq-tab" onclick="switchFaqTab('student')">🎓 Student</button>
-                <button class="faq-tab" onclick="switchFaqTab('teacher')">👨‍🏫 Teacher</button>
-                <button class="faq-tab" onclick="switchFaqTab('faq')">❓ FAQ</button>
-                <button class="faq-tab" onclick="switchFaqTab('links')">🔗 Links</button>
+                <button class="faq-tab active" onclick="switchFaqTab('login')">How to Login</button>
+                <button class="faq-tab" onclick="switchFaqTab('student')">Student Guide</button>
+                <button class="faq-tab" onclick="switchFaqTab('teacher')">Teacher Guide</button>
+                <button class="faq-tab" onclick="switchFaqTab('faq')">FAQ</button>
+                <button class="faq-tab" onclick="switchFaqTab('feedback')">Feedback</button>
             </div>
 
             <!-- Tab: Login -->
             <div class="faq-panel active" id="faqPanel-login">
                 <div class="faq-role-grid">
                     <div class="faq-role-card">
-                        <div class="faq-role-icon" style="background:rgba(59,130,246,0.15);">🎓</div>
+                        <div class="faq-role-icon" style="background:rgba(59,130,246,0.15);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </div>
                         <div>
                             <h4>Student</h4>
                             <p>Register on the Sign Up page, select role <strong>Student</strong>. Wait for admin approval, then log in to access your exam dashboard.</p>
-                            <span class="faq-creds">Role → Student &nbsp;|&nbsp; Status → Pending until approved</span>
+                            <span class="faq-creds">Role: Student &nbsp;|&nbsp; Status: Pending until approved</span>
                         </div>
                     </div>
                     <div class="faq-role-card">
-                        <div class="faq-role-icon" style="background:rgba(16,185,129,0.15);">👨‍🏫</div>
+                        <div class="faq-role-icon" style="background:rgba(16,185,129,0.15);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
                         <div>
                             <h4>Teacher / Lecturer</h4>
                             <p>Register with role <strong>Teacher</strong>. Admin approves your account. Once active, log in to create exams, upload material, and grade submissions.</p>
-                            <span class="faq-creds">Role → Teacher &nbsp;|&nbsp; Needs admin approval</span>
+                            <span class="faq-creds">Role: Teacher &nbsp;|&nbsp; Needs admin approval</span>
                         </div>
                     </div>
                     <div class="faq-role-card">
-                        <div class="faq-role-icon" style="background:rgba(245,158,11,0.15);">🛡️</div>
+                        <div class="faq-role-icon" style="background:rgba(245,158,11,0.15);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </div>
                         <div>
                             <h4>Administrator</h4>
                             <p>Admin accounts are pre-created. Log in with your admin credentials to manage users, approve registrations, and view platform analytics.</p>
@@ -1790,10 +1798,12 @@
                         </div>
                     </div>
                     <div class="faq-role-card" style="border-color:rgba(99,102,241,0.25);background:rgba(99,102,241,0.06);">
-                        <div class="faq-role-icon" style="background:rgba(99,102,241,0.15);">ℹ️</div>
+                        <div class="faq-role-icon" style="background:rgba(99,102,241,0.15);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        </div>
                         <div>
-                            <h4>New User? Here's what to do</h4>
-                            <p>1. Click <strong>Login</strong> in the top nav &nbsp;→&nbsp; 2. Click <strong>Create Account</strong> &nbsp;→&nbsp; 3. Fill in your details &nbsp;→&nbsp; 4. Wait for admin approval email &nbsp;→&nbsp; 5. Log in!</p>
+                            <h4>New User — Getting Started</h4>
+                            <p>1. Click <strong>Login</strong> in the top nav &nbsp;→&nbsp; 2. Click <strong>Create Account</strong> &nbsp;→&nbsp; 3. Fill in your details &nbsp;→&nbsp; 4. Wait for admin approval &nbsp;→&nbsp; 5. Log in and start!</p>
                         </div>
                     </div>
                 </div>
@@ -1906,33 +1916,40 @@
                 </div>
             </div>
 
-            <!-- Tab: Links -->
-            <div class="faq-panel" id="faqPanel-links">
-                <div class="faq-links">
-                    <div class="faq-link-row">
-                        <span>🌐 Live Website</span>
-                        <a href="https://smart-web-exam-system.vercel.app" target="_blank">Open ↗</a>
+            <!-- Tab: Feedback & Complaints -->
+            <div class="faq-panel" id="faqPanel-feedback">
+                <p style="font-size:0.82rem;color:#94a3b8;margin:0 0 1rem;line-height:1.6;">
+                    Share your experience, suggest improvements, or report a problem. Your input helps us make the system better.
+                </p>
+                <div style="display:grid;gap:0.75rem;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                        <div>
+                            <label style="display:block;font-size:0.78rem;font-weight:700;color:#94a3b8;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.05em;">Your Name</label>
+                            <input id="fbName" type="text" placeholder="Optional" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(96,165,250,0.2);border-radius:8px;padding:8px 12px;color:#e2e8f0;font-size:0.84rem;font-family:inherit;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='rgba(96,165,250,0.5)'" onblur="this.style.borderColor='rgba(96,165,250,0.2)'">
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:0.78rem;font-weight:700;color:#94a3b8;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.05em;">Email</label>
+                            <input id="fbEmail" type="email" placeholder="Optional" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(96,165,250,0.2);border-radius:8px;padding:8px 12px;color:#e2e8f0;font-size:0.84rem;font-family:inherit;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='rgba(96,165,250,0.5)'" onblur="this.style.borderColor='rgba(96,165,250,0.2)'">
+                        </div>
                     </div>
-                    <div class="faq-link-row">
-                        <span>🔑 Login Page</span>
-                        <a href="login.html">Go to Login</a>
+                    <div>
+                        <label style="display:block;font-size:0.78rem;font-weight:700;color:#94a3b8;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.05em;">Type</label>
+                        <select id="fbType" style="width:100%;background:#0d1b3e;border:1px solid rgba(96,165,250,0.2);border-radius:8px;padding:8px 12px;color:#e2e8f0;font-size:0.84rem;font-family:inherit;outline:none;cursor:pointer;">
+                            <option value="feedback">General Feedback</option>
+                            <option value="suggestion">Suggestion / Improvement</option>
+                            <option value="complaint">Complaint / Issue</option>
+                        </select>
                     </div>
-                    <div class="faq-link-row">
-                        <span>📝 Sign Up</span>
-                        <a href="signup.html">Create Account</a>
+                    <div>
+                        <label style="display:block;font-size:0.78rem;font-weight:700;color:#94a3b8;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.05em;">Message <span style="color:#ef4444;">*</span></label>
+                        <textarea id="fbMessage" rows="4" placeholder="Describe your feedback, suggestion, or issue in detail..." style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(96,165,250,0.2);border-radius:8px;padding:8px 12px;color:#e2e8f0;font-size:0.84rem;font-family:inherit;outline:none;resize:vertical;box-sizing:border-box;line-height:1.55;" onfocus="this.style.borderColor='rgba(96,165,250,0.5)'" onblur="this.style.borderColor='rgba(96,165,250,0.2)'"></textarea>
                     </div>
-                    <div class="faq-link-row">
-                        <span>⚙️ Backend API</span>
-                        <a href="https://smart-web-exam-system.onrender.com/api/health" target="_blank">Health Check ↗</a>
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+                        <span id="fbStatus" style="font-size:0.8rem;color:#94a3b8;"></span>
+                        <button onclick="submitHelpFeedback()" style="background:linear-gradient(135deg,#1d4ed8,#0f766e);color:#fff;border:none;border-radius:9px;padding:9px 22px;font-size:0.84rem;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+                            Submit
+                        </button>
                     </div>
-                    <div class="faq-link-row">
-                        <span>💻 GitHub Repository</span>
-                        <a href="https://github.com/alihydershar688/Smart-web-exam-system" target="_blank">View Code ↗</a>
-                    </div>
-                </div>
-                <div style="margin-top:1.2rem;padding:0.9rem 1rem;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:10px;">
-                    <p style="font-size:0.8rem;color:#7dd3fc;margin:0;font-weight:600;">💡 Demo Tip</p>
-                    <p style="font-size:0.78rem;color:#94a3b8;margin:4px 0 0;line-height:1.55;">Visit the backend health check link first to wake up the server before your demo. It takes ~30 seconds on cold start.</p>
                 </div>
             </div>
         </div>
@@ -1952,7 +1969,7 @@
         }
         function switchFaqTab(tab) {
             document.querySelectorAll('.faq-tab').forEach((t, i) => {
-                const tabs = ['login','student','teacher','faq','links']
+                const tabs = ['login','student','teacher','faq','feedback']
                 t.classList.toggle('active', tabs[i] === tab)
             })
             document.querySelectorAll('.faq-panel').forEach(p => {
@@ -1964,6 +1981,40 @@
             const wasOpen = item.classList.contains('open')
             document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'))
             if (!wasOpen) item.classList.add('open')
+        }
+        async function submitHelpFeedback() {
+            const msg = (document.getElementById('fbMessage').value || '').trim()
+            const status = document.getElementById('fbStatus')
+            if (!msg) { status.textContent = 'Please enter a message.'; status.style.color = '#f87171'; return }
+            status.textContent = 'Sending...'; status.style.color = '#94a3b8'
+            try {
+                const backendBase = window.AppConfig ? window.AppConfig.getBackendBase() : 'https://smart-web-exam-system.onrender.com/api'
+                const res = await fetch(backendBase + '/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: document.getElementById('fbType').value,
+                        message: msg,
+                        name: document.getElementById('fbName').value || 'Anonymous',
+                        email: document.getElementById('fbEmail').value || '',
+                        page: window.location.pathname
+                    })
+                })
+                const data = await res.json()
+                if (data.success) {
+                    status.textContent = 'Thank you! Your message has been received.'
+                    status.style.color = '#34d399'
+                    document.getElementById('fbMessage').value = ''
+                    document.getElementById('fbName').value = ''
+                    document.getElementById('fbEmail').value = ''
+                } else {
+                    status.textContent = data.error || 'Something went wrong. Please try again.'
+                    status.style.color = '#f87171'
+                }
+            } catch (e) {
+                status.textContent = 'Could not connect. Please try again later.'
+                status.style.color = '#f87171'
+            }
         }
         // Close on Escape key
         document.addEventListener('keydown', e => {
