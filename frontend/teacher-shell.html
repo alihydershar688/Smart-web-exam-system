@@ -205,7 +205,7 @@ html body.teacher-shell-page .sidebar::-webkit-scrollbar-thumb { background: rgb
             <main class="content-column">
                 <div class="teacher-shell-stage">
                     <!-- Loading overlay: covers content area during page transitions -->
-                    <div id="shellLoadingOverlay" style="display:none;position:fixed;top:68px;left:300px;right:0;bottom:0;z-index:400;background:#F0F4FF;align-items:center;justify-content:center;flex-direction:column;gap:12px;">
+                    <div id="shellLoadingOverlay" style="display:none;position:absolute;inset:0;z-index:400;background:#F0F4FF;align-items:center;justify-content:center;flex-direction:column;gap:12px;min-height:200px;">
                         <div style="width:36px;height:36px;border:3px solid rgba(30,58,138,0.15);border-top:3px solid #1E3A8A;border-radius:50%;animation:shellSpin 0.7s linear infinite;"></div>
                         <span style="font-size:0.82rem;color:#6B7280;font-weight:600;font-family:Manrope,sans-serif;">Loading...</span>
                     </div>
@@ -401,14 +401,9 @@ html body.teacher-shell-page .sidebar::-webkit-scrollbar-thumb { background: rgb
             function showFrameLoading() {
                 const overlay = document.getElementById('shellLoadingOverlay');
                 if (overlay) {
-                    // Position overlay to cover only the content area (right of sidebar)
-                    const sidebar = document.querySelector('.sidebar');
-                    const sidebarWidth = (sidebar && window.innerWidth > 1024)
-                        ? (sidebar.offsetWidth || 268) : 0;
-                    overlay.style.left = sidebarWidth + 'px';
                     overlay.style.display = 'flex';
                 }
-                // Hide iframe so old content is invisible
+                // Fade out iframe so old content isn't visible
                 frame.style.opacity = '0';
                 frame.style.pointerEvents = 'none';
             }
@@ -416,8 +411,10 @@ html body.teacher-shell-page .sidebar::-webkit-scrollbar-thumb { background: rgb
             function hideFrameLoading() {
                 const overlay = document.getElementById('shellLoadingOverlay');
                 if (overlay) overlay.style.display = 'none';
+                // Always restore iframe visibility
                 frame.style.opacity = '1';
                 frame.style.pointerEvents = '';
+                frame.style.visibility = 'visible';
             }
 
             function navigate(target, options) {
@@ -515,6 +512,11 @@ html body.teacher-shell-page .sidebar::-webkit-scrollbar-thumb { background: rgb
             if (window.AppShell) {
                 window.AppShell.init();
             }
+
+            // Ensure iframe is always visible on init
+            frame.style.opacity = '1';
+            frame.style.visibility = 'visible';
+            frame.style.pointerEvents = '';
 
             // Show loading immediately on first load — before iframe renders anything
             showFrameLoading();

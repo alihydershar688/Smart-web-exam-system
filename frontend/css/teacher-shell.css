@@ -1,175 +1,158 @@
+/* ═══════════════════════════════════════════════════
+   TEACHER SHELL — Layout & Theme
+   Navbar: sticky, 68px
+   Sidebar: fixed, starts at 84px (navbar + 16px gap)
+   Content: margin-left to clear sidebar
+   ═══════════════════════════════════════════════════ */
+
 body.teacher-shell-page {
-    --teacher-shell-header-height: 68px;
-    --teacher-shell-pane-height: calc(100vh - var(--teacher-shell-header-height) - 24px);
+    --teacher-shell-navbar-h: 68px;
+    --teacher-shell-sidebar-w: 268px;
+    --teacher-shell-sidebar-top: 84px; /* navbar + 16px */
+    --teacher-shell-pane-height: calc(100vh - var(--teacher-shell-navbar-h) - 24px);
     min-height: 100vh !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
     margin: 0 !important;
     padding: 0 !important;
+    background: #F0F4FF !important;
 }
 
-body.teacher-shell-page .container {
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 1.2rem 1.4rem 1.6rem 0.85rem !important;
-    min-height: calc(100vh - var(--teacher-shell-header-height)) !important;
-    overflow: visible !important;
-    background: #F0F4FF !important;
-    width: 100% !important;
-    display: block !important;
+/* ── Navbar ── */
+body.teacher-shell-page .navbar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
+    height: var(--teacher-shell-navbar-h) !important;
 }
 
 body.teacher-shell-page .navbar-content {
-    min-height: 68px !important;
+    min-height: var(--teacher-shell-navbar-h) !important;
     padding: 0 1.5rem !important;
 }
 
-body.teacher-shell-page .header-brand-group {
-    gap: 10px !important;
-    align-items: center !important;
-}
-
-body.teacher-shell-page .brand {
-    gap: 10px !important;
-    align-items: center !important;
-}
-
-body.teacher-shell-page .brand-copy {
-    gap: 1px !important;
-    justify-content: center !important;
-}
-
-body.teacher-shell-page .brand-name {
-    font-size: 8px !important;
-    line-height: 1.15 !important;
-    letter-spacing: 0.12em !important;
-    font-weight: 800 !important;
-    color: rgba(226, 232, 240, 0.78) !important;
-}
-
-body.teacher-shell-page .brand-page {
-    font-size: 11px !important;
-    line-height: 1.12 !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.01em !important;
-}
-
-body.teacher-shell-page .header-utility {
-    margin-left: auto !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    padding-right: 18px !important;
-}
-
-body.teacher-shell-page .teacher-shell-header-profile {
-    width: 48px !important;
-    height: 48px !important;
-    border-radius: 999px !important;
-    padding: 4px !important;
-    box-sizing: border-box !important;
-    background: rgba(255, 255, 255, 0.04) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.18) !important;
-    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease !important;
-}
-
-body.teacher-shell-page .teacher-shell-header-profile:hover {
-    background: rgba(255, 255, 255, 0.08) !important;
-    border-color: rgba(251, 113, 133, 0.34) !important;
-    box-shadow: 0 18px 36px rgba(127, 29, 29, 0.22) !important;
-    transform: translateY(-1px) !important;
-}
-
-body.teacher-shell-page .teacher-shell-header-avatar {
+/* ── Container: full width, no extra padding ── */
+body.teacher-shell-page .container {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
     width: 100% !important;
-    height: 100% !important;
-    border-radius: 999px !important;
-    background: linear-gradient(135deg, #991b1b, #be123c) !important;
-    box-shadow: 0 12px 24px rgba(159, 18, 57, 0.28) !important;
-    color: #ffffff !important;
+    display: block !important;
+    background: #F0F4FF !important;
+    overflow: visible !important;
 }
 
-body.teacher-shell-page .teacher-shell-header-avatar .avatar-media {
-    object-position: center center !important;
-    transform: scale(1.08) !important;
-}
-
+/* ── App shell: simple block, sidebar is fixed so grid not needed ── */
 body.teacher-shell-page .app-shell {
-    grid-template-columns: 268px minmax(0, 1fr) !important;
-    gap: 1.25rem !important;
-    align-items: start !important;
-    display: grid !important;
+    display: block !important;
     position: relative !important;
     min-height: var(--teacher-shell-pane-height) !important;
-    transition: grid-template-columns 220ms ease, gap 220ms ease !important;
 }
 
+/* ── Sidebar: fixed, below navbar, full height minus navbar ── */
 body.teacher-shell-page .sidebar {
     position: fixed !important;
     left: 16px !important;
-    top: 125px !important;
-    width: 268px !important;
-    height: calc(100vh - 150px) !important;
+    top: var(--teacher-shell-sidebar-top) !important;
+    width: var(--teacher-shell-sidebar-w) !important;
+    height: calc(100vh - var(--teacher-shell-sidebar-top) - 16px) !important;
     min-height: unset !important;
-    max-height: calc(100vh - 150px) !important;
+    max-height: calc(100vh - var(--teacher-shell-sidebar-top) - 16px) !important;
     display: flex !important;
     flex-direction: column !important;
-    justify-content: space-between !important;
     padding: 1rem !important;
     margin: 0 !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     overscroll-behavior-y: contain !important;
-    overscroll-behavior-x: none !important;
     scrollbar-width: thin !important;
     scrollbar-color: rgba(125, 211, 252, 0.3) transparent !important;
-    transition: transform 220ms ease, padding 220ms ease !important;
     border: 1px solid #DBEAFE !important;
     border-radius: 14px !important;
-    background: var(--adm-sidebar, #1E3A8A) !important;
-    box-shadow: 0 4px 16px rgba(30, 58, 138, 0.1) !important;
+    background: #1E3A8A !important;
+    box-shadow: 0 4px 16px rgba(30, 58, 138, 0.15) !important;
     z-index: 500 !important;
     gap: 0.35rem !important;
+    transition: transform 220ms ease !important;
 }
 
+/* ── Content column: offset by sidebar width + gap ── */
 body.teacher-shell-page .content-column {
-    max-width: none !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    overflow: visible !important;
-    background: #F0F4FF !important;
-    margin-left: 300px !important;
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    margin-left: calc(var(--teacher-shell-sidebar-w) + 32px) !important;
+    padding: 16px 16px 24px 0 !important;
+    min-width: 0 !important;
+    width: calc(100% - var(--teacher-shell-sidebar-w) - 48px) !important;
+    background: #F0F4FF !important;
     position: relative !important;
+    overflow: visible !important;
 }
 
-body.teacher-shell-page .sidebar::-webkit-scrollbar {
-    width: 10px !important;
-    height: 10px !important;
+/* ── Iframe: always visible ── */
+body.teacher-shell-page .teacher-shell-frame {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    min-height: var(--teacher-shell-pane-height) !important;
+    border: 0 !important;
+    background: transparent !important;
+    transition: opacity 0.15s ease !important;
 }
 
-body.teacher-shell-page .sidebar::-webkit-scrollbar-track,
-body.teacher-shell-page .teacher-shell-stage::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.04) !important;
-    border-radius: 999px !important;
+/* ── Stage ── */
+.teacher-shell-stage {
+    min-height: var(--teacher-shell-pane-height);
+    border-radius: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+    position: relative;
 }
 
-body.teacher-shell-page .sidebar::-webkit-scrollbar-thumb,
-body.teacher-shell-page .teacher-shell-stage::-webkit-scrollbar-thumb {
-    background: rgba(125, 211, 252, 0.24) !important;
-    border-radius: 999px !important;
-}
-
+/* ── Sidebar nav ── */
 body.teacher-shell-page .sidebar-nav {
     flex: 1 1 auto !important;
     min-height: 0 !important;
     gap: 8px !important;
     padding-top: 8px !important;
-    padding-bottom: 16px !important;
+    padding-bottom: 8px !important;
+    overflow-y: auto !important;
 }
 
+/* ── Sidebar footer (logout) — always visible at bottom ── */
+body.teacher-shell-page .sidebar-footer {
+    flex-shrink: 0 !important;
+    margin-top: auto !important;
+    padding-top: 12px !important;
+    gap: 6px !important;
+    background: none !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+body.teacher-shell-page .sidebar-footer .sidebar-footer-link,
+body.teacher-shell-page .sidebar-footer .sidebar-footer-button {
+    min-height: 40px !important;
+    padding: 0 10px !important;
+    border-radius: 11px !important;
+    text-decoration: none !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+}
+
+body.teacher-shell-page .sidebar-footer .sidebar-footer-button span:first-child svg {
+    width: 16px !important;
+    height: 16px !important;
+}
+
+/* ── Sidebar links ── */
 body.teacher-shell-page .sidebar-link {
     min-height: 42px !important;
     padding: 0 10px !important;
@@ -177,7 +160,9 @@ body.teacher-shell-page .sidebar-link {
     text-decoration: none !important;
     border: 1px solid transparent !important;
     background: rgba(255, 255, 255, 0.04) !important;
-    transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease !important;
+    transition: background 180ms ease, border-color 180ms ease !important;
+    display: flex !important;
+    align-items: center !important;
 }
 
 body.teacher-shell-page .sidebar-link-main {
@@ -207,21 +192,18 @@ body.teacher-shell-page .sidebar-link-icon svg {
 body.teacher-shell-page .sidebar-link-copy {
     display: flex !important;
     align-items: center !important;
-    min-height: 42px !important;
 }
 
 body.teacher-shell-page .sidebar-link-title {
     font-size: 13px !important;
     font-weight: 700 !important;
-    letter-spacing: 0.01em !important;
     white-space: nowrap !important;
     color: rgba(219, 234, 254, 0.95) !important;
 }
 
 body.teacher-shell-page .sidebar-link:hover {
-    background: rgba(255, 255, 255, 0.06) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
     border-color: rgba(125, 211, 252, 0.16) !important;
-    transform: translateY(-1px) !important;
 }
 
 body.teacher-shell-page .sidebar-link:hover .sidebar-link-icon,
@@ -230,139 +212,119 @@ body.teacher-shell-page .sidebar-link.active .sidebar-link-icon {
 }
 
 body.teacher-shell-page .sidebar-link.active {
-    background: linear-gradient(180deg, rgba(29, 158, 117, 0.22), rgba(15, 110, 86, 0.14)) !important;
-    border-color: rgba(29, 158, 117, 0.35) !important;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 12px 24px rgba(10, 46, 31, 0.18) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
-body.teacher-shell-page .sidebar-footer {
-    margin-top: auto !important;
-    margin-bottom: 6px !important;
-    padding-top: 12px !important;
-    gap: 6px !important;
-    background: none !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.07) !important;
-    position: sticky !important;
-    bottom: 0 !important;
-    flex-shrink: 0 !important;
-}
-
-body.teacher-shell-page .sidebar-footer .sidebar-footer-link,
-body.teacher-shell-page .sidebar-footer .sidebar-footer-button {
-    min-height: 40px !important;
-    padding: 0 10px !important;
-    border-radius: 11px !important;
-    text-decoration: none !important;
-    font-size: 12px !important;
-    font-weight: 600 !important;
-    display: inline-flex !important;
-    align-items: center !important;
+/* ── Brand / header ── */
+body.teacher-shell-page .header-brand-group {
     gap: 10px !important;
+    align-items: center !important;
+}
+
+body.teacher-shell-page .brand { gap: 10px !important; align-items: center !important; }
+body.teacher-shell-page .brand-copy { gap: 1px !important; justify-content: center !important; }
+body.teacher-shell-page .brand-name {
+    font-size: 8px !important;
+    letter-spacing: 0.12em !important;
+    font-weight: 800 !important;
+    color: rgba(226, 232, 240, 0.78) !important;
+}
+body.teacher-shell-page .brand-page {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+}
+
+body.teacher-shell-page .header-utility {
+    margin-left: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    padding-right: 18px !important;
+}
+
+body.teacher-shell-page .teacher-shell-header-profile {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 999px !important;
+    padding: 4px !important;
+    box-sizing: border-box !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+body.teacher-shell-page .teacher-shell-header-avatar {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 999px !important;
+    background: linear-gradient(135deg, #991b1b, #be123c) !important;
+    color: #ffffff !important;
 }
 
 body.teacher-shell-page.teacher-shell-profile-view .header-utility {
     display: none !important;
 }
 
-body.teacher-shell-page .sidebar-footer .sidebar-footer-button span:first-child svg {
-    width: 16px !important;
-    height: 16px !important;
+/* ── Scrollbar ── */
+body.teacher-shell-page .sidebar::-webkit-scrollbar { width: 4px !important; }
+body.teacher-shell-page .sidebar::-webkit-scrollbar-track { background: transparent !important; }
+body.teacher-shell-page .sidebar::-webkit-scrollbar-thumb {
+    background: rgba(125, 211, 252, 0.24) !important;
+    border-radius: 999px !important;
 }
 
-body.teacher-shell-page.sidebar-collapsed .app-shell {
-    grid-template-columns: 92px minmax(0, 1fr) !important;
-    gap: 10px !important;
-}
-
+/* ── Collapsed sidebar ── */
 body.teacher-shell-page.sidebar-collapsed .sidebar {
+    width: 72px !important;
     padding-left: 8px !important;
     padding-right: 8px !important;
 }
-
-body.teacher-shell-page.sidebar-collapsed .sidebar-nav {
-    align-items: stretch !important;
+body.teacher-shell-page.sidebar-collapsed .content-column {
+    margin-left: calc(72px + 32px) !important;
+    width: calc(100% - 72px - 48px) !important;
 }
-
-body.teacher-shell-page.sidebar-collapsed .sidebar-link,
-body.teacher-shell-page.sidebar-collapsed .sidebar-footer .sidebar-footer-button {
+body.teacher-shell-page.sidebar-collapsed .sidebar-link {
     justify-content: center !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
 }
-
 body.teacher-shell-page.sidebar-collapsed .sidebar-link-main {
     justify-content: center !important;
     gap: 0 !important;
 }
-
-body.teacher-shell-page.sidebar-collapsed .sidebar-footer {
-    align-items: stretch !important;
-}
-
 body.teacher-shell-page.sidebar-collapsed .sidebar-footer .sidebar-footer-button span:last-child {
     display: none !important;
 }
 
-.teacher-shell-stage {
-    min-height: var(--teacher-shell-pane-height);
-    border-radius: 0;
-    border: none;
-    background: transparent;
-    box-shadow: none;
-    overflow: visible;
-}
-
-.teacher-shell-frame {
-    display: block;
-    width: 100%;
-    min-height: var(--teacher-shell-pane-height);
-    border: 0;
-    background: transparent;
-}
-
+/* ═══════════════════════════════════════════════════
+   MOBILE (≤ 1024px): sidebar becomes a drawer
+   ═══════════════════════════════════════════════════ */
 @media (max-width: 1024px) {
     body.teacher-shell-page .container {
-        padding: 1rem 1rem 1.2rem 1rem !important;
+        padding: 0 !important;
     }
 
-    body.teacher-shell-page .navbar-content {
-        min-height: 68px !important;
-        padding: 0 1.5rem !important;
-    }
-
-    body.teacher-shell-page .brand-page {
-        font-size: 13px !important;
-    }
-
-    body.teacher-shell-page .app-shell {
-        grid-template-columns: 1fr !important;
-        gap: 0 !important;
-        display: block !important;
+    body.teacher-shell-page .content-column {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 12px !important;
     }
 
     body.teacher-shell-page .sidebar {
-        position: fixed !important;
         left: 0 !important;
-        top: 68px !important;
-        bottom: 0 !important;
+        top: var(--teacher-shell-navbar-h) !important;
         width: 268px !important;
-        height: auto !important;
-        min-height: auto !important;
-        max-height: none !important;
+        height: calc(100vh - var(--teacher-shell-navbar-h)) !important;
+        max-height: calc(100vh - var(--teacher-shell-navbar-h)) !important;
+        border-radius: 0 !important;
+        border: none !important;
         transform: translateX(-100%) !important;
         z-index: 1300 !important;
-        box-shadow: 0 28px 56px rgba(2, 6, 23, 0.42) !important;
-        border: none !important;
-        border-radius: 0 !important;
+        box-shadow: 4px 0 24px rgba(2, 6, 23, 0.35) !important;
     }
 
     body.teacher-shell-page.sidebar-drawer-open .sidebar {
         transform: translateX(0) !important;
-    }
-
-    body.teacher-shell-page.sidebar-drawer-open .app-shell-overlay {
-        opacity: 1 !important;
-        pointer-events: auto !important;
     }
 
     .teacher-shell-stage,
@@ -372,58 +334,6 @@ body.teacher-shell-page.sidebar-collapsed .sidebar-footer .sidebar-footer-button
 }
 
 @media (max-width: 640px) {
-    body.teacher-shell-page .header-brand-group {
-        gap: 8px !important;
-    }
-
-    body.teacher-shell-page .brand {
-        gap: 8px !important;
-    }
-
-    body.teacher-shell-page .brand-name {
-        font-size: 9.5px !important;
-        letter-spacing: 0.1em !important;
-    }
-
-    body.teacher-shell-page .brand-page {
-        font-size: 12.25px !important;
-    }
-}
-
-@media (min-width: 1025px) {
-    body.teacher-shell-page .app-shell {
-        display: grid !important;
-        grid-template-columns: 268px minmax(0, 1fr) !important;
-        gap: 1.25rem !important;
-        min-height: var(--teacher-shell-pane-height) !important;
-    }
-
-    body.teacher-shell-page .sidebar {
-        position: fixed !important;
-        left: 16px !important;
-        top: 125px !important;
-        width: 268px !important;
-        height: calc(100vh - 150px) !important;
-        min-height: unset !important;
-        max-height: calc(100vh - 150px) !important;
-    }
-
-    body.teacher-shell-page .content-column {
-        margin-left: 300px !important;
-        width: calc(100% - 300px) !important;
-    }
-
-    body.teacher-shell-page.sidebar-collapsed .app-shell {
-        grid-template-columns: 92px minmax(0, 1fr) !important;
-        gap: 10px !important;
-    }
-
-    body.teacher-shell-page.sidebar-collapsed .sidebar {
-        width: 92px !important;
-    }
-
-    body.teacher-shell-page.sidebar-collapsed .content-column {
-        margin-left: 120px !important;
-        width: calc(100% - 120px) !important;
-    }
+    body.teacher-shell-page .brand-name { font-size: 9.5px !important; }
+    body.teacher-shell-page .brand-page { font-size: 12px !important; }
 }
