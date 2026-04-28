@@ -310,28 +310,42 @@
         .container {
             width: 100%;
             margin: 0;
-            padding: 1.2rem 1.4rem 1.6rem 1.2rem;
+            padding: 0;
             position: relative;
             z-index: 1;
         }
 
+        /* ── MAIN LAYOUT: flex wrapper below navbar ── */
         .app-shell {
-            display: grid;
-            grid-template-columns: 240px minmax(0, 1fr);
-            gap: 1.25rem;
-            align-items: start;
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 16px !important;
+            padding: 16px !important;
+            align-items: flex-start !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
         }
 
+        /* ── SIDEBAR ── */
         .sidebar {
-            position: sticky;
-            top: 80px;
-            min-height: calc(100vh - 96px);
-            max-height: calc(100vh - 96px);
-            overflow-y: auto;
+            width: 280px !important;
+            min-width: 280px !important;
+            flex-shrink: 0 !important;
+            position: sticky !important;
+            top: 96px !important;
+            height: calc(100vh - 112px) !important;
+            max-height: calc(100vh - 112px) !important;
+            overflow-y: auto !important;
+            z-index: 10 !important;
         }
 
+        /* ── MAIN CONTENT ── */
         .content-column {
-            min-width: 0;
+            flex: 1 !important;
+            min-width: 0 !important;
+            margin-left: 0 !important;
+            overflow: visible !important;
+            padding: 0 !important;
         }
 
         .dashboard-header {
@@ -419,8 +433,8 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 0.75rem;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
             margin-bottom: 0.9rem;
         }
 
@@ -586,9 +600,10 @@
 
         .table th, .users-table th, .table td, .users-table td {
             text-align: left;
-            padding: 0.8rem 0.95rem;
+            padding: 0.55rem 0.85rem;
             border-bottom: 1px solid #E0E7FF;
             font-size: 0.78rem;
+            vertical-align: middle;
         }
 
         .table th, .users-table th {
@@ -603,6 +618,8 @@
         .table td, .users-table td {
             color: #1F2937;
             font-weight: 500;
+            height: 60px;
+            max-height: 75px;
         }
 
         .table tbody tr, .users-table tbody tr {
@@ -626,8 +643,26 @@
 
         .table th.col-action,
         .table td.col-action {
-            text-align: center;
+            text-align: right;
             width: 1%;
+            white-space: nowrap;
+        }
+
+        /* Action buttons: compact row, right-aligned, no overflow */
+        .table-actions {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 4px;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .table-actions .btn {
+            padding: 4px 10px !important;
+            font-size: 0.74rem !important;
+            min-height: 28px !important;
+            height: 28px !important;
+            white-space: nowrap !important;
+            border-radius: 6px !important;
         }
 
         .badge {
@@ -830,22 +865,22 @@
 
         @media (max-width: 980px) {
             .app-shell {
-                grid-template-columns: 1fr;
+                flex-direction: column !important;
+                padding: 12px !important;
+                gap: 12px !important;
             }
 
             .sidebar {
-                position: static;
-                min-height: auto;
-                max-height: none;
+                width: 100% !important;
+                min-width: 0 !important;
+                position: static !important;
+                height: auto !important;
+                max-height: none !important;
             }
 
             .sidebar-nav {
                 overflow: visible;
                 padding-right: 0;
-            }
-
-            .container {
-                padding: 1rem;
             }
 
             .stats-grid {
@@ -1156,10 +1191,12 @@ body.teacher-dashboard-page .table td,
 body.teacher-dashboard-page table td {
     color: #1F2937 !important;
     border-bottom: 1px solid #E0E7FF !important;
-    padding: 0.65rem 0.95rem !important;
+    padding: 0.55rem 0.85rem !important;
     background: #FFFFFF !important;
     font-weight: 500 !important;
     vertical-align: middle !important;
+    height: 60px !important;
+    max-height: 75px !important;
 }
 body.teacher-dashboard-page .table tbody tr,
 body.teacher-dashboard-page table tbody tr {
@@ -3599,14 +3636,25 @@ html body.teacher-dashboard-page .badge-warning { background: #FEF3C7 !important
 /* ── TABLE ACTION BUTTONS LAYOUT ── */
 body.teacher-dashboard-page .table-actions {
     display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 0.35rem !important;
+    flex-wrap: nowrap !important;
+    gap: 4px !important;
     align-items: center !important;
     justify-content: flex-end !important;
 }
 body.teacher-dashboard-page td.col-action {
     white-space: nowrap !important;
     width: 1% !important;
+    text-align: right !important;
+}
+body.teacher-dashboard-page .table-actions .btn,
+body.teacher-dashboard-page .btn-table {
+    padding: 4px 10px !important;
+    font-size: 0.74rem !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    white-space: nowrap !important;
+    border-radius: 6px !important;
+    line-height: 1 !important;
 }
 
 /* ── FILTER CHIPS ── */
@@ -3616,55 +3664,56 @@ html body.teacher-dashboard-page .filter-chip.active { background: #1E3A8A !impo
 /* Keep the teacher sidebar pinned while the dashboard content scrolls. */
 @media (min-width: 981px) {
     html body.teacher-dashboard-page:not(.embedded-shell) .app-shell {
-        display: grid !important;
-        grid-template-columns: 240px minmax(0, 1fr) !important;
-        gap: 1.25rem !important;
-        align-items: start !important;
-        position: relative !important;
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 16px !important;
+        padding: 16px !important;
+        align-items: flex-start !important;
     }
 
     html body.teacher-dashboard-page:not(.embedded-shell) .sidebar {
+        width: 280px !important;
+        min-width: 280px !important;
+        flex-shrink: 0 !important;
         position: sticky !important;
-        top: 80px !important;
+        top: 96px !important;
+        height: calc(100vh - 112px) !important;
+        max-height: calc(100vh - 112px) !important;
         left: auto !important;
         bottom: auto !important;
-        width: auto !important;
-        min-height: calc(100vh - 96px) !important;
-        max-height: calc(100vh - 96px) !important;
-        height: auto !important;
-        z-index: 100 !important;
+        z-index: 10 !important;
         transform: none !important;
         pointer-events: auto !important;
         overflow-y: auto !important;
     }
 
     html body.teacher-dashboard-page:not(.embedded-shell) .content-column {
-        grid-column: 2 !important;
-        margin-left: 0 !important;
-        width: 100% !important;
+        flex: 1 !important;
         min-width: 0 !important;
+        margin-left: 0 !important;
+        overflow: visible !important;
+        padding: 0 !important;
     }
 
     html body.teacher-dashboard-page.embedded-shell .app-shell {
         display: block !important;
-        grid-template-columns: 1fr !important;
-        gap: 0 !important;
+        padding: 16px !important;
     }
 
     html body.teacher-dashboard-page.embedded-shell .content-column {
-        grid-column: 1 !important;
         margin-left: 0 !important;
         width: 100% !important;
-        max-width: none !important;
         min-width: 0 !important;
     }
 }
 
-/* ── Mobile: sidebar must NOT be fixed or cover content ── */
+/* ── Mobile: sidebar slides in as drawer ── */
 @media (max-width: 980px) {
     html body.teacher-dashboard-page:not(.embedded-shell) .app-shell {
-        display: block !important;
-        grid-template-columns: 1fr !important;
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 12px !important;
+        gap: 12px !important;
     }
 
     html body.teacher-dashboard-page:not(.embedded-shell) .sidebar {
@@ -3672,8 +3721,9 @@ html body.teacher-dashboard-page .filter-chip.active { background: #1E3A8A !impo
         left: 16px !important;
         top: 104px !important;
         bottom: 16px !important;
-        width: min(336px, calc(100vw - 32px)) !important;
+        width: min(280px, calc(100vw - 32px)) !important;
         height: auto !important;
+        max-height: none !important;
         z-index: 1300 !important;
         transform: translateX(calc(-100% - 24px)) !important;
         transition: transform 220ms ease !important;
@@ -3686,7 +3736,8 @@ html body.teacher-dashboard-page .filter-chip.active { background: #1E3A8A !impo
     }
 
     html body.teacher-dashboard-page:not(.embedded-shell) .content-column {
-        grid-column: 1 !important;
+        flex: 1 !important;
+        min-width: 0 !important;
         margin-left: 0 !important;
         width: 100% !important;
     }
