@@ -71,6 +71,9 @@ html body.teacher-shell-page .sidebar::-webkit-scrollbar-thumb { background: rgb
 
 /* Smooth fade-in when iframe content loads */
 #teacherShellFrame { transition: opacity 0.15s ease; }
+
+/* Ensure chatbot is never visible in shell */
+#chatbot-fab, #chatbot-window { display: none !important; visibility: hidden !important; }
     </style>
 </head>
 <body class="teacher-shell-page">
@@ -525,6 +528,6 @@ html body.teacher-shell-page .sidebar::-webkit-scrollbar-thumb { background: rgb
             navigate(getTargetFromLocation(), { replaceHistory: true });
         })();
     </script>
-    <script src="js/chatbot.js"></script>
+    <script src="js/chatbot.js?v=disabled-20260428"></script>
 </body>
 </html>
