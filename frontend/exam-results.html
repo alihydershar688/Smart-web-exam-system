@@ -535,6 +535,35 @@
             }
         }
 
+        /* ── Print styles for exam results ── */
+        @media print {
+            body { background: white !important; color: #111827 !important; }
+            .workspace-topbar, .workspace-sidebar,
+            .btn, button, .grade-input,
+            .save-grades-btn, .print-btn,
+            .results-actions, .back-btn { display: none !important; }
+            .workspace-shell, .workspace-content, .container {
+                display: block !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                background: white !important;
+            }
+            .answer-item {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                border: 1px solid #d1d5db !important;
+                background: white !important;
+                margin-bottom: 12px !important;
+            }
+            .question-text, .answer-text { color: #111827 !important; }
+            .badge-correct { background: #dcfce7 !important; color: #14532d !important; }
+            .badge-incorrect { background: #fee2e2 !important; color: #7f1d1d !important; }
+            .ai-hint { background: #eff6ff !important; color: #1e3a8a !important; border: 1px solid #bfdbfe !important; }
+        }
+
     </style>
     <link rel="stylesheet" href="css/ui-system.css">
     <link rel="stylesheet" href="css/product-theme.css">

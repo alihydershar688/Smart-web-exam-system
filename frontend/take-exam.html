@@ -1129,6 +1129,34 @@
                 min-width: 110px;
             }
         }
+
+        /* ── Mobile timer fix ── */
+        @media (max-width: 480px) {
+            .timer { min-width: auto; font-size: 1.1rem; padding: 4px 10px; }
+            .timer-row { flex-direction: column; align-items: flex-end; gap: 6px; }
+            .timer-container { align-items: flex-end; }
+        }
+
+        /* ── Print styles ── */
+        @media print {
+            body { background: white !important; color: #000 !important; }
+            .exam-header, .navigation, .navigation-shell,
+            .auto-save, .tab-warning, .status-pill { display: none !important; }
+            .container { padding: 0 !important; margin: 0 auto !important; max-width: 100% !important; }
+            .question-card {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                margin-bottom: 16px !important;
+                background: white !important;
+            }
+            .question-text { color: #000 !important; }
+            .option { background: white !important; border: 1px solid #ccc !important; color: #000 !important; }
+            .option.selected { background: #e8f4fd !important; border-color: #1E3A8A !important; }
+            .paper-sidebar { display: none !important; }
+            .paper-layout { grid-template-columns: 1fr !important; }
+        }
     </style>
 
     <link rel="stylesheet" href="css/ui-system.css">

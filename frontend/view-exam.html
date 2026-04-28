@@ -251,8 +251,13 @@
                 color: #111827;
             }
 
-            .navbar {
-                display: none;
+            .navbar,
+            .btn-print,
+            .btn,
+            button,
+            .show-answer-key-wrap,
+            .print-controls {
+                display: none !important;
             }
 
             .container {
@@ -288,6 +293,10 @@
                 border-color: #86efac;
                 color: #14532d;
             }
+
+            /* Ensure all text is readable in print */
+            * { color: #111827 !important; }
+            .muted, small { color: #4B5563 !important; }
         }
 
 

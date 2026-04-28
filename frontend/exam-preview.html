@@ -771,7 +771,13 @@
             .workspace-sidebar,
             .settings-panel,
             .workspace-shell::before,
-            .workspace-shell::after {
+            .workspace-shell::after,
+            .btn, button,
+            .header-utility,
+            .workspace-topbar-actions,
+            .preview-controls,
+            .publish-btn,
+            .action-bar {
                 display: none !important;
             }
 
@@ -798,7 +804,28 @@
                 min-height: auto;
                 border: none;
                 padding: 16mm 14mm 18mm;
+                page-break-after: always;
             }
+
+            .academic-paper-page:last-child {
+                page-break-after: auto;
+            }
+
+            .academic-question {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            .academic-section {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            /* Ensure text is black for print */
+            * { color: #000 !important; }
+            .academic-question-text { color: #000 !important; font-size: 11pt !important; }
+            .academic-question-number { color: #000 !important; font-weight: 800 !important; }
+            .academic-option { border: 1px solid #ccc !important; background: white !important; }
         }
     </style>
     <link rel="stylesheet" href="css/ui-system.css?v=1776845866">
@@ -1179,7 +1206,7 @@
                 {
                     key: 'B',
                     title: 'Short Answer Questions',
-                    subtitle: '(Answer in 2–3 sentences)',
+                    subtitle: '(Answer in 2ï¿½3 sentences)',
                     note: buildMarksNote(sectionB, 'Write concise and clear answers'),
                     questions: sectionB,
                     perPage: 5
@@ -1468,7 +1495,7 @@
 
             questions = (questions || []).map((question, index) => normalizePreviewQuestion(question, index));
 
-            // DEBUG: type+options diagnostic — open DevTools Console to inspect
+            // DEBUG: type+options diagnostic ï¿½ open DevTools Console to inspect
             console.log('TYPE+OPTIONS CHECK', questions.map(q => ({
                 id: q.id,
                 type: q.question_type,
