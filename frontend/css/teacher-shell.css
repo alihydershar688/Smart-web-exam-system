@@ -86,23 +86,24 @@ html body.teacher-shell-page .sidebar {
     will-change: auto !important;
 }
 
-/* ── Content column: offset by sidebar width + gap ── */
+/* ── Content column: offset by sidebar width + gap + divider ── */
 body.teacher-shell-page .content-column,
 html body.teacher-shell-page .content-column {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    margin-left: calc(var(--teacher-shell-sidebar-w) + 32px) !important;
+    margin-left: calc(var(--teacher-shell-sidebar-w) + 48px) !important;
     margin-top: 0 !important;
     margin-right: 0 !important;
     margin-bottom: 0 !important;
-    padding: 16px 16px 24px 0 !important;
+    padding: 16px 16px 24px 20px !important;
     min-width: 0 !important;
-    width: calc(100% - var(--teacher-shell-sidebar-w) - 48px) !important;
+    width: calc(100% - var(--teacher-shell-sidebar-w) - 64px) !important;
     max-width: none !important;
     background: #F0F4FF !important;
     position: relative !important;
     overflow: visible !important;
+    border-left: 1px solid #DBEAFE !important;
 }
 
 /* ── Iframe: always visible, full width ── */
@@ -296,8 +297,10 @@ body.teacher-shell-page.sidebar-collapsed .sidebar {
     padding-right: 8px !important;
 }
 body.teacher-shell-page.sidebar-collapsed .content-column {
-    margin-left: calc(72px + 32px) !important;
-    width: calc(100% - 72px - 48px) !important;
+    margin-left: calc(72px + 48px) !important;
+    width: calc(100% - 72px - 64px) !important;
+    padding-left: 20px !important;
+    border-left: 1px solid #DBEAFE !important;
 }
 body.teacher-shell-page.sidebar-collapsed .sidebar-link {
     justify-content: center !important;
@@ -324,6 +327,7 @@ body.teacher-shell-page.sidebar-collapsed .sidebar-footer .sidebar-footer-button
         margin-left: 0 !important;
         width: 100% !important;
         padding: 12px !important;
+        border-left: none !important;
     }
 
     body.teacher-shell-page .sidebar {
