@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher Dashboard | Smart Exam System</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231E3A8A'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='28' fill='white' font-family='Arial' font-weight='bold'%3ESE%3C/text%3E%3C/svg%3E">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/ui-system.css?v=2">
     <link rel="stylesheet" href="css/product-theme.css?v=2">
@@ -221,7 +222,8 @@ html body.teacher-shell-page .sidebar::-webkit-scrollbar-thumb { background: rgb
     <script src="js/app-shell.js"></script>
     <script>
         (function () {
-            const SHELL_VIEW_VERSION = 'v' + Date.now();
+            // Fixed version — don't use Date.now() which busts browser cache on every load
+            const SHELL_VIEW_VERSION = 'v20260428';
             const ALLOWED_PAGES = new Set([
                 'dashboard-teacher.html',
                 'create-exam.html',

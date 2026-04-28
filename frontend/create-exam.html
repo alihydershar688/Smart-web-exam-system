@@ -277,12 +277,12 @@
     <link rel="stylesheet" href="css/workspace-shell.css?v=2">
     <style>
 /* ---------------------------------------------------
-   CREATE EXAM — CONTENT AREA REDESIGN
+   CREATE EXAM ï¿½ CONTENT AREA REDESIGN
    Targets exact class names from the HTML.
    Shell (navbar/sidebar) is untouched.
    --------------------------------------------------- */
 
-/* 1 — Content area background */
+/* 1 ï¿½ Content area background */
 html body.create-exam-page,
 html body.create-exam-page.workspace-theme {
     background: #F8FAFF !important;
@@ -293,7 +293,7 @@ html body.create-exam-page .container {
     background: transparent !important;
 }
 
-/* 2 — Page title */
+/* 2 ï¿½ Page title */
 html body.create-exam-page .page-header {
     background: #1E3A8A !important;
     border-radius: 14px 14px 0 0 !important;
@@ -307,7 +307,7 @@ html body.create-exam-page .page-title {
     margin: 0 !important;
 }
 
-/* 3 — Stepper bar */
+/* 3 ï¿½ Stepper bar */
 html body.create-exam-page .steps {
     background: #EFF6FF !important;
     border: none !important;
@@ -368,7 +368,7 @@ html body.create-exam-page .step {
     color: #6B7280 !important;
 }
 
-/* 4 — Form card */
+/* 4 ï¿½ Form card */
 html body.create-exam-page .card {
     background: #FFFFFF !important;
     border: 0.5px solid #BFDBFE !important;
@@ -377,7 +377,7 @@ html body.create-exam-page .card {
     box-shadow: 0 4px 16px rgba(30,58,138,0.08) !important;
 }
 
-/* 5 — Card section heading h2 */
+/* 5 ï¿½ Card section heading h2 */
 html body.create-exam-page .card h2 {
     color: #1E3A8A !important;
     border-bottom-color: #EFF6FF !important;
@@ -391,14 +391,14 @@ html body.create-exam-page .card h2::before {
     height: 30px !important;
 }
 
-/* 6 — Labels */
+/* 6 ï¿½ Labels */
 html body.create-exam-page label {
     color: #1e40af !important;
     font-size: 13px !important;
     font-weight: 500 !important;
 }
 
-/* 7 — Inputs, selects, textareas */
+/* 7 ï¿½ Inputs, selects, textareas */
 html body.create-exam-page .form-control {
     background: #F8FAFF !important;
     border: 1.5px solid #BFDBFE !important;
@@ -418,7 +418,7 @@ html body.create-exam-page select.form-control option {
     color: #1E3A8A !important;
 }
 
-/* 8 — Primary button (Next / Generate) */
+/* 8 ï¿½ Primary button (Next / Generate) */
 html body.create-exam-page .btn.btn-primary,
 html body.create-exam-page button.btn-primary {
     background: #1E3A8A !important;
@@ -1191,7 +1191,6 @@ html body.create-exam-page small {
                     headers
                 });
                 const result = await response.json().catch(() => ({}));
-                console.log('?? Teacher courses API response:', {status: response.status, ok: response.ok, result});
                 const courses = Array.isArray(result.courses) ? result.courses : [];
 
                 if (response.ok && result.success && courses.length > 0) {
