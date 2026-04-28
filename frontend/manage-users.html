@@ -1004,6 +1004,11 @@
             try {
                 const response = await adminRequest('/admin/users')
                 const data = await response.json()
+                if (response.status === 401 || response.status === 403) {
+                    setNotice('Session expired or insufficient permissions. Please log out and log back in as admin.', 'error')
+                    document.getElementById('usersTableBody').innerHTML = `<tr><td colspan="8" class="empty">Session expired. <a href="login.html" style="color:#3B82F6;font-weight:700;">Click here to log in again</a></td></tr>`
+                    return
+                }
                 if (!response.ok || !data.success) throw new Error(data.error || 'Failed to load users')
                 state.users = Array.isArray(data.users) ? data.users : []
                 updateSummary(); applyFilters(); populateAssignmentStudentOptions()
