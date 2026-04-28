@@ -294,7 +294,74 @@
         /* Shared Dashboard Shell */
         body {
             padding: 0 !important;
+            /* Light background when embedded in shell */
+            background: #F0F4FF !important;
+            background-image: none !important;
+            background-attachment: unset !important;
+            color: #1F2937 !important;
         }
+
+        /* Override CSS variables for light theme */
+        :root {
+            --ink: #1F2937 !important;
+            --muted: #6B7280 !important;
+            --surface: #FFFFFF !important;
+            --surface-alt: #FFFFFF !important;
+            --surface-soft: #F8FAFC !important;
+            --border: #DBEAFE !important;
+            --shadow: 0 4px 16px rgba(30, 58, 138, 0.1) !important;
+        }
+
+        /* Paper shell — white card like admin dashboard */
+        .paper-shell {
+            background: #FFFFFF !important;
+            border: 1px solid #DBEAFE !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 16px rgba(30, 58, 138, 0.08) !important;
+            color: #1F2937 !important;
+        }
+
+        /* All text inside paper-shell should be dark */
+        .paper-shell h1, .paper-shell h2, .paper-shell h3,
+        .paper-shell h4, .paper-shell p, .paper-shell span,
+        .paper-shell div, .paper-shell label {
+            color: #1F2937 !important;
+        }
+
+        .paper-shell .muted, .paper-shell small {
+            color: #6B7280 !important;
+        }
+
+        /* Question cards — white */
+        .question {
+            background: #FFFFFF !important;
+            border: 1px solid #DBEAFE !important;
+            color: #1F2937 !important;
+        }
+
+        .question * { color: #1F2937 !important; }
+
+        /* Options */
+        .option {
+            background: #F8FAFC !important;
+            border: 1px solid #DBEAFE !important;
+            color: #1F2937 !important;
+        }
+
+        /* Correct answer highlight */
+        .correct {
+            background: rgba(16, 185, 129, 0.1) !important;
+            border-color: rgba(16, 185, 129, 0.4) !important;
+            color: #065f46 !important;
+        }
+
+        /* Exam info header */
+        .exam-info, .exam-meta, .exam-header {
+            color: #1F2937 !important;
+        }
+
+        /* Info/error messages */
+        .muted { color: #6B7280 !important; }
 
         .navbar {
             position: sticky;
@@ -967,7 +1034,7 @@
                 }
 
                 Promise.all([
-                    fetch(AI_BACKEND_URL + '/exam/' + encodeURIComponent(examId)),
+                    fetch(AI_BACKEND_URL + '/exams/' + encodeURIComponent(examId)),
                     fetch(AI_BACKEND_URL + '/exam-questions/' + encodeURIComponent(examId))
                 ]).then(function (responses) {
                     return Promise.all([responses[0].json(), responses[1].json()]).then(function (data) {
