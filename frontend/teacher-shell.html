@@ -61,6 +61,12 @@ html body.teacher-shell-page .sidebar-footer-button:hover {
     color: #FFFFFF !important;
 }
 html body.teacher-shell-page .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15) !important; }
+
+/* Loading overlay spin animation */
+@keyframes shellSpin { to { transform: rotate(360deg); } }
+
+/* Stage must be relative for overlay positioning */
+.teacher-shell-stage { position: relative; }
     </style>
 </head>
 <body class="teacher-shell-page">
@@ -195,6 +201,11 @@ html body.teacher-shell-page .sidebar::-webkit-scrollbar-thumb { background: rgb
 
             <main class="content-column">
                 <div class="teacher-shell-stage">
+                    <!-- Loading overlay shown during page transitions -->
+                    <div id="shellLoadingOverlay" style="display:none;position:absolute;inset:0;z-index:500;background:#F0F4FF;align-items:center;justify-content:center;flex-direction:column;gap:12px;min-height:300px;">
+                        <div style="width:36px;height:36px;border:3px solid rgba(30,58,138,0.15);border-top:3px solid #1E3A8A;border-radius:50%;animation:shellSpin 0.7s linear infinite;"></div>
+                        <span style="font-size:0.82rem;color:#6B7280;font-weight:600;font-family:Manrope,sans-serif;">Loading...</span>
+                    </div>
                     <iframe id="teacherShellFrame" name="teacherShellFrame" class="teacher-shell-frame" title="Teacher workspace content"></iframe>
                 </div>
             </main>
@@ -384,14 +395,31 @@ html body.teacher-shell-page .sidebar::-webkit-scrollbar-thumb { background: rgb
                 });
             }
 
+            function showFrameLoading() {
+                const overlay = document.getElementById('shellLoadingOverlay');
+                if (overlay) overlay.style.display = 'flex';
+                frame.style.visibility = 'hidden';
+                frame.style.opacity = '0';
+            }
+
+            function hideFrameLoading() {
+                const overlay = document.getElementById('shellLoadingOverlay');
+                if (overlay) overlay.style.display = 'none';
+                frame.style.visibility = 'visible';
+                frame.style.opacity = '1';
+            }
+
             function navigate(target, options) {
                 const nextTarget = sanitizeTarget(target);
                 const frameSrc = buildEmbeddedSrc(nextTarget);
+                // Update active nav IMMEDIATELY — before iframe loads
                 setActiveNav(nextTarget);
                 if (!options || !options.skipHistory) {
                     updateHistory(nextTarget, !!(options && options.replaceHistory));
                 }
                 if (frame.getAttribute('src') !== frameSrc) {
+                    // Show loading overlay instantly so old content never flashes
+                    showFrameLoading();
                     frame.setAttribute('src', frameSrc);
                 }
             }
@@ -417,6 +445,9 @@ html body.teacher-shell-page .sidebar::-webkit-scrollbar-thumb { background: rgb
                     bindFrameResizeObserver();
                 } catch (error) {
                     resizeFrame();
+                } finally {
+                    // Always hide loading overlay when frame finishes loading
+                    hideFrameLoading();
                 }
             }
 
@@ -470,6 +501,8 @@ html body.teacher-shell-page .sidebar::-webkit-scrollbar-thumb { background: rgb
                 window.AppShell.init();
             }
 
+            // Show loading immediately on first load — before iframe renders anything
+            showFrameLoading();
             navigate(getTargetFromLocation(), { replaceHistory: true });
         })();
     </script>
