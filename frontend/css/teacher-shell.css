@@ -87,21 +87,27 @@ html body.teacher-shell-page .sidebar {
 }
 
 /* ── Content column: offset by sidebar width + gap ── */
-body.teacher-shell-page .content-column {
+body.teacher-shell-page .content-column,
+html body.teacher-shell-page .content-column {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
     margin-left: calc(var(--teacher-shell-sidebar-w) + 32px) !important;
+    margin-top: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
     padding: 16px 16px 24px 0 !important;
     min-width: 0 !important;
     width: calc(100% - var(--teacher-shell-sidebar-w) - 48px) !important;
+    max-width: none !important;
     background: #F0F4FF !important;
     position: relative !important;
     overflow: visible !important;
 }
 
-/* ── Iframe: always visible ── */
-body.teacher-shell-page .teacher-shell-frame {
+/* ── Iframe: always visible, full width ── */
+body.teacher-shell-page .teacher-shell-frame,
+html body.teacher-shell-page .teacher-shell-frame {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -341,7 +347,6 @@ body.teacher-shell-page.sidebar-collapsed .sidebar-footer .sidebar-footer-button
     body.teacher-shell-page.sidebar-drawer-open .sidebar,
     html body.teacher-shell-page.sidebar-drawer-open .sidebar {
         transform: translateX(0) !important;
-    }
     }
 
     .teacher-shell-stage,
