@@ -12,26 +12,31 @@ body.teacher-shell-page {
     --teacher-shell-pane-height: calc(100vh - var(--teacher-shell-navbar-h) - 24px);
     min-height: 100vh !important;
     overflow-x: hidden !important;
-    overflow-y: auto !important;
+    /* Do NOT set overflow-y — it breaks position:sticky on navbar */
+    overflow-y: visible !important;
     margin: 0 !important;
     padding: 0 !important;
     background: #F0F4FF !important;
 }
 
-/* ── Navbar ── */
-body.teacher-shell-page .navbar {
+/* ── Navbar: sticky, beats dashboard-shell z-index 1200 ── */
+body.teacher-shell-page .navbar,
+html body.teacher-shell-page .navbar {
     position: sticky !important;
     top: 0 !important;
-    z-index: 1000 !important;
+    z-index: 1300 !important;
     height: var(--teacher-shell-navbar-h) !important;
+    /* No transform/overflow on navbar that could break stacking */
+    overflow: visible !important;
 }
 body.teacher-shell-page .navbar-content {
     min-height: var(--teacher-shell-navbar-h) !important;
     padding: 0 1.5rem !important;
 }
 
-/* ── Container: full width, no extra padding ── */
-body.teacher-shell-page .container {
+/* ── Container: full width, no overflow that traps sticky navbar ── */
+body.teacher-shell-page .container,
+html body.teacher-shell-page .container {
     max-width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -39,6 +44,8 @@ body.teacher-shell-page .container {
     display: block !important;
     background: #F0F4FF !important;
     overflow: visible !important;
+    /* No position that creates stacking context issues */
+    position: static !important;
 }
 
 /* ── App shell: simple block, sidebar is fixed so grid not needed ── */
