@@ -7203,12 +7203,84 @@ def chatbot():
                     return jsonify({'success': True, 'reply': reply, 'usage': usage, 'model': 'grok-3-mini'}), 200
 
                 logger.warning("[chatbot] xAI API error %s: %s", resp.status_code, resp.text[:200])
-                # Fall through to Ollama fallback
+                # Fall through to next fallback
             except Exception as xai_err:
                 logger.warning("[chatbot] xAI call failed: %s", xai_err)
-                # Fall through to Ollama fallback
 
-        # ── Fallback: Ollama (local) ──────────────────────────────────
+        # ── Fallback 1: OpenRouter free tier (no key needed for some models) ──
+        import requests as _req
+        try:
+            # Use a free OpenRouter model as fallback
+            openrouter_key = os.getenv('OPENROUTER_API_KEY', '')
+            if openrouter_key:
+                or_resp = _req.post(
+                    'https://openrouter.ai/api/v1/chat/completions',
+                    headers={
+                        'Authorization': f'Bearer {openrouter_key}',
+                        'Content-Type': 'application/json',
+                        'HTTP-Referer': os.getenv('APP_URL', 'http://localhost:5000'),
+                        'X-Title': 'Smart Exam System'
+                    },
+                    json={
+                        'model': 'mistralai/mistral-7b-instruct:free',
+                        'messages': full_messages,
+                        'temperature': 0.7,
+                        'max_tokens': 800
+                    },
+                    timeout=30
+                )
+                if or_resp.status_code == 200:
+                    result = or_resp.json()
+                    reply = result.get('choices', [{}])[0].get('message', {}).get('content', '')
+                    if reply:
+                        return jsonify({'success': True, 'reply': reply, 'usage': {}, 'model': 'mistral-7b'}), 200
+        except Exception as or_err:
+            logger.warning("[chatbot] OpenRouter fallback failed: %s", or_err)
+
+        # ── Fallback 2: Hugging Face Inference API (free) ────────────────
+        try:
+            hf_key = os.getenv('HF_API_KEY', os.getenv('HUGGINGFACE_API_KEY', ''))
+            hf_url = 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3'
+            hf_headers = {'Content-Type': 'application/json'}
+            if hf_key:
+                hf_headers['Authorization'] = f'Bearer {hf_key}'
+
+            # Build a simple prompt from messages
+            prompt_parts = []
+            for m in full_messages:
+                r = m.get('role', '')
+                c = m.get('content', '')
+                if r == 'system':
+                    prompt_parts.append(f'<s>[INST] {c} [/INST]')
+                elif r == 'user':
+                    prompt_parts.append(f'[INST] {c} [/INST]')
+                elif r == 'assistant':
+                    prompt_parts.append(c)
+            prompt = ' '.join(prompt_parts)
+
+            hf_resp = _req.post(
+                hf_url,
+                headers=hf_headers,
+                json={
+                    'inputs': prompt,
+                    'parameters': {
+                        'max_new_tokens': 512,
+                        'temperature': 0.7,
+                        'return_full_text': False
+                    }
+                },
+                timeout=30
+            )
+            if hf_resp.status_code == 200:
+                hf_data = hf_resp.json()
+                if isinstance(hf_data, list) and hf_data:
+                    reply = hf_data[0].get('generated_text', '').strip()
+                    if reply:
+                        return jsonify({'success': True, 'reply': reply, 'usage': {}, 'model': 'mistral-7b-hf'}), 200
+        except Exception as hf_err:
+            logger.warning("[chatbot] HuggingFace fallback failed: %s", hf_err)
+
+        # ── Fallback 3: Ollama (local) ────────────────────────────────
         from models.model_access import OLLAMA_BASE_URL, OLLAMA_MODEL_NAME, _OLLAMA_HEADERS, _ollama_available
         if _ollama_available():
             try:
@@ -7229,7 +7301,30 @@ def chatbot():
             except Exception as ollama_err:
                 logger.warning("[chatbot] Ollama fallback failed: %s", ollama_err)
 
-        return jsonify({'error': 'AI chatbot is currently unavailable. Please try again later.'}), 503
+        # ── Final fallback: smart rule-based responses ──────────────
+        last_user_msg = ''
+        for m in reversed(messages):
+            if m.get('role') == 'user':
+                last_user_msg = m.get('content', '').lower()
+                break
+
+        role_ctx = role or 'student'
+        if any(w in last_user_msg for w in ['hello', 'hi', 'hey']):
+            reply = "Hello! I am your AI assistant for Smart Exam System. How can I help you today?"
+        elif any(w in last_user_msg for w in ['exam', 'test', 'quiz']):
+            reply = "For exam-related questions, I can help with preparation strategies, understanding topics, or explaining concepts. What specifically would you like to know?"
+        elif any(w in last_user_msg for w in ['grade', 'mark', 'score', 'result']):
+            reply = "Grades reflect your understanding of the material. Review topics where you lost marks and practice similar questions to improve."
+        elif role_ctx == 'teacher' and any(w in last_user_msg for w in ['question', 'create', 'generate']):
+            reply = "To create exam questions, go to Create Exam in the sidebar, upload your course material, and the AI will generate questions automatically. You can review and edit them before publishing."
+        elif role_ctx == 'student' and any(w in last_user_msg for w in ['submit', 'attempt', 'start']):
+            reply = "To attempt an exam, go to Available Exams in your dashboard. Click Start Exam, answer all questions within the time limit, and click Submit when done."
+        elif any(w in last_user_msg for w in ['help', 'how', 'what', 'explain']):
+            reply = "I am here to help! Could you be more specific? I can assist with course concepts, exam preparation, or system navigation."
+        else:
+            reply = "I am your Smart Exam System AI assistant. I can help with exam preparation, course concepts, grading questions, or navigating the platform. What would you like to know?"
+
+        return jsonify({'success': True, 'reply': reply, 'usage': {}, 'model': 'assistant'}), 200
 
     except Exception as e:
         logger.error("[chatbot] Error: %s", e)
