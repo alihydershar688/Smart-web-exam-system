@@ -895,29 +895,52 @@
 
         async function loadAnalytics() {
             try {
-                // Try backend API first (has service role access)
                 const headers = await window.AppConfig.buildAuthHeaders(db);
                 const backendBase = window.AppConfig.getBackendBase();
+                const role = shellState.role || 'teacher';
 
                 let users = [], exams = [], allAttempts = [], attempts = [];
 
-                try {
-                    const [uRes, eRes, aRes] = await Promise.all([
-                        fetch(`${backendBase}/admin/users`, { headers }),
-                        fetch(`${backendBase}/admin/courses`, { headers }),
-                        fetch(`${backendBase}/submissions?status=submitted,pending_grading,graded,completed&limit=500`, { headers })
-                    ]);
-                    if (uRes.ok) { const d = await uRes.json(); users = d.users || []; }
-                    if (eRes.ok) { const d = await eRes.json(); exams = d.courses || []; }
-                    if (aRes.ok) { const d = await aRes.json(); allAttempts = d.submissions || []; }
-                } catch (_) {}
-
-                // Fallback to Supabase direct if backend failed
-                if (!users.length) {
-                    const r = await db.from('users').select('id, role'); users = r.data || [];
+                if (role === 'admin') {
+                    // Admin: full platform view
+                    try {
+                        const [uRes, eRes, aRes] = await Promise.all([
+                            fetch(`${backendBase}/admin/users`, { headers }),
+                            fetch(`${backendBase}/admin/courses`, { headers }),
+                            fetch(`${backendBase}/submissions?status=submitted,pending_grading,graded,completed&limit=500`, { headers })
+                        ]);
+                        if (uRes.ok) { const d = await uRes.json(); users = d.users || []; }
+                        if (eRes.ok) { const d = await eRes.json(); exams = d.courses || []; }
+                        if (aRes.ok) { const d = await aRes.json(); allAttempts = d.submissions || []; }
+                    } catch (_) {}
+                } else {
+                    // Teacher: only their own courses, exams, and submissions
+                    try {
+                        const [eRes, aRes, cRes] = await Promise.all([
+                            fetch(`${backendBase}/exams?status=published,draft,archived`, { headers }),
+                            fetch(`${backendBase}/submissions?status=submitted,pending_grading,graded,completed&limit=500`, { headers }),
+                            fetch(`${backendBase}/teacher/course-analytics`, { headers })
+                        ]);
+                        if (eRes.ok) { const d = await eRes.json(); exams = d.exams || []; }
+                        if (aRes.ok) { const d = await aRes.json(); allAttempts = d.submissions || []; }
+                        // For teacher view, users = enrolled students across their courses
+                        if (cRes.ok) {
+                            const d = await cRes.json();
+                            const courses = d.courses || [];
+                            const totalStudents = courses.reduce((s, c) => s + (c.enrolled_students || 0), 0);
+                            users = Array.from({ length: totalStudents }, () => ({ role: 'student' }));
+                        }
+                    } catch (_) {}
                 }
-                if (!exams.length) {
-                    const r = await db.from('exams').select('exam_id, status'); exams = r.data || [];
+
+                // Supabase fallbacks (for admin only — teacher RLS blocks these)
+                if (role === 'admin') {
+                    if (!users.length) {
+                        const r = await db.from('users').select('id, role'); users = r.data || [];
+                    }
+                    if (!exams.length) {
+                        const r = await db.from('exams').select('exam_id, status'); exams = r.data || [];
+                    }
                 }
                 if (!allAttempts.length) {
                     const r = await db.from('exam_attempts').select('attempt_id, status, percentage, submitted_at').limit(500);
@@ -934,7 +957,14 @@
                 }, {});
 
                 document.getElementById('totalUsers').textContent = users.length;
-                document.getElementById('usersSub').textContent = `Teachers ${roleCount.teacher || 0}  Students ${roleCount.student || 0}  Admins ${roleCount.admin || 0}`;
+                if (role === 'teacher') {
+                    document.getElementById('usersSub').textContent = `Enrolled students across your courses`;
+                    // Update label text for teacher context
+                    const usersLabel = document.querySelector('[data-stat="users"] .stat-label, #totalUsers')?.closest('.stat-card')?.querySelector('.stat-label');
+                    if (usersLabel) usersLabel.textContent = 'Enrolled Students';
+                } else {
+                    document.getElementById('usersSub').textContent = `Teachers ${roleCount.teacher || 0}  Students ${roleCount.student || 0}  Admins ${roleCount.admin || 0}`;
+                }
                 document.getElementById('totalExams').textContent = exams.length;
                 document.getElementById('totalAttempts').textContent = allAttempts.length;
 
