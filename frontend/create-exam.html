@@ -1558,9 +1558,41 @@ html body.create-exam-page small {
                 console.log('Response ok:', response.ok);
 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('Backend error:', errorText);
-                    throw new Error(`Failed to generate questions: ${errorText}`);
+                    let errorData = {};
+                    try { errorData = await response.json(); } catch (_) { errorData = { error: await response.text() }; }
+                    const errorMsg = errorData.error || 'Failed to generate questions';
+                    const errorCode = errorData.error_code || '';
+                    const hint = errorData.hint || '';
+
+                    // Show specific user-friendly messages based on error code
+                    let displayMsg = errorMsg;
+                    let displayTitle = 'Generation Failed';
+                    if (errorCode === 'AI_SERVER_OFFLINE') {
+                        displayTitle = 'AI Server Offline';
+                        displayMsg = 'The AI generation server (Ollama) is not running. Please start Ollama and try again.';
+                    } else if (errorCode === 'IRRELEVANT_CONTENT') {
+                        displayTitle = 'Irrelevant Content Detected';
+                        displayMsg = 'The uploaded file does not appear to be academic course material. Please upload lecture slides, notes, or textbook chapters.';
+                    } else if (errorCode === 'LOW_ACADEMIC_CONTENT') {
+                        displayTitle = 'Insufficient Academic Content';
+                        displayMsg = 'The uploaded file does not contain enough course-related content. Please upload a file with definitions, concepts, or examples.';
+                    }
+
+                    // Show prominent error in the UI
+                    const warningsEl = document.getElementById('fileWarnings');
+                    if (warningsEl) {
+                        warningsEl.innerHTML = `
+                            <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.4);padding:1rem 1.1rem;border-radius:10px;margin-bottom:1rem;">
+                                <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.4rem;">
+                                    <span style="font-size:1.1rem;">⚠️</span>
+                                    <strong style="color:#ef4444;font-size:0.95rem;">${displayTitle}</strong>
+                                </div>
+                                <p style="color:#fca5a5;font-size:0.85rem;margin:0 0 0.3rem;">${displayMsg}</p>
+                                ${hint ? `<p style="color:#94a3b8;font-size:0.78rem;margin:0;">💡 ${hint}</p>` : ''}
+                            </div>
+                        `;
+                    }
+                    throw new Error(displayMsg);
                 }
 
                 const result = await response.json();

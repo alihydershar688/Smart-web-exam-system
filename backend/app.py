@@ -2534,6 +2534,21 @@ def generate_questions():
             requested_difficulty = ''  # empty = let generator decide
         logger.info("QG params: subject=%s, num_questions=%d, difficulty=%s, use_ollama=%s",
                     subject, num_questions, requested_difficulty or 'auto', use_ollama_flag)
+
+        # ── STEP 0: Check AI server availability BEFORE doing anything ──
+        try:
+            from models.model_access import _ollama_available, OLLAMA_BASE_URL
+            ollama_up = _ollama_available()
+        except Exception:
+            ollama_up = False
+
+        if not ollama_up:
+            logger.warning("QG: Ollama is not running — rejecting generation request")
+            return jsonify({
+                'error': 'AI generation server is not running. Please start Ollama and try again.',
+                'error_code': 'AI_SERVER_OFFLINE',
+                'hint': 'Run: ollama serve  (then wait a few seconds and retry)'
+            }), 503
        
         # Normalize and validate subject
         subject_raw = str(subject or 'general').strip().lower()
@@ -2630,6 +2645,47 @@ def generate_questions():
             return jsonify({
                 'error': 'Extracted material is too short or empty after cleaning. Please upload clearer Database slides/notes.',
                 'length': len(extracted_text)
+            }), 400
+
+        # ── STEP 1b: Relevance check — reject non-academic content ──────
+        _irrelevant_signals = [
+            # Social media / personal content
+            'instagram', 'tiktok', 'snapchat', 'facebook', 'twitter', 'youtube',
+            'followers', 'likes', 'subscribe', 'hashtag', 'reels', 'stories',
+            # Entertainment
+            'movie', 'song lyrics', 'recipe', 'cooking', 'restaurant menu',
+            # Clearly non-academic
+            'dear customer', 'invoice', 'order number', 'shipping address',
+            'terms and conditions', 'privacy policy', 'cookie policy',
+        ]
+        _academic_signals = [
+            # Academic structure
+            'introduction', 'definition', 'concept', 'theory', 'algorithm',
+            'function', 'method', 'class', 'database', 'network', 'system',
+            'analysis', 'design', 'implementation', 'architecture', 'model',
+            'chapter', 'lecture', 'objective', 'learning outcome', 'example',
+            'figure', 'table', 'equation', 'formula', 'theorem', 'proof',
+            'software', 'hardware', 'programming', 'data structure', 'query',
+            'protocol', 'interface', 'module', 'framework', 'library',
+        ]
+        text_lower = extracted_text.lower()
+        irrelevant_hits = sum(1 for s in _irrelevant_signals if s in text_lower)
+        academic_hits   = sum(1 for s in _academic_signals if s in text_lower)
+
+        if irrelevant_hits >= 3 and academic_hits < 2:
+            logger.warning("QG: Irrelevant content detected (irrelevant=%d, academic=%d)", irrelevant_hits, academic_hits)
+            return jsonify({
+                'error': 'The uploaded material does not appear to be academic course content. Please upload lecture slides, notes, or textbook chapters related to your subject.',
+                'error_code': 'IRRELEVANT_CONTENT',
+                'hint': 'Upload PDF/DOCX files containing course material, lecture notes, or textbook chapters.'
+            }), 400
+
+        if academic_hits < 2 and len(extracted_text) < 1000:
+            logger.warning("QG: Low academic signal (academic=%d, length=%d)", academic_hits, len(extracted_text))
+            return jsonify({
+                'error': 'The uploaded file does not contain enough recognizable academic content. Please upload course lecture slides or notes.',
+                'error_code': 'LOW_ACADEMIC_CONTENT',
+                'hint': 'Make sure the file contains course-related text such as definitions, concepts, or examples.'
             }), 400
         max_chars = int(os.getenv("QG_MAX_CHARS", "18000"))
         if max_chars > 0 and len(extracted_text) > max_chars:
