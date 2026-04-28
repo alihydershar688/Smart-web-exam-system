@@ -25,7 +25,6 @@ body.teacher-shell-page .navbar {
     z-index: 1000 !important;
     height: var(--teacher-shell-navbar-h) !important;
 }
-
 body.teacher-shell-page .navbar-content {
     min-height: var(--teacher-shell-navbar-h) !important;
     padding: 0 1.5rem !important;
@@ -50,7 +49,8 @@ body.teacher-shell-page .app-shell {
 }
 
 /* ── Sidebar: fixed, below navbar, full height minus navbar ── */
-body.teacher-shell-page .sidebar {
+body.teacher-shell-page .sidebar,
+html body.teacher-shell-page .sidebar {
     position: fixed !important;
     left: 16px !important;
     top: var(--teacher-shell-sidebar-top) !important;
@@ -74,6 +74,9 @@ body.teacher-shell-page .sidebar {
     z-index: 500 !important;
     gap: 0.35rem !important;
     transition: transform 220ms ease !important;
+    /* Ensure fixed works — no transform on parent */
+    transform: none !important;
+    will-change: auto !important;
 }
 
 /* ── Content column: offset by sidebar width + gap ── */
@@ -321,10 +324,17 @@ body.teacher-shell-page.sidebar-collapsed .sidebar-footer .sidebar-footer-button
         transform: translateX(-100%) !important;
         z-index: 1300 !important;
         box-shadow: 4px 0 24px rgba(2, 6, 23, 0.35) !important;
+        position: fixed !important;
     }
 
-    body.teacher-shell-page.sidebar-drawer-open .sidebar {
+    html body.teacher-shell-page .sidebar {
+        position: fixed !important;
+    }
+
+    body.teacher-shell-page.sidebar-drawer-open .sidebar,
+    html body.teacher-shell-page.sidebar-drawer-open .sidebar {
         transform: translateX(0) !important;
+    }
     }
 
     .teacher-shell-stage,
