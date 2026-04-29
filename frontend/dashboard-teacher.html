@@ -3,522 +3,3779 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231E3A8A'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='28' fill='white' font-family='Arial' font-weight='bold'%3ETE%3C/text%3E%3C/svg%3E">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%234f46e5'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='28' fill='white' font-family='Arial' font-weight='bold'%3ESE%3C/text%3E%3C/svg%3E">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Teacher Dashboard | Smart Exam System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script>
+        // If accessed directly (not inside teacher-shell iframe), redirect to shell
+        (function() {
+            var isEmbedded = window.self !== window.top;
+            var hasEmbed = new URLSearchParams(window.location.search).get('embed') === '1';
+            if (!isEmbedded && !hasEmbed) {
+                var view = new URLSearchParams(window.location.search).get('view') || 'dashboard';
+                var target = 'teacher-shell.html?page=' + encodeURIComponent('dashboard-teacher.html?view=' + view);
+                window.location.replace(target);
+            }
+        })();
+    </script>
+    <script src="js/teacher-shell.js"></script>
+    <script>
+        // Prevent back button - create deeper history stack
+        function disableBackButton() {
+            history.pushState(null, null, location.href);
+            history.pushState(null, null, location.href);
+            history.pushState(null, null, location.href);
+        }
+        disableBackButton();
+
+        window.onpopstate = function(event) {
+            disableBackButton();
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         :root {
+            /* Layout */
             --adm-bg:           #F0F4FF;
             --adm-bg2:          #EFF6FF;
             --adm-card:         #FFFFFF;
             --adm-card-hover:   #EFF6FF;
             --adm-border:       #DBEAFE;
+            /* Sidebar */
             --adm-sidebar:      #1E3A8A;
             --adm-menu-item:    rgba(255,255,255,0.06);
             --adm-active:       #1e40af;
             --adm-hover:        #2563EB;
             --adm-sidebar-text: #CBD5E8;
+            /* Topbar */
             --adm-topbar:       #1E3A8A;
             --adm-input-bg:     #F0F4FF;
             --adm-input-border: #BFDBFE;
+            /* Text */
             --adm-heading:      #1E3A8A;
             --adm-text:         #1F2937;
             --adm-muted:        #6B7280;
+            /* Buttons */
             --adm-primary:      #1E3A8A;
             --adm-primary-hov:  #1e40af;
             --adm-secondary:    #FFFFFF;
             --adm-danger:       #DC2626;
             --adm-danger-hov:   #B91C1C;
+            /* Shadows */
             --adm-shadow:       0 4px 16px rgba(30, 58, 138, 0.1);
             --adm-shadow-sm:    0 2px 8px rgba(30, 58, 138, 0.07);
             --radius: 12px;
+            /* Legacy vars for compatibility */
+            --bg: #F0F4FF;
+            --surface: #FFFFFF;
+            --surface-soft: #F8FAFC;
+            --text: #1F2937;
+            --muted: #6B7280;
+            --border: #DBEAFE;
+            --brand: #3B82F6;
+            --brand-strong: #1e40af;
+            --success-bg: rgba(34, 197, 94, 0.18);
+            --success-text: #86efac;
+            --warn-bg: rgba(245, 158, 11, 0.18);
+            --warn-text: #fcd34d;
+            --info-bg: rgba(56, 189, 248, 0.18);
+            --info-text: #bae6fd;
+            --danger-bg: rgba(248, 113, 113, 0.18);
+            --danger-text: #fecaca;
+            --shadow: 0 4px 16px rgba(30, 58, 138, 0.1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
-            font-family: "Manrope", sans-serif;
-            background: var(--adm-bg);
-            color: var(--adm-text);
-            min-height: 100vh;
-            font-size: 14px;
+            font-family: 'Manrope', 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            position: relative;
+            overflow-x: clip;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 14% 16%, rgba(29,158,117,0.06), transparent 40%),
+                radial-gradient(circle at 86% 12%, rgba(59, 130, 246, 0.18), transparent 32%),
+                radial-gradient(circle at 72% 78%, rgba(6, 182, 212, 0.1), transparent 34%);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.9;
+        }
+
+        @keyframes backgroundFloat {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1001;
+            background: var(--adm-topbar) !important;
+            border-bottom: 1px solid var(--adm-border) !important;
+            box-shadow: var(--adm-shadow-sm) !important;
+        }
+        .navbar .navbar-content {
+            min-height: 68px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.25rem;
+            width: 100%;
+            margin: 0;
+            padding: 0 1.5rem;
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: none;
+            margin: 0 auto;
+            gap: 1rem;
+            padding: 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 0;
+        }
+
+        .brand-mark {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(140deg, #1E3A8A, #2563EB);
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+            flex-shrink: 0;
+        }
+
+        .logo {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            text-decoration: none;
+            letter-spacing: 0.2px;
+            line-height: 1.1;
+            white-space: nowrap;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-left: auto;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: rgba(226, 232, 240, 0.78);
+            font-weight: 700;
+            padding: 0.6rem 0.95rem;
+            border-radius: 10px;
+            transition: all 0.25s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(29,158,117,0.18);
+            color: #ffffff;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .user-role {
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--adm-primary) !important;
+            color: #fff !important;
+            box-shadow: 0 2px 6px rgba(30, 58, 138, 0.25) !important;
+        }
+
+        .btn-primary:hover {
+            background: var(--adm-primary-hov) !important;
+            box-shadow: 0 6px 16px rgba(30, 58, 138, 0.35) !important;
+        }
+
+        .btn-secondary {
+            background: #3B82F6 !important;
+            color: #FFFFFF !important;
+            border-color: #3B82F6 !important;
+            box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25) !important;
+        }
+
+        .btn-secondary:hover {
+            background: #1E40AF !important;
+            border-color: #1E40AF !important;
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35) !important;
+        }
+
+        .btn-logout {
+            background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+            padding: 0.75rem 1.25rem !important;
+            font-weight: 600 !important;
+            font-size: 0.95rem !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 0.5rem !important;
+            cursor: pointer !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important;
+            box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+            transform: translateY(-2px) !important;
+        }
+
+        .btn-logout:active {
+            transform: translateY(0) !important;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+        }
+
+        .btn-logout svg {
+            transition: transform 0.3s ease !important;
+            width: 1.1rem !important;
+            height: 1.1rem !important;
+            stroke: currentColor !important;
+        }
+
+        .btn-logout:hover svg {
+            transform: translateX(2px) !important;
+        }
+
+        .btn-outline {
+            background: rgba(37, 99, 235, 0.12);
+            border: 1px solid rgba(96, 165, 250, 0.22);
+            color: #dbeafe;
+            padding: 0.58rem 1rem;
+            border-radius: 12px;
+            font-weight: 700;
+            transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+        }
+
+        .btn-outline:hover {
+            background: rgba(59, 130, 246, 0.22);
+            border-color: rgba(147, 197, 253, 0.34);
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        .container {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── MAIN LAYOUT: flex wrapper below navbar ── */
+        .app-shell {
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 16px !important;
+            padding: 16px !important;
+            align-items: flex-start !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 280px !important;
+            min-width: 280px !important;
+            flex-shrink: 0 !important;
+            position: sticky !important;
+            top: 96px !important;
+            height: calc(100vh - 112px) !important;
+            max-height: calc(100vh - 112px) !important;
+            overflow-y: auto !important;
+            z-index: 10 !important;
+        }
+
+        /* ── MAIN CONTENT ── */
+        .content-column {
+            flex: 1 !important;
+            min-width: 0 !important;
+            margin-left: 0 !important;
+            overflow: visible !important;
+            padding: 0 !important;
         }
 
         .dashboard-header {
-            background: var(--adm-card);
-            border: 1px solid var(--adm-border);
-            border-radius: 10px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--adm-shadow-sm);
+            background: var(--adm-card) !important;
+            border: 1px solid var(--adm-border) !important;
+            border-radius: 10px !important;
+            box-shadow: var(--adm-shadow-sm) !important;
+            padding: 0.75rem 1.1rem !important;
+            margin-bottom: 0.9rem !important;
         }
 
         .dashboard-header h1 {
-            color: var(--adm-heading);
-            font-size: 28px;
-            margin-bottom: 0.5rem;
+            font-size: 1.28rem;
+            margin-bottom: 0.08rem;
+            color: var(--adm-heading) !important;
         }
 
         .dashboard-header p {
-            color: var(--adm-muted);
-            font-size: 14px;
+            color: #5B6B7F !important;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            max-width: 680px;
         }
+
+        .quick-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .section-stack {
+            display: grid;
+            gap: 1.05rem;
+        }
+
+        /* Override dashboard-shell.css !important for view-based hiding */
+        .stats-grid.hidden-by-view {
+            display: none !important;
+        }
+        .quick-actions.hidden-by-view {
+            display: none !important;
+        }
+
+        .meta-row {
+            margin-top: 0.5rem;
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            pointer-events: none;
+        }
+
+        .toast {
+            min-width: 280px;
+            max-width: 420px;
+            padding: 0.8rem 0.9rem;
+            border-radius: 8px;
+            background: #111827;
+            color: #f8fafc;
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            opacity: 0;
+            transform: translateY(-8px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: auto;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success { border-left: 4px solid #22c55e; }
+        .toast.error { border-left: 4px solid #ef4444; }
+        .toast.info { border-left: 4px solid #60a5fa; }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 0.9rem;
         }
 
         .stat-card {
             background: var(--adm-card);
             border: 1px solid var(--adm-border);
             border-radius: 10px;
-            padding: 1.5rem;
             box-shadow: var(--adm-shadow-sm);
-            transition: all 0.3s ease;
+            padding: 1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
             position: relative;
-            border-bottom: 4px solid transparent;
+            overflow: hidden;
         }
 
-        .stat-card:nth-child(1) {
-            border-bottom-color: #1E3A8A;
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #2563EB;
+            transition: height 0.2s ease;
         }
 
-        .stat-card:nth-child(2) {
-            border-bottom-color: #10B981;
+        .stat-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.6rem;
+            margin-bottom: 0.25rem;
         }
 
-        .stat-card:nth-child(3) {
-            border-bottom-color: #60A5FA;
+        .stat-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid var(--adm-border);
+            background: rgba(255, 255, 255, 0.04);
+            color: #93C5FD;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 800;
+            flex-shrink: 0;
+            transition: all 0.18s ease;
         }
 
-        .stat-card:nth-child(4) {
-            border-bottom-color: #F59E0B;
+        .stat-icon svg, .stat-icon i {
+            width: 16px;
+            height: 16px;
+            font-size: 16px;
+            line-height: 1;
         }
 
         .stat-card:hover {
             transform: translateY(-3px);
+            background: var(--adm-card-hover);
             box-shadow: var(--adm-shadow);
         }
 
-        .stat-card-label {
-            color: var(--adm-muted);
-            font-size: 12px;
+        .stat-card:hover::before {
+            height: 5px;
+        }
+
+        .section-focus {
+            box-shadow: 0 0 0 3px rgba(15, 94, 140, 0.2), 0 10px 24px rgba(15, 94, 140, 0.12);
+            transition: box-shadow 0.35s ease;
+        }
+
+        .view-filters {
+            display: inline-flex;
+            gap: 0.5rem;
+            margin-right: 0.75rem;
+        }
+
+        .filter-chip {
+            padding: 0.35rem 0.7rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: #f4f8fc;
+            color: #334155;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .filter-chip.active {
+            background: var(--brand);
+            color: #fff;
+            border-color: var(--brand);
+        }
+
+        .stat-label {
+            color: #6B7280;
+            font-size: 0.7rem;
+            display: block;
+            margin-bottom: 0.35rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.5rem;
+            letter-spacing: 0.08em;
+            font-weight: 600;
         }
 
-        .stat-card-value {
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 900;
+            display: block;
             color: var(--adm-heading);
-            font-size: 28px;
-            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 0.3rem;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .stat-card-subtitle {
-            color: var(--adm-muted);
-            font-size: 12px;
-            margin-top: 0.5rem;
+        .stat-footer {
+            color: #6B7280;
+            font-size: 0.7rem;
+            line-height: 1.4;
+            font-weight: 500;
         }
 
-        .content-section {
-            margin-bottom: 2rem;
-        }
-
-        .content-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .content-header h2 {
-            color: var(--adm-heading);
-            font-size: 20px;
-        }
-
-        .table-container {
+        .card {
             background: var(--adm-card);
             border: 1px solid var(--adm-border);
             border-radius: 10px;
-            overflow: hidden;
             box-shadow: var(--adm-shadow-sm);
+            padding: 0.95rem;
+            margin-bottom: 0.75rem;
         }
 
-        table {
+        .card h3, .policy-card h4 {
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            color: var(--adm-heading);
+            font-weight: 700;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dashboard-header .btn {
+            min-height: 40px;
+            padding: 0 14px;
+            font-size: 0.86rem;
+        }
+
+        .table, .users-table {
             width: 100%;
             border-collapse: collapse;
+            background: #FFFFFF;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #E0E7FF;
         }
 
-        table thead {
-            background: var(--adm-sidebar);
-            color: white;
-        }
-
-        table th {
-            padding: 1rem;
+        .table th, .users-table th, .table td, .users-table td {
             text-align: left;
-            font-weight: 600;
-            font-size: 13px;
+            padding: 0.55rem 0.85rem;
+            border-bottom: 1px solid #E0E7FF;
+            font-size: 0.78rem;
+            vertical-align: middle;
         }
 
-        table td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--adm-border);
+        .table th, .users-table th {
+            background: #1E3A8A;
+            color: #FFFFFF;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
         }
 
-        table tbody tr:hover {
-            background: var(--adm-bg2);
+        .table td, .users-table td {
+            color: #1F2937;
+            font-weight: 500;
+            height: 60px;
+            max-height: 75px;
         }
 
-        .btn {
-            display: inline-block;
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.3s ease;
+        .table tbody tr, .users-table tbody tr {
+            background: #FFFFFF;
+            transition: background 0.15s ease;
         }
 
-        .btn-primary {
-            background: var(--adm-primary);
-            color: white;
+        .table tbody tr:hover, .users-table tbody tr:hover {
+            background: #F0F7FF;
         }
 
-        .btn-primary:hover {
-            background: var(--adm-primary-hov);
+        .table td:last-child,
+        .table th:last-child {
+            white-space: nowrap;
         }
 
-        .btn-secondary {
-            background: #3B82F6;
-            color: white;
+        .table th.col-center,
+        .table td.col-center {
+            text-align: center;
         }
 
-        .btn-secondary:hover {
-            background: #2563EB;
+        .table th.col-action,
+        .table td.col-action {
+            text-align: right;
+            width: 1%;
+            white-space: nowrap;
+        }
+
+        /* Action buttons: compact row, right-aligned, no overflow */
+        .table-actions {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 4px;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .table-actions .btn {
+            padding: 4px 10px !important;
+            font-size: 0.74rem !important;
+            min-height: 28px !important;
+            height: 28px !important;
+            white-space: nowrap !important;
+            border-radius: 6px !important;
         }
 
         .badge {
-            display: inline-block;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
+            padding: 0.46rem 0.88rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
         }
 
         .badge-success {
-            background: #DBEAFE;
-            color: #1E3A8A;
+            background: var(--success-bg);
+            color: var(--success-text);
         }
 
         .badge-warning {
-            background: #FEF3C7;
-            color: #92400E;
+            background: var(--warn-bg);
+            color: var(--warn-text);
         }
 
-        .badge-danger {
-            background: #FEE2E2;
-            color: #991B1B;
+        .badge-info {
+            background: var(--info-bg);
+            color: var(--info-text);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.42rem 0.84rem;
+            border-radius: 999px;
+            background: rgba(59,130,246,0.08);
+            color: #e0e7ff;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: lowercase;
+        }
+
+        .quick-action-grid {
+            display: grid;
+            grid-template-columns: minmax(260px, 1.2fr) minmax(220px, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 960px) {
+            .quick-action-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .quick-action-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .quick-action-card {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.9rem;
+            min-height: 150px;
+            padding: 1.35rem;
+            background: var(--surface-soft);
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .quick-action-card:hover {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(30, 58, 138, 0.28);
+            border-color: transparent;
+        }
+
+        .quick-action-card:hover .quick-action-icon {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+
+        .quick-action-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: #deebf5;
+            color: #1f425f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+        }
+
+        .quick-action-card strong {
+            display: block;
+            font-size: 1rem;
+            color: inherit;
+        }
+
+        .quick-action-card span:last-child {
+            color: var(--muted);
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+
+        .quick-action-card:hover span:last-child {
+            color: rgba(255, 255, 255, 0.86);
+        }
+
+        .quick-action-card.primary {
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.18), rgba(15, 76, 129, 0.36));
+            border-color: rgba(103, 232, 249, 0.32);
+        }
+
+        .quick-action-card.primary .quick-action-icon {
+            background: rgba(255, 255, 255, 0.92);
+        }
+
+        .table .btn.btn-outline {
+            min-height: 36px;
+            padding: 0 12px;
+            font-size: 0.82rem;
+            border-radius: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--muted);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .empty-state {
             text-align: center;
             padding: 3rem;
-            color: var(--adm-muted);
+            color: var(--muted);
         }
 
         .empty-state-icon {
-            font-size: 48px;
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+            background: #e4edf6;
+            color: #355777;
             margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: var(--adm-muted);
-        }
-
-        .error {
-            background: #FEE2E2;
-            color: #991B1B;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            border-left: 4px solid #DC2626;
-        }
-
-        @media (max-width: 1200px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
         }
 
         @media (max-width: 768px) {
+            .navbar {
+                padding: 0.9rem 1rem;
+            }
+
+            .navbar-content {
+                flex-wrap: wrap;
+            }
+
+            .brand {
+                width: 100%;
+            }
+
+            .logo {
+                font-size: 1.2rem;
+                white-space: normal;
+            }
+
+            .nav-links {
+                width: 100%;
+                justify-content: flex-start;
+                gap: 0.6rem;
+            }
+
+            .dashboard-header {
+                padding: 1.1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .table {
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 980px) {
+            .app-shell {
+                flex-direction: column !important;
+                padding: 12px !important;
+                gap: 12px !important;
+            }
+
+            .sidebar {
+                width: 100% !important;
+                min-width: 0 !important;
+                position: static !important;
+                height: auto !important;
+                max-height: none !important;
+            }
+
+            .sidebar-nav {
+                overflow: visible;
+                padding-right: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 900px) {
+            .nav-links {
+                display: none;
+            }
+        }
+
+        @media (max-width: 560px) {
             .stats-grid {
                 grid-template-columns: 1fr;
             }
-            .table-container {
-                overflow-x: auto;
-            }
-            table {
-                font-size: 12px;
-            }
-            table th, table td {
-                padding: 0.75rem;
-            }
         }
+    </style>
+    <link rel="stylesheet" href="css/ui-system.css?v=blue4">
+    <link rel="stylesheet" href="css/product-theme.css?v=blue4">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=blue4">
+    <style>
+/* ═══════════════════════════════════════════════════════════════════════
+   TEACHER DASHBOARD — COMPLETE COLOR OVERRIDE
+   Uses html body prefix for maximum specificity to beat all !important rules.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ?? Scrollbar ????????????????????????????????????????????????????????? */
+* { -webkit-font-smoothing: antialiased; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #EFF6FF; }
+::-webkit-scrollbar-thumb { background: #3B82F6; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #1e40af; }
+
+/* ?? Page background ??????????????????????????????????????????????????? */
+body.teacher-dashboard-page {
+    background-color: #F0F4FF !important;
+    background-image: none !important;
+}
+body.teacher-dashboard-page::before { display: none !important; }
+
+/* ?? Navbar / Topbar ??????????????????????????????????????????????????? */
+body.teacher-dashboard-page .navbar {
+    background-color: #1E3A8A !important;
+    border-bottom: 1px solid #DBEAFE !important;
+    backdrop-filter: none !important;
+}
+
+/* ?? Sidebar ??????????????????????????????????????????????????????????? */
+body.teacher-dashboard-page .sidebar {
+    background: #1E3A8A !important;
+    border: 1px solid #DBEAFE !important;
+    border-radius: 14px !important;
+    box-shadow: 0 4px 16px rgba(30, 58, 138, 0.1) !important;
+    padding: 1rem !important;
+}
+body.teacher-dashboard-page .sidebar::before { display: none !important; }
+body.teacher-dashboard-page .sidebar-link {
+    color: rgba(203, 213, 232, 0.9) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: transparent !important;
+    border-radius: 10px !important;
+    padding: 0.7rem 0.8rem !important;
+    transition: all 0.18s ease !important;
+}
+body.teacher-dashboard-page .sidebar-link:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(96, 165, 250, 0.2) !important;
+    color: #FFFFFF !important;
+}
+body.teacher-dashboard-page .sidebar-link.active {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.15)) !important;
+    border-color: rgba(96, 165, 250, 0.4) !important;
+    color: #ffffff !important;
+    box-shadow: inset 0 0 12px rgba(96, 165, 250, 0.15) !important;
+}
+body.teacher-dashboard-page .sidebar-link::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    border-radius: 999px;
+    background: transparent;
+    transition: background 0.18s ease;
+}
+body.teacher-dashboard-page .sidebar-link:hover::before { background: #60A5FA; }
+body.teacher-dashboard-page .sidebar-link.active::before { background: #BFDBFE; height: calc(100% - 8px); }
+body.teacher-dashboard-page .sidebar-link-title { color: inherit !important; }
+body.teacher-dashboard-page .sidebar-link-icon {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 8px !important;
+    border: 1px solid #DBEAFE !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: #93C5FD !important;
+    transition: all 0.18s ease !important;
+}
+body.teacher-dashboard-page .sidebar-link:hover .sidebar-link-icon,
+body.teacher-dashboard-page .sidebar-link.active .sidebar-link-icon {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    color: #FFFFFF !important;
+}
+body.teacher-dashboard-page .sidebar-profile-name { color: #FFFFFF !important; }
+body.teacher-dashboard-page .sidebar-profile-meta { color: rgba(203, 213, 232, 0.9) !important; }
+body.teacher-dashboard-page .sidebar-head { border-bottom-color: #DBEAFE !important; }
+body.teacher-dashboard-page .sidebar-footer { border-top-color: #DBEAFE !important; }
+body.teacher-dashboard-page .sidebar-footer-button {
+    background: #DC2626 !important;
+    border-color: #DC2626 !important;
+    color: #FFFFFF !important;
+}
+body.teacher-dashboard-page .sidebar-footer-button:hover {
+    background: #B91C1C !important;
+    color: #FFFFFF !important;
+}
+
+/* ?? Dashboard header card ????????????????????????????????????????????? */
+body.teacher-dashboard-page .dashboard-header {
+    background: #FFFFFF !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 10px !important;
+    box-shadow: var(--adm-shadow-sm) !important;
+    padding: 0.75rem 1.1rem !important;
+}
+body.teacher-dashboard-page .dashboard-header h1 { color: #1E3A8A !important; }
+body.teacher-dashboard-page .dashboard-header p,
+body.teacher-dashboard-page #welcomeMessage { color: #5B6B7F !important; }
+body.teacher-dashboard-page .meta-row { color: #5B6B7F !important; }
+
+/* ?? BUTTONS ? Create New Exam (btn-primary) ??????????????????????????? */
+body.teacher-dashboard-page .btn-primary,
+body.teacher-dashboard-page a.btn-primary,
+body.teacher-dashboard-page button.btn-primary {
+    background: #1E3A8A !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 0.85rem !important;
+    font-weight: 700 !important;
+    font-size: 0.8rem !important;
+    box-shadow: 0 2px 6px rgba(30,58,138,0.25) !important;
+    opacity: 1 !important;
+}
+body.teacher-dashboard-page .btn-primary:hover:not(:disabled),
+body.teacher-dashboard-page a.btn-primary:hover {
+    background: #1e40af !important;
+    box-shadow: 0 6px 16px rgba(30,58,138,0.35) !important;
+}
+
+/* ?? BUTTONS ? Secondary (btn-secondary) ??????????????????????? */
+body.teacher-dashboard-page .btn-secondary,
+body.teacher-dashboard-page a.btn-secondary,
+body.teacher-dashboard-page button.btn-secondary {
+    background: #3B82F6 !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-color: #3B82F6 !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 0.85rem !important;
+    font-weight: 700 !important;
+    font-size: 0.8rem !important;
+    box-shadow: 0 2px 6px rgba(59,130,246,0.25) !important;
+    opacity: 1 !important;
+}
+body.teacher-dashboard-page .btn-secondary:hover,
+body.teacher-dashboard-page a.btn-secondary:hover {
+    background: #1E40AF !important;
+    border-color: #1E40AF !important;
+    box-shadow: 0 6px 16px rgba(59,130,246,0.35) !important;
+}
+
+/* ?? BUTTONS ? Table action buttons ??????????????????????????????????? */
+body.teacher-dashboard-page .btn-table {
+    border-radius: 8px !important;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    padding: 0 12px !important;
+    min-height: 34px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+/* btn-outline = View Details */
+body.teacher-dashboard-page .btn-outline.btn-table,
+body.teacher-dashboard-page .btn-outline {
+    background: #E6F1FB !important;
+    border: 1px solid #185FA5 !important;
+    color: #0C447C !important;
+}
+body.teacher-dashboard-page .btn-outline.btn-table:hover,
+body.teacher-dashboard-page .btn-outline:hover {
+    background: #185FA5 !important;
+    color: #FFFFFF !important;
+}
+/* btn-secondary.btn-table = Print Paper / Plagiarism / Close */
+body.teacher-dashboard-page .btn-secondary.btn-table {
+    background: #F3EFFE !important;
+    border: 1px solid #534AB7 !important;
+    color: #26215C !important;
+    padding: 0 12px !important;
+    min-height: 34px !important;
+}
+body.teacher-dashboard-page .btn-secondary.btn-table:hover {
+    background: #534AB7 !important;
+    color: #FFFFFF !important;
+}
+/* btn-primary.btn-table = Publish */
+body.teacher-dashboard-page .btn-primary.btn-table {
+    background: #1E3A8A !important;
+    border: none !important;
+    color: #FFFFFF !important;
+    padding: 0 12px !important;
+    min-height: 34px !important;
+}
+body.teacher-dashboard-page .btn-primary.btn-table:hover {
+    background: #1e40af !important;
+}
+
+/* ?? STAT CARDS ???????????????????????????????????????????????????????? */
+body.teacher-dashboard-page .stat-card {
+    background: #FFFFFF !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 10px !important;
+    box-shadow: var(--adm-shadow-sm) !important;
+}
+body.teacher-dashboard-page .stat-card::before {
+    height: 4px !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    background: #2563EB !important;
+    opacity: 1 !important;
+}
+
+body.teacher-dashboard-page .stat-card:nth-child(1)::before { background: #2563EB !important; }
+body.teacher-dashboard-page .stat-card:nth-child(2)::before { background: #16A34A !important; }
+body.teacher-dashboard-page .stat-card:nth-child(3)::before { background: #3B82F6 !important; }
+body.teacher-dashboard-page .stat-card:nth-child(4)::before { background: #F59E0B !important; }
+
+body.teacher-dashboard-page .stat-card:hover {
+    transform: translateY(-3px) !important;
+    background: #F9FAFB !important;
+    box-shadow: var(--adm-shadow) !important;
+    border-color: #D1D5DB !important;
+}
+
+body.teacher-dashboard-page .stat-card:hover::before { height: 5px !important; }
+
+body.teacher-dashboard-page .stat-number {
+    color: #2563EB !important;
+    font-size: 2rem !important;
+    font-weight: 900 !important;
+}
+body.teacher-dashboard-page .stat-card:nth-child(2) .stat-number { color: #16A34A !important; }
+body.teacher-dashboard-page .stat-card:nth-child(3) .stat-number { color: #3B82F6!important; }
+body.teacher-dashboard-page .stat-card:nth-child(4) .stat-number { color: #F59E0B !important; }
+
+body.teacher-dashboard-page .stat-label { color: #6B7280 !important; font-size: 0.7rem !important; }
+body.teacher-dashboard-page .stat-footer { color: #6B7280 !important; font-size: 0.7rem !important; }
+
+/* Stat icons */
+body.teacher-dashboard-page .stat-icon {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 8px !important;
+    border: 1px solid #E5E7EB !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: #93C5FD !important;
+    box-shadow: none !important;
+}
+body.teacher-dashboard-page .stat-card:nth-child(2) .stat-icon { color: #22C55E !important; border-color: #DCFCE7 !important; }
+body.teacher-dashboard-page .stat-card:nth-child(3) .stat-icon { color: #60A5FA !important; border-color: #DBEAFE !important; }
+body.teacher-dashboard-page .stat-card:nth-child(4) .stat-icon { color: #FBBF24 !important; border-color: #FEF3C7 !important; }
+
+/* ?? CARDS (general) ??????????????????????????????????????????????????? */
+body.teacher-dashboard-page .card {
+    background: #FFFFFF !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 10px !important;
+    box-shadow: var(--adm-shadow-sm) !important;
+}
+body.teacher-dashboard-page .card h3 { color: #1E3A8A !important; }
+
+/* ?? TABLE ????????????????????????????????????????????????????????????? */
+body.teacher-dashboard-page .table,
+body.teacher-dashboard-page table {
+    background: #FFFFFF !important;
+    border: 1px solid #E0E7FF !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+}
+body.teacher-dashboard-page .table th,
+body.teacher-dashboard-page table th {
+    background: #1E3A8A !important;
+    color: #FFFFFF !important;
+    font-size: 0.7rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    font-weight: 700 !important;
+    padding: 0.8rem 0.95rem !important;
+    border-bottom: 1px solid #E0E7FF !important;
+}
+body.teacher-dashboard-page .table td,
+body.teacher-dashboard-page table td {
+    color: #1F2937 !important;
+    border-bottom: 1px solid #E0E7FF !important;
+    padding: 0.55rem 0.85rem !important;
+    background: #FFFFFF !important;
+    font-weight: 500 !important;
+    vertical-align: middle !important;
+    height: 60px !important;
+    max-height: 75px !important;
+}
+body.teacher-dashboard-page .table tbody tr,
+body.teacher-dashboard-page table tbody tr {
+    background: #FFFFFF !important;
+    transition: background 0.15s ease !important;
+}
+body.teacher-dashboard-page .table tbody tr:hover,
+body.teacher-dashboard-page table tbody tr:hover {
+    background: #F0F7FF !important;
+}
+
+/* ?? STATUS BADGES ????????????????????????????????????????????????????? */
+body.teacher-dashboard-page .badge-published,
+body.teacher-dashboard-page .status-badge.published {
+    background: #1E3A8A !important;
+    color: #E1F5EE !important;
+    border: none !important;
+    border-radius: 20px !important;
+    padding: 4px 14px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+}
+body.teacher-dashboard-page .badge-draft,
+body.teacher-dashboard-page .status-badge.draft {
+    background: #EF9F27 !important;
+    color: #412402 !important;
+    border: none !important;
+    border-radius: 20px !important;
+    padding: 4px 14px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+}
+body.teacher-dashboard-page .badge-archived,
+body.teacher-dashboard-page .badge-closed,
+body.teacher-dashboard-page .status-badge.archived,
+body.teacher-dashboard-page .status-badge.closed {
+    background: #E24B4A !important;
+    color: #FCEBEB !important;
+    border: none !important;
+    border-radius: 20px !important;
+    padding: 4px 14px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+}
+body.teacher-dashboard-page .badge-warning,
+body.teacher-dashboard-page .status-badge.submitted,
+body.teacher-dashboard-page .status-badge.pending {
+    background: #FEF3C7 !important;
+    color: #B45309 !important;
+    border: none !important;
+    border-radius: 20px !important;
+    padding: 4px 14px !important;
+}
+body.teacher-dashboard-page .badge-success,
+body.teacher-dashboard-page .status-badge.graded {
+    background: #DCFCE7 !important;
+    color: #15803D !important;
+    border: none !important;
+    border-radius: 20px !important;
+    padding: 4px 14px !important;
+}
+body.teacher-dashboard-page .badge-info,
+body.teacher-dashboard-page .status-badge {
+    background: #E6F1FB !important;
+    color: #185FA5 !important;
+    border: none !important;
+    border-radius: 20px !important;
+    padding: 4px 14px !important;
+}
+
+/* ?? FILTER CHIPS ?????????????????????????????????????????????????????? */
+body.teacher-dashboard-page .filter-chip {
+    background: #F0F4FF !important;
+    border: 1.5px solid #BFDBFE !important;
+    color: #1E3A8A !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    padding: 0.4rem 1rem !important;
+    font-size: 0.82rem !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+body.teacher-dashboard-page .filter-chip:hover {
+    background: #DBEAFE !important;
+    border-color: #1E3A8A !important;
+}
+body.teacher-dashboard-page .filter-chip.active {
+    background: #1E3A8A !important;
+    color: #FFFFFF !important;
+    border-color: #1E3A8A !important;
+    font-weight: 600 !important;
+}
+
+/* ?? QUICK ACTION CARDS ???????????????????????????????????????????????? */
+body.teacher-dashboard-page .quick-action-card {
+    background: #FFFFFF !important;
+    border: 0.5px solid #DBEAFE !important;
+    color: #1E3A8A !important;
+}
+body.teacher-dashboard-page .quick-action-card:hover {
+    background: #EFF6FF !important;
+    border-color: #1E3A8A !important;
+}
+body.teacher-dashboard-page .quick-action-card strong { color: #1E3A8A !important; }
+body.teacher-dashboard-page .quick-action-icon {
+    background: #EFF6FF !important;
+    color: #1E3A8A !important;
+}
+
+/* ?? SECTION HEADERS ??????????????????????????????????????????????????? */
+body.teacher-dashboard-page .card-header { border-bottom-color: #C0E8D8 !important; }
+body.teacher-dashboard-page .card h3,
+body.teacher-dashboard-page .section-title { color: #1E3A8A !important; }
+body.teacher-dashboard-page .loading,
+body.teacher-dashboard-page .empty-state { color: #6B7280 !important; }
+
+/* ?? TOAST ????????????????????????????????????????????????????????????? */
+body.teacher-dashboard-page .toast { background: #1F2937 !important; color: #F3F4F6 !important; }
+body.teacher-dashboard-page .toast.success { border-left-color: #16A34A !important; }
+body.teacher-dashboard-page .toast.error { border-left-color: #DC2626 !important; }
+body.teacher-dashboard-page .toast.info { border-left-color: #3B82F6 !important; }
     </style>
 </head>
 <body class="teacher-dashboard-page">
-    <div class="container">
-        <!-- Dashboard Header -->
-        <div class="dashboard-header">
-            <h1>Welcome, <span id="teacherName">Teacher</span></h1>
-            <p>Monitor exams, grade submissions, and track student performance</p>
-        </div>
-
-        <!-- Stats Grid -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-card-label">Total Exams</div>
-                <div class="stat-card-value" id="totalExams">0</div>
-                <div class="stat-card-subtitle">Created</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card-label">Active Exams</div>
-                <div class="stat-card-value" id="activeExams">0</div>
-                <div class="stat-card-subtitle">Running now</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card-label">Pending Grading</div>
-                <div class="stat-card-value" id="pendingGrading">0</div>
-                <div class="stat-card-subtitle">To review</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card-label">Students</div>
-                <div class="stat-card-value" id="totalStudents">0</div>
-                <div class="stat-card-subtitle">Enrolled</div>
-            </div>
-        </div>
-
-        <!-- Exams Section -->
-        <div class="content-section">
-            <div class="content-header">
-                <h2>Your Exams</h2>
-                <button class="btn btn-primary" onclick="window.location.href='/create-exam.html'">
-                    <i class="bi bi-plus-circle"></i> Create Exam
+    <script>
+        // Detect embed mode and add CSS class
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('embed') === '1') {
+                document.body.classList.add('embedded-shell');
+                window.__TEACHER_SHELL_EMBEDDED__ = true;
+            }
+        })();
+    </script>
+    <!-- Cold-start / connecting banner -->
+    <div id="coldStartBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#1e3a8a,#1d4ed8);color:#e0f2fe;font-size:0.82rem;font-weight:600;padding:9px 16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);letter-spacing:0.01em;">
+        <span id="coldStartMsg">⏳ Connecting to server — this may take up to 30 seconds on first load...</span>
+        <span id="coldStartDots"></span>
+        <button onclick="document.getElementById('coldStartBanner').style.display='none'" style="margin-left:16px;background:rgba(255,255,255,0.15);border:none;color:#e0f2fe;border-radius:6px;padding:2px 10px;cursor:pointer;font-size:0.78rem;">✕</button>
+    </div>
+    <!-- Navigation -->
+    <nav class="navbar" style="margin-top:0;" id="mainNavbar">
+        <div class="navbar-content">
+            <div class="header-brand-group">
+                <button class="shell-toggle" type="button" data-sidebar-toggle aria-label="Toggle sidebar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                        <path d="M4 7h16M4 12h16M4 17h16" />
+                    </svg>
                 </button>
-            </div>
-            <div id="examsContainer" class="table-container">
-                <div class="loading">Loading exams...</div>
+                <div class="brand">
+                    <span class="brand-mark">SE</span>
+                    <a href="index.html" class="logo">Smart Exam System</a>
+                </div>
             </div>
         </div>
+    </nav>
 
-        <!-- Pending Submissions Section -->
-        <div class="content-section">
-            <div class="content-header">
-                <h2>Pending Submissions</h2>
-                <button class="btn btn-secondary">View All</button>
+    <div class="container">
+        <div class="app-shell">
+            <div class="content-column">
+                <div class="dashboard-header" id="profileSection">
+                    <h1>Teacher Dashboard</h1>
+                    <p id="welcomeMessage">Welcome back! Here's your assessment overview.</p>
+                    <div class="meta-row" id="lastUpdated">Last updated: --</div>
+                    <div class="quick-actions">
+                        <a href="create-exam.html" class="btn btn-primary">Create New Exam</a>
+                        <a href="dashboard-teacher.html?view=submissions" class="btn btn-secondary">Pending Grades</a>
+                    </div>
+                </div>
+
+                <div class="section-stack">
+                    <div class="stats-grid">
+                        <div class="stat-card clickable" onclick="setExamFilter('all'); navigateToSection('examsSection')" title="View all exams">
+                            <div class="stat-head">
+                                <span class="stat-label">Total Exams</span>
+                                <span class="stat-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M9 3h6l4 4v14H5V3h4z" />
+                                        <path d="M9 3v4h6V3" />
+                                        <path d="M9 12h6M9 16h6" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <span class="stat-number" id="totalExams">0</span>
+                            <div class="stat-footer">All time</div>
+                        </div>
+                        <div class="stat-card clickable" onclick="navigateToSection('examsSection')" title="View active exams">
+                            <div class="stat-head">
+                                <span class="stat-label">Active Exams</span>
+                                <span class="stat-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="4" y="5" width="16" height="14" rx="3" />
+                                        <path d="M8 10h8M8 14h5" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <span class="stat-number" id="activeExams">0</span>
+                            <div class="stat-footer">Currently published</div>
+                        </div>
+                        <div class="stat-card clickable" onclick="navigateTeacherDashboardView('students')" title="View students overview">
+                            <div class="stat-head">
+                                <span class="stat-label">Students</span>
+                                <span class="stat-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" />
+                                        <circle cx="9.5" cy="7" r="3" />
+                                        <path d="M20 21v-2a4 4 0 0 0-3-3.87" />
+                                        <path d="M16 4.13a3 3 0 0 1 0 5.74" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <span class="stat-number" id="totalStudents">0</span>
+                            <div class="stat-footer">Across all courses</div>
+                        </div>
+                        <div class="stat-card clickable" onclick="navigateTeacherDashboardView('submissions')" title="View pending grades">
+                            <div class="stat-head">
+                                <span class="stat-label">Pending Grades</span>
+                                <span class="stat-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 20h9" />
+                                        <path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4Z" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <span class="stat-number" id="pendingGrading">0</span>
+                            <div class="stat-footer">Awaiting teacher finalization</div>
+                        </div>
+                        <div class="stat-card clickable" onclick="navigateTeacherDashboardView('results')" title="View finalized results">
+                            <div class="stat-head">
+                                <span class="stat-label">Average Score</span>
+                                <span class="stat-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 19h16" />
+                                        <path d="M7 16V9" />
+                                        <path d="M12 16V5" />
+                                        <path d="M17 16v-3" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <span class="stat-number" id="averageScore">N/A</span>
+                            <div class="stat-footer">Across submitted attempts</div>
+                        </div>
+                    </div>
+
+                    <div class="card" id="examsSection">
+                        <div class="card-header">
+                            <h3>Recent Exams</h3>
+                            <div>
+                                <span class="view-filters">
+                                    <button class="filter-chip active" id="examFilterAll" onclick="setExamFilter('all')">All</button>
+                                    <button class="filter-chip" id="examFilterActive" onclick="setExamFilter('active')">Active</button>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div id="examsTableContainer">
+                            <div class="loading">Loading exams...</div>
+                        </div>
+                    </div>
+
+                <div class="card" id="pendingSection">
+            <div class="card-header">
+                <h3>Pending Grades</h3>
+                <div style="display:flex;gap:0.6rem;align-items:center;">
+                    <button onclick="gradeAllPendingWithAI()" class="btn btn-secondary btn-table" id="gradeAllBtn" title="Apply AI-suggested scores to all pending subjective answers in one click">
+                        Auto-Grade All Pending
+                    </button>
+                </div>
             </div>
-            <div id="submissionsContainer" class="table-container">
+
+            <div id="pendingGradingTableContainer">
                 <div class="loading">Loading submissions...</div>
+            </div>
+                    </div>
+
+                    <div class="card" id="studentsSection">
+            <div class="card-header">
+                <h3>Enrolled Students</h3>
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <input type="text" id="studentSearchInput" placeholder="Search by name or email..."
+                        oninput="filterStudentTable(this.value)"
+                        style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:6px 12px;color:#f8fafc;font-size:0.82rem;font-family:inherit;outline:none;width:220px;">
+                    <span class="badge badge-info" id="studentCountBadge">Loading...</span>
+                </div>
+            </div>
+
+            <div id="studentsTableContainer">
+                <div class="loading" style="display:flex;flex-direction:column;align-items:center;gap:1rem;padding:3rem;">
+                    <div style="width:36px;height:36px;border:3px solid rgba(59,130,246,0.15);border-top:3px solid #3b82f6;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+                    <p style="color:#64748b;font-size:0.88rem;">Loading enrolled students...</p>
+                </div>
+            </div>
+                    </div>
+
+                    <div class="card" id="resultsSection">
+            <div class="card-header">
+                <h3>Finalized Results</h3>
+                <span class="badge badge-success">Published Marks</span>
+            </div>
+
+            <div id="resultsTableContainer">
+                <div class="loading">Loading results...</div>
+            </div>
+                    </div>
+
+                    <!-- Per-Course Analytics -->
+                    <div class="card" id="courseAnalyticsSection">
+                        <div class="card-header">
+                            <h3>Per-Course Analytics</h3>
+                            <span class="badge badge-info">Live</span>
+                        </div>
+                        <div id="courseAnalyticsContainer">
+                            <div class="loading" style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;padding:2rem;">
+                                <div style="width:28px;height:28px;border:3px solid rgba(59,130,246,0.15);border-top:3px solid #3b82f6;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+                                <p style="color:#64748b;font-size:0.85rem;">Loading course analytics...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Exam Leaderboard -->
+                    <div class="card" id="leaderboardSection">
+                        <div class="card-header">
+                            <h3>Exam Leaderboard</h3>
+                            <div style="display:flex;align-items:center;gap:0.75rem;">
+                                <select id="leaderboardExamSelect" onchange="loadLeaderboard(this.value)"
+                                    style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:5px 10px;color:#1E3A8A;font-size:0.82rem;font-family:inherit;outline:none;">
+                                    <option value="">Select an exam...</option>
+                                </select>
+                                <span class="badge badge-warning">Top 10</span>
+                            </div>
+                        </div>
+                        <div id="leaderboardContainer">
+                            <div class="empty-state"><p style="color:#64748b;">Select an exam above to view its leaderboard.</p></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
-    <script src="/js/app-config.js"></script>
+    <!-- Plagiarism Results Modal -->
+    <div id="plagiarismModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+        <div style="background:#FFFFFF;border:1px solid rgba(59,130,246,0.2);border-radius:18px;padding:28px;max-width:600px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,0.5);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h2 style="font-size:1.1rem;font-weight:800;color:#1E3A8A;" id="plagiarismModalTitle">Plagiarism Check Results</h2>
+                <button onclick="document.getElementById('plagiarismModal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:1.5rem;cursor:pointer;">&times;</button>
+            </div>
+            <div id="plagiarismModalBody"></div>
+        </div>
+    </div>
+
+    <script src="js/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="js/app-config.js"></script>
+    <script src="js/error-handler.js"></script>
+    <script src="js/session-manager.js"></script>
+    <script src="js/user-profile.js"></script>
+    <script src="js/app-shell.js"></script>
+    <script src="js/mobile-nav.js"></script>
+    <script src="js/teacher-dashboard-rbac.js"></script>
     <script>
-        // Get auth headers from the app config (same as login.html uses)
-        async function getAuthHeaders() {
-            try {
-                if (window.AppConfig && window.AppConfig.buildAuthHeaders) {
-                    return await window.AppConfig.buildAuthHeaders(window.supabaseClient, {
-                        'Content-Type': 'application/json'
-                    });
-                }
-            } catch (error) {
-                console.warn('AppConfig not available:', error);
-            }
+        // Prevent back button immediately on page load
+        window.history.pushState(null, null, window.location.href)
+        window.addEventListener('popstate', function(event) {
+            window.history.pushState(null, null, window.location.href)
+        })
 
-            // Fallback: Try to get token from sessionStorage
-            const sbAccessToken = sessionStorage.getItem('sb-access-token') || localStorage.getItem('sb-access-token');
-            const authToken = sessionStorage.getItem('authToken') || localStorage.getItem('authToken');
-            const supabaseAuth = sessionStorage.getItem('sb-auth') || localStorage.getItem('sb-auth');
-            
-            const token = sbAccessToken || authToken || supabaseAuth;
-            
-            console.log('Auth Debug:', {
-                sbAccessToken: !!sbAccessToken,
-                authToken: !!authToken,
-                supabaseAuth: !!supabaseAuth,
-                selectedToken: !!token,
-                availableKeys: Object.keys(sessionStorage)
-            });
-            
-            return {
-                'Authorization': token ? `Bearer ${token}` : '',
-                'Content-Type': 'application/json'
-            };
+        if (window.AppShell) {
+            window.AppShell.init()
         }
 
-        async function loadDashboardData() {
+        const { SUPABASE_URL, SUPABASE_ANON_KEY, getBackendBase } = window.AppConfig
+        
+        const { createClient } = supabase
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        const AI_BACKEND_URL = getBackendBase()
+        const DASHBOARD_TEACHER_VERSION = '2026-02-18-v4'
+        let cachedTeacherExams = []
+        let cachedExamSubmissionCounts = {}
+        let cachedExamAverageScores = {}
+        let examFilterMode = 'all'
+        let isAutoRefreshing = false
+        let isActionInProgress = false
+        let lastInteractionAt = Date.now()
+        let refreshTimer = null
+        let backendUnavailableUntil = 0
+        let backendHealthy = null
+        let backendLastCheckedAt = 0
+        let backendWarnShown = false
+        let realtimeRefreshTimer = null
+        let realtimeChannel = null
+        let dashboardBroadcast = null
+        const PROD_CLEAN_LOGS = true
+        const devLog = (...args) => { if (!PROD_CLEAN_LOGS) console.log(...args) }
+        const devWarn = (...args) => { if (!PROD_CLEAN_LOGS) console.warn(...args) }
+        const isValidUuid = (value) =>
+            typeof value === 'string' &&
+            /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(value)
+
+        function backendAvailable() {
+            return Date.now() >= backendUnavailableUntil
+        }
+
+        function markBackendUnavailable(ms = 20000) {
+            backendUnavailableUntil = Date.now() + ms
+        }
+
+        // Cold-start banner: shown when first health check takes >2s (Render free tier spin-up)
+        let _coldStartTimer = null
+        let _coldStartDotsTimer = null
+        function showColdStartBanner() {
+            const banner = document.getElementById('coldStartBanner')
+            if (banner) {
+                banner.style.display = 'block'
+                document.getElementById('mainNavbar').style.marginTop = '38px'
+                let dots = 0
+                _coldStartDotsTimer = setInterval(() => {
+                    dots = (dots + 1) % 4
+                    const el = document.getElementById('coldStartDots')
+                    if (el) el.textContent = '.'.repeat(dots)
+                }, 500)
+            }
+        }
+        function hideColdStartBanner() {
+            clearTimeout(_coldStartTimer)
+            clearInterval(_coldStartDotsTimer)
+            const banner = document.getElementById('coldStartBanner')
+            if (banner) {
+                banner.style.display = 'none'
+                const nav = document.getElementById('mainNavbar')
+                if (nav) nav.style.marginTop = '0'
+            }
+        }
+
+        async function checkBackendHealth(force = false) {
+            const now = Date.now()
+            if (!force && backendHealthy !== null && (now - backendLastCheckedAt) < 15000) {
+                return backendHealthy
+            }
+            backendLastCheckedAt = now
+
+            // Show cold-start banner after 2s if health check hasn't returned
+            _coldStartTimer = setTimeout(showColdStartBanner, 2000)
+
+            const controller = new AbortController()
+            const timer = setTimeout(() => controller.abort(), 35000) // 35s for Render cold start
             try {
-                // Get auth headers properly
-                const headers = await getAuthHeaders();
+                const response = await fetch(`${AI_BACKEND_URL}/health`, { signal: controller.signal })
+                backendHealthy = response.ok
+                if (!backendHealthy) markBackendUnavailable(45000)
+            } catch (_) {
+                backendHealthy = false
+                markBackendUnavailable(45000)
+            } finally {
+                clearTimeout(timer)
+                hideColdStartBanner()
+            }
+            return backendHealthy
+        }
+
+        async function fetchBackendJson(path, options = {}, timeoutMs = 9000) {
+            if (!backendAvailable()) {
+                return { ok: false, data: null, error: 'Backend temporarily unavailable' }
+            }
+
+            const method = String(options.method || 'GET').toUpperCase()
+            const maxAttempts = method === 'GET' ? 2 : 1
+
+            for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+                const controller = new AbortController()
+                const timer = setTimeout(() => controller.abort(), timeoutMs)
+                try {
+                    const headers = await window.AppConfig.buildAuthHeaders(supabaseClient, options.headers)
+                    const response = await fetch(`${AI_BACKEND_URL}${path}`, {
+                        ...options,
+                        headers,
+                        signal: controller.signal
+                    })
+                    const text = await response.text()
+                    let data = null
+                    try {
+                        data = text ? JSON.parse(text) : null
+                    } catch (_) {
+                        data = null
+                    }
+
+                    if (!response.ok) {
+                        const errorMessage = (data && (data.error || data.message)) || `HTTP ${response.status}`
+                        if (method === 'GET' && response.status >= 500 && attempt < maxAttempts) {
+                            await new Promise((resolve) => setTimeout(resolve, 500))
+                            continue
+                        }
+                        return {
+                            ok: false,
+                            data,
+                            error: errorMessage
+                        }
+                    }
+                    return { ok: true, data, error: null }
+                } catch (error) {
+                    if (method === 'GET' && attempt < maxAttempts) {
+                        await new Promise((resolve) => setTimeout(resolve, 500))
+                        continue
+                    }
+                    markBackendUnavailable()
+                    return { ok: false, data: null, error: error?.message || 'Network error' }
+                } finally {
+                    clearTimeout(timer)
+                }
+            }
+
+            return { ok: false, data: null, error: 'Backend temporarily unavailable' }
+        }
+
+        function normalizeExamStatus(status) {
+            const s = (status || '').toString().trim().toLowerCase()
+            if (s === 'active') return 'published'
+            if (s === 'closed' || s === 'completed' || s === 'inactive') return 'archived'
+            return s || 'draft'
+        }
+
+        function getExamId(exam) {
+            return String(exam?.exam_id || exam?.id || '').trim()
+        }
+
+        function setSidebarActive(navKey) {
+            document.querySelectorAll('.sidebar-link[data-nav]').forEach((link) => {
+                link.classList.toggle('active', link.dataset.nav === navKey)
+            })
+        }
+
+        function setSidebarActiveBySection(sectionId) {
+            const map = {
+                examsSection: 'dashboard',
+                pendingSection: 'submissions',
+                resultsSection: 'results',
+                studentsSection: 'students',
+                profileSection: 'dashboard'
+            }
+            if (map[sectionId]) {
+                setSidebarActive(map[sectionId])
+            }
+        }
+
+        function navigateTeacherWorkspace(target, options = {}) {
+            if (window.TeacherShellNav && typeof window.TeacherShellNav.navigate === 'function') {
+                return window.TeacherShellNav.navigate(target, options)
+            }
+            if (options.replace) {
+                window.location.replace(target)
+                return target
+            }
+            window.location.href = target
+            return target
+        }
+
+        function getTeacherDashboardView() {
+            const params = new URLSearchParams(window.location.search || '')
+            const value = String(params.get('view') || 'dashboard').toLowerCase()
+            if (value === 'submissions' || value === 'students' || value === 'results') return value
+            return 'dashboard'
+        }
+
+        function navigateTeacherDashboardView(view) {
+            const nextView = String(view || 'dashboard').toLowerCase()
+            const normalized = ['submissions', 'students', 'results'].includes(nextView) ? nextView : 'dashboard'
+            const url = normalized === 'dashboard'
+                ? 'dashboard-teacher.html?view=dashboard'
+                : `dashboard-teacher.html?view=${encodeURIComponent(normalized)}`
+            navigateTeacherWorkspace(url)
+        }
+
+        function applyTeacherDashboardView(firstName) {
+            const view = getTeacherDashboardView()
+            const header = document.querySelector('.dashboard-header')
+            const headerTitle = header ? header.querySelector('h1') : null
+            const welcomeEl = document.getElementById('welcomeMessage')
+            const quickActions = header ? header.querySelector('.quick-actions') : null
+            const metaRow = document.getElementById('lastUpdated')
+            const statsGrid = document.querySelector('.stats-grid')
+            const examsSection = document.getElementById('examsSection')
+            const pendingSection = document.getElementById('pendingSection')
+            const studentsSection = document.getElementById('studentsSection')
+            const resultsSection = document.getElementById('resultsSection')
+
+            const configs = {
+                dashboard: {
+                    nav: 'dashboard',
+                    title: 'Teacher Dashboard',
+                    copy: `Welcome back, ${firstName || 'Teacher'}! Here's your assessment overview.`,
+                    showStats: true,
+                    showQuickActions: true,
+                    showMeta: true,
+                    visibleSections: ['examsSection']
+                },
+                submissions: {
+                    nav: 'submissions',
+                    title: 'Pending Grades',
+                    copy: 'Review attempts awaiting teacher approval, finish grading, and publish final results.',
+                    showStats: false,
+                    showQuickActions: false,
+                    showMeta: false,
+                    visibleSections: ['pendingSection']
+                },
+                results: {
+                    nav: 'results',
+                    title: 'Results',
+                    copy: 'Review finalized student outcomes, marks, and grade distribution.',
+                    showStats: false,
+                    showQuickActions: false,
+                    showMeta: false,
+                    visibleSections: ['resultsSection']
+                },
+                students: {
+                    nav: 'students',
+                    title: 'Enrolled Students',
+                    copy: 'View all students enrolled in your courses.',
+                    showStats: false,
+                    showQuickActions: false,
+                    showMeta: false,
+                    visibleSections: ['studentsSection']
+                }
+            }
+
+            const config = configs[view] || configs.dashboard
+            if (headerTitle) headerTitle.textContent = config.title
+            if (welcomeEl) welcomeEl.textContent = config.copy
+            if (quickActions) {
+                if (config.showQuickActions) {
+                    quickActions.classList.remove('hidden-by-view')
+                } else {
+                    quickActions.classList.add('hidden-by-view')
+                }
+            }
+            if (metaRow) metaRow.style.display = config.showMeta ? '' : 'none'
+
+            // Use class toggle to override dashboard-shell.css !important rule
+            if (statsGrid) {
+                if (config.showStats) {
+                    statsGrid.classList.remove('hidden-by-view')
+                } else {
+                    statsGrid.classList.add('hidden-by-view')
+                }
+            }
+
+            // Also hide the entire dashboard-header card on non-dashboard views
+            const dashHeader = document.querySelector('.dashboard-header')
+            if (dashHeader) {
+                if (!config.showStats && !config.showQuickActions) {
+                    // Keep header but make it minimal — just title + copy
+                    dashHeader.style.paddingBottom = '1rem'
+                } else {
+                    dashHeader.style.paddingBottom = ''
+                }
+            }
+
+            const visibleIds = new Set(config.visibleSections)
+            ;[
+                ['examsSection', examsSection],
+                ['pendingSection', pendingSection],
+                ['studentsSection', studentsSection],
+                ['resultsSection', resultsSection]
+            ].forEach(([id, element]) => {
+                if (!element) return
+                element.style.display = visibleIds.has(id) ? '' : 'none'
+            })
+
+            setSidebarActive(config.nav)
+        }
+
+        function normalizeText(value) {
+            return (value || '')
+                .toString()
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, ' ')
+        }
+
+        function toCleanText(value, fallback = 'N/A') {
+            const text = (value || '').toString().replace(/\s+/g, ' ').trim()
+            return text || fallback
+        }
+
+        function cleanExamTitle(value) {
+            const text = (value || '').toString().replace(/\s+/g, ' ').trim()
+            if (!text) return 'Untitled Exam'
+            if (text.length < 2) return 'Untitled Exam'
+            if (/^[^a-zA-Z0-9]+$/.test(text)) return 'Untitled Exam'
+            return text
+        }
+
+        function attemptStatusRank(status) {
+            const s = String(status || '').toLowerCase()
+            if (s === 'completed' || s === 'graded') return 4
+            if (s === 'submitted' || s === 'pending_grading') return 3
+            if (s === 'in_progress') return 2
+            return 1
+        }
+
+        function attemptTimestamp(attempt) {
+            const t = attempt?.submitted_at || attempt?.updated_at || attempt?.created_at
+            const ms = t ? new Date(t).getTime() : 0
+            return Number.isFinite(ms) ? ms : 0
+        }
+
+        function choosePreferredAttempt(a, b) {
+            const rankA = attemptStatusRank(a?.status)
+            const rankB = attemptStatusRank(b?.status)
+            if (rankA !== rankB) return rankA > rankB ? a : b
+            return attemptTimestamp(a) >= attemptTimestamp(b) ? a : b
+        }
+
+        function dedupeAttempts(attempts) {
+            const byId = new Map()
+            const withoutId = []
+            ;(attempts || []).forEach((attempt) => {
+                const id = String(attempt?.attempt_id || attempt?.submission_id || '').trim()
+                if (!id) {
+                    withoutId.push(attempt)
+                    return
+                }
+                if (!byId.has(id)) byId.set(id, attempt)
+                else byId.set(id, choosePreferredAttempt(byId.get(id), attempt))
+            })
+
+            const bySignature = new Map()
+            ;[...byId.values(), ...withoutId].forEach((attempt) => {
+                const studentId = normalizeText(attempt?.student_id)
+                const examId = normalizeText(attempt?.exam_id || attempt?.exam_title)
+                const submitted = normalizeText(attempt?.submitted_at)
+                const sig = `${studentId}|${examId}|${submitted}`
+                const key = sig && sig !== '||' ? sig : `fallback_${Math.random().toString(36).slice(2)}`
+                if (!bySignature.has(key)) bySignature.set(key, attempt)
+                else bySignature.set(key, choosePreferredAttempt(bySignature.get(key), attempt))
+            })
+
+            return Array.from(bySignature.values()).sort((a, b) => attemptTimestamp(b) - attemptTimestamp(a))
+        }
+
+        function statusRank(status) {
+            const s = normalizeExamStatus(status)
+            if (s === 'published') return 3
+            if (s === 'archived') return 2
+            if (s === 'draft') return 1
+            return 0
+        }
+
+        function examTimestamp(exam) {
+            const t = exam?.updated_at || exam?.created_at || exam?.scheduled_at
+            const ms = t ? new Date(t).getTime() : 0
+            return Number.isFinite(ms) ? ms : 0
+        }
+
+        function examSignature(exam) {
+            const teacher = normalizeText(exam?.teacher_id || exam?.created_by || exam?.user_id)
+            const title = normalizeText(exam?.exam_title || exam?.title)
+            const duration = String(exam?.duration_minutes || exam?.duration || '')
+            const totalMarks = String(exam?.total_marks || '')
+            return [teacher, title, duration, totalMarks].join('|')
+        }
+
+        function pickPreferredExam(a, b) {
+            const rankA = statusRank(a?.status)
+            const rankB = statusRank(b?.status)
+            if (rankA !== rankB) return rankA > rankB ? a : b
+            return examTimestamp(a) >= examTimestamp(b) ? a : b
+        }
+
+        function dedupeTeacherExams(exams) {
+            const normalized = (exams || []).map((exam) => {
+                const copy = { ...exam }
+                copy.status = normalizeExamStatus(copy.status)
+                if (!copy.exam_id && copy.id) {
+                    copy.exam_id = copy.id
+                }
+                return copy
+            })
+
+            const byId = new Map()
+            const withoutId = []
+
+            normalized.forEach((exam) => {
+                const id = getExamId(exam)
+                if (!id) {
+                    withoutId.push(exam)
+                    return
+                }
+                if (!byId.has(id)) {
+                    byId.set(id, exam)
+                } else {
+                    byId.set(id, pickPreferredExam(byId.get(id), exam))
+                }
+            })
+
+            const bySignature = new Map()
+            const merged = [...byId.values(), ...withoutId]
+            merged.forEach((exam) => {
+                const sig = examSignature(exam)
+                if (!sig || sig === '||||') {
+                    const fallbackKey = `__fallback__${Math.random().toString(36).slice(2)}`
+                    bySignature.set(fallbackKey, exam)
+                    return
+                }
+                if (!bySignature.has(sig)) {
+                    bySignature.set(sig, exam)
+                } else {
+                    bySignature.set(sig, pickPreferredExam(bySignature.get(sig), exam))
+                }
+            })
+
+            const deduped = Array.from(bySignature.values())
+            const publishedTitles = new Set(
+                deduped
+                    .filter(e => normalizeExamStatus(e.status) === 'published')
+                    .map(e => normalizeText(e.exam_title || e.title))
+                    .filter(Boolean)
+            )
+            const filtered = deduped.filter((e) => {
+                const status = normalizeExamStatus(e.status)
+                if (status !== 'draft') return true
+                const title = normalizeText(e.exam_title || e.title)
+                return !publishedTitles.has(title)
+            })
+            return filtered.sort((a, b) => examTimestamp(b) - examTimestamp(a))
+        }
+
+        function markUserInteraction() {
+            lastInteractionAt = Date.now()
+        }
+
+        function showToast(message, type = 'info', durationMs = 2800) {
+            const container = document.getElementById('toastContainer')
+            if (!container) return
+            const toast = document.createElement('div')
+            toast.className = `toast ${type}`
+            toast.textContent = message
+            container.appendChild(toast)
+            requestAnimationFrame(() => toast.classList.add('show'))
+            setTimeout(() => {
+                toast.classList.remove('show')
+                setTimeout(() => toast.remove(), 220)
+            }, durationMs)
+        }
+
+        function setLastUpdated() {
+            const el = document.getElementById('lastUpdated')
+            if (!el) return
+            const now = new Date()
+            el.textContent = `Last updated: ${now.toLocaleTimeString()}`
+        }
+
+        function scheduleRealtimeRefresh(userId) {
+            if (!userId) return
+            if (realtimeRefreshTimer) {
+                clearTimeout(realtimeRefreshTimer)
+            }
+            realtimeRefreshTimer = setTimeout(async () => {
+                await Promise.allSettled([
+                    loadTeacherStats(userId),
+                    loadPendingGrading(userId),
+                    loadRecentResults(userId)
+                ])
+                setLastUpdated()
+                showToast('Dashboard updated', 'success', 1400)
+            }, 900)
+        }
+
+        function setupLiveRefresh(userId) {
+            if (!userId || !supabaseClient) return
+
+            // Cross-tab / page-to-page lightweight signal.
+            if ('BroadcastChannel' in window) {
+                try {
+                    dashboardBroadcast = new BroadcastChannel('teacher_dashboard_updates')
+                    dashboardBroadcast.onmessage = (event) => {
+                        if (event?.data?.type === 'GRADES_UPDATED') {
+                            scheduleRealtimeRefresh(userId)
+                        }
+                    }
+                } catch (_) {}
+            }
+
+            // Supabase realtime for DB updates.
+            try {
+                realtimeChannel = supabaseClient.channel(`teacher-live-${userId}`)
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'student_answers' }, () => {
+                        scheduleRealtimeRefresh(userId)
+                    })
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'exam_attempts' }, () => {
+                        scheduleRealtimeRefresh(userId)
+                    })
+                    .subscribe()
+            } catch (e) {
+                devWarn('Realtime subscription setup failed:', e)
+            }
+        }
+
+        async function maybeAutoRefresh(userId) {
+            if (!userId) return
+            if (document.hidden) return
+            if (isAutoRefreshing || isActionInProgress) return
+            if (Date.now() - lastInteractionAt < 8000) return
+            try {
+                isAutoRefreshing = true
+                const healthy = await checkBackendHealth()
+                if (!healthy) {
+                    if (!backendWarnShown) {
+                        showToast('Backend is temporarily unavailable. Auto-refresh paused.', 'info', 2200)
+                        backendWarnShown = true
+                    }
+                    return
+                }
+                backendWarnShown = false
+                await Promise.allSettled([
+                    loadTeacherStats(userId),
+                    loadTeacherExams(userId),
+                    loadPendingGrading(userId)
+                ])
+                setLastUpdated()
+            } finally {
+                isAutoRefreshing = false
+            }
+        }
+
+        // Check authentication
+        window.addEventListener('DOMContentLoaded', async function() {
+            devLog('Teacher Dashboard version:', DASHBOARD_TEACHER_VERSION)
+            const isLoggedIn = localStorage.getItem('isLoggedIn')
+            const userRole   = localStorage.getItem('userRole')
+
+            const proceedWithDashboard = () => {
+                if (!window.__TEACHER_SHELL_EMBEDDED__ && window.SessionManager && !window.SessionManager.init({ loginUrl: 'login.html' })) return
+                initDashboard()
+                setLastUpdated()
+                const currentUserId = localStorage.getItem('userId')
+                setupLiveRefresh(currentUserId)
+                ;['click', 'keydown', 'input', 'focusin', 'scroll'].forEach(evt => {
+                    window.addEventListener(evt, markUserInteraction, { passive: true })
+                })
+                window.addEventListener('storage', function(e) {
+                    if (e.key === 'teacher_dashboard_refresh') {
+                        const userId = localStorage.getItem('userId')
+                        scheduleRealtimeRefresh(userId)
+                    }
+                })
+                refreshTimer = setInterval(() => {
+                    const userId = localStorage.getItem('userId')
+                    maybeAutoRefresh(userId)
+                }, 30000)
+                window.addEventListener('beforeunload', () => {
+                    if (refreshTimer) clearInterval(refreshTimer)
+                    if (realtimeRefreshTimer) clearTimeout(realtimeRefreshTimer)
+                    if (dashboardBroadcast) { try { dashboardBroadcast.close() } catch (_) {} }
+                    if (realtimeChannel) { try { supabaseClient.removeChannel(realtimeChannel) } catch (_) {} }
+                })
+            }
+
+            if (isLoggedIn && (userRole === 'teacher' || userRole === 'admin')) {
+                proceedWithDashboard()
+            } else {
+                // localStorage cleared on refresh — restore from Supabase session
+                try {
+                    const { data: { session } } = await supabaseClient.auth.getSession()
+                    if (!session) { window.location.href = 'login.html?return=dashboard-teacher.html'; return }
+
+                    const { data: { user } } = await supabaseClient.auth.getUser()
+                    if (!user) { window.location.href = 'login.html'; return }
+
+                    const { data: profile } = await supabaseClient
+                        .from('users').select('*').eq('email', user.email).limit(1).maybeSingle()
+
+                    if (!profile || (profile.role !== 'teacher' && profile.role !== 'admin')) {
+                        showToast('Access denied. This page is for teachers only.', 'error')
+                        window.location.href = 'login.html'
+                        return
+                    }
+
+                    localStorage.setItem('isLoggedIn',    'true')
+                    localStorage.setItem('userRole',      profile.role)
+                    localStorage.setItem('userEmail',     profile.email)
+                    localStorage.setItem('userId',        profile.id || profile.user_id || user.id)
+                    localStorage.setItem('userName',      profile.full_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email)
+                    localStorage.setItem('userFirstName', profile.first_name || '')
+                    localStorage.setItem('userLastName',  profile.last_name  || '')
+                    if (profile.teacher_id) localStorage.setItem('teacherId', profile.teacher_id)
+
+                    proceedWithDashboard()
+                } catch (err) {
+                    console.error('Session restore failed:', err)
+                    window.location.href = 'login.html?return=dashboard-teacher.html'
+                }
+            }
+        })
+
+        async function initDashboard() {
+            const profile = window.UserProfile ? window.UserProfile.getStoredProfile() : null
+            const userName = profile?.displayName || localStorage.getItem('userName')
+            const firstName = profile?.first_name || localStorage.getItem('userFirstName')
+            // Use UUID-based userId for exams, and text teacherId for courses/enrollments
+            const userId = localStorage.getItem('userId')
+            const teacherId = localStorage.getItem('teacherId')
+            // Prevent stale historical exams from browser cache.
+            localStorage.removeItem('exams')
+
+            devLog('=== DASHBOARD INIT DEBUG ===')
+            devLog('Using UUID userId:', userId)
+            devLog('teacherId (text):', teacherId)
+            devLog('==========================')
+
+            if (!isValidUuid(userId)) {
+                showToast('No valid user ID found. Please log in again.', 'error')
+                window.location.href = 'login.html'
+                return
+            }
+
+            const sidebarNameEl = document.getElementById('sidebarTeacherName')
+            const sidebarMetaEl = document.getElementById('sidebarTeacherMeta')
+            if (sidebarNameEl) {
+                sidebarNameEl.textContent = userName || firstName || 'Teacher Panel'
+            }
+            if (sidebarMetaEl) {
+                sidebarMetaEl.textContent = 'Teacher'
+            }
+            const avatarName = userName || firstName || 'Teacher'
+            const avatarInitials = profile?.initials || avatarName
+                .toString()
+                .trim()
+                .split(/\s+/)
+                .filter(Boolean)
+                .slice(0, 2)
+                .map(part => part[0]?.toUpperCase() || '')
+                .join('')
+            if (window.UserProfile) {
+                window.UserProfile.renderAvatar('sidebarTeacherAvatar', {
+                    name: avatarName,
+                    initials: avatarInitials || 'TE',
+                    photoUrl: profile?.profile_photo_url || ''
+                })
+            }
+            const welcomeEl = document.getElementById('welcomeMessage')
+            if (welcomeEl) {
+                welcomeEl.textContent = `Welcome back, ${firstName || 'Teacher'}! Here's your assessment overview.`
+            }
+            applyTeacherDashboardView(firstName)
+
+            try {
+                const healthy = await checkBackendHealth(true)
+                // Trigger all loads immediately without waiting for the slowest one.
+                loadTeacherStats(userId)
+                if (healthy) {
+                    loadPendingGrading(userId)
+                    loadTeacherExams(userId)
+                    backendWarnShown = false
+                } else {
+                    if (!backendWarnShown) {
+                        showToast('Backend is temporarily unavailable. Showing cached data only.', 'info', 2400)
+                        backendWarnShown = true
+                    }
+                }
+                loadEnrolledStudents(userId)
+                loadRecentResults(userId)
+                loadCourseAnalytics()
+                setLastUpdated()
+            } catch (error) {
+                console.error('Dashboard error:', error)
+            }
+        }
+        
+        // Note: Dashboard auto-refreshes every 3 seconds
+
+        async function loadTeacherStats(userId) {
+            try {
+                devLog('📊 Loading stats for userId:', userId)
+                let allExams = []
                 
-                // Get user info
-                const userEmail = sessionStorage.getItem('userEmail') || localStorage.getItem('userEmail');
-                const userName = sessionStorage.getItem('userName') || localStorage.getItem('userName') || 'Teacher';
-                document.getElementById('teacherName').textContent = userName;
-
-                // Get exams
-                const examsRes = await fetch('/api/exams', {
-                    headers: headers,
-                    credentials: 'include'
-                });
-
-                if (examsRes.ok) {
-                    const examsData = await examsRes.json();
-                    const exams = examsData.exams || [];
-                    
-                    document.getElementById('totalExams').textContent = exams.length;
-                    document.getElementById('activeExams').textContent = exams.filter(e => e.status === 'active').length;
-
-                    if (exams.length > 0) {
-                        const examsHTML = `
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Exam Title</th>
-                                        <th>Date</th>
-                                        <th>Status</th>
-                                        <th>Submissions</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${exams.slice(0, 5).map(exam => `
-                                        <tr>
-                                            <td>${exam.title || 'Untitled Exam'}</td>
-                                            <td>${new Date(exam.created_at).toLocaleDateString()}</td>
-                                            <td><span class="badge badge-success">${exam.status}</span></td>
-                                            <td>${exam.submission_count || 0}</td>
-                                            <td><button class="btn btn-primary btn-sm">View</button></td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        `;
-                        document.getElementById('examsContainer').innerHTML = examsHTML;
+                // Try to get from backend
+                try {
+                    const examsResult = await fetchBackendJson('/exams?status=published,draft,archived')
+                    if (examsResult.ok) {
+                        const examsData = examsResult.data || {}
+                        if (examsData.success && examsData.exams && examsData.exams.length > 0) {
+                            devLog('🔙 Backend exams:', examsData.exams.length, examsData.exams)
+                            allExams = [...examsData.exams]
+                        }
                     } else {
-                        document.getElementById('examsContainer').innerHTML = `
-                            <div class="empty-state">
-                                <div class="empty-state-icon"><i class="bi bi-inbox"></i></div>
-                                <p>No exams created yet. <a href="/create-exam.html">Create your first exam</a></p>
-                            </div>
-                        `;
+                        devWarn('Backend exam fetch skipped:', examsResult.error)
                     }
-                } else {
-                    console.error('Exams fetch failed:', examsRes.status, examsRes.statusText);
-                    document.getElementById('examsContainer').innerHTML = `
-                        <div class="error">
-                            Failed to load exams. Status: ${examsRes.status}. Please ensure you are logged in.
-                        </div>
-                    `;
+                } catch (e) {
+                    devWarn('Backend exam fetch failed:', e.message)
+                }
+                if (!Array.isArray(allExams) || allExams.length === 0) {
+                    const fallback = await supabaseClient
+                        .from('exams')
+                        .select('*')
+                        .eq('teacher_id', userId)
+                        .in('status', ['published', 'draft', 'archived'])
+                        .order('created_at', { ascending: false })
+                        .limit(200)
+                    if (!fallback.error && Array.isArray(fallback.data)) {
+                        allExams = [...fallback.data]
+                    }
+                }
+                
+                const uniqueExams = dedupeTeacherExams(allExams)
+                
+                devLog('✅ Total unique exams:', uniqueExams.length)
+                
+                const totalExamsEl = document.getElementById('totalExams')
+                const activeExamsEl = document.getElementById('activeExams')
+                
+                totalExamsEl.textContent = uniqueExams.length
+                
+                const activeCount = uniqueExams.filter(e => 
+                    e.status === 'published' || e.status === 'active'
+                ).length
+                activeExamsEl.textContent = activeCount
+                const sidebarPublishedEl = document.getElementById('sidebarPublishedCount')
+                if (sidebarPublishedEl) {
+                    sidebarPublishedEl.textContent = String(activeCount)
                 }
 
-                // Get submissions
-                const submissionsRes = await fetch('/api/submissions?status=pending_grading', {
-                    headers: headers,
-                    credentials: 'include'
-                });
-
-                if (submissionsRes.ok) {
-                    const submissionsData = await submissionsRes.json();
-                    const submissions = submissionsData.submissions || [];
-                    
-                    document.getElementById('pendingGrading').textContent = submissions.length;
-
-                    if (submissions.length > 0) {
-                        const submissionsHTML = `
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Student</th>
-                                        <th>Exam</th>
-                                        <th>Submitted</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${submissions.slice(0, 5).map(sub => `
-                                        <tr>
-                                            <td>${sub.student_name || 'Unknown'}</td>
-                                            <td>${sub.exam_title || 'Unknown'}</td>
-                                            <td>${new Date(sub.submitted_at).toLocaleDateString()}</td>
-                                            <td><span class="badge badge-warning">Pending</span></td>
-                                            <td><button class="btn btn-primary btn-sm">Grade</button></td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        `;
-                        document.getElementById('submissionsContainer').innerHTML = submissionsHTML;
-                    } else {
-                        document.getElementById('submissionsContainer').innerHTML = `
-                            <div class="empty-state">
-                                <div class="empty-state-icon"><i class="bi bi-check-circle"></i></div>
-                                <p>No pending submissions. All exams have been graded!</p>
-                            </div>
-                        `;
+                const pendingGradingEl = document.getElementById('pendingGrading')
+                if (pendingGradingEl) {
+                    const pendingCount = await getPendingSubmissionCount(userId)
+                    pendingGradingEl.textContent = String(pendingCount)
+                    const sidebarPendingEl = document.getElementById('sidebarPendingCount')
+                    if (sidebarPendingEl) {
+                        sidebarPendingEl.textContent = String(pendingCount)
                     }
-                } else {
-                    console.error('Submissions fetch failed:', submissionsRes.status);
-                    document.getElementById('submissionsContainer').innerHTML = `
-                        <div class="error">
-                            Failed to load submissions. Status: ${submissionsRes.status}
-                        </div>
-                    `;
                 }
-
-                // Get students count
-                const coursesRes = await fetch('/api/teacher/courses', {
-                    headers: headers,
-                    credentials: 'include'
-                });
-
-                if (coursesRes.ok) {
-                    const coursesData = await coursesRes.json();
-                    let totalStudents = 0;
-                    if (Array.isArray(coursesData)) {
-                        totalStudents = coursesData.reduce((sum, course) => sum + (course.student_count || 0), 0);
-                    }
-                    document.getElementById('totalStudents').textContent = totalStudents;
-                }
-
             } catch (error) {
-                console.error('Error loading dashboard:', error);
-                const errorMsg = `<div class="error">Error loading dashboard: ${error.message}</div>`;
-                document.getElementById('examsContainer').innerHTML = errorMsg;
-                document.getElementById('submissionsContainer').innerHTML = errorMsg;
+                devWarn('Error loading stats:', error)
             }
         }
 
-        // Load data when page loads
-        document.addEventListener('DOMContentLoaded', loadDashboardData);
+        async function getPendingSubmissionCount(userId) {
+            if (!userId) return 0
+            try {
+                const submissionsResult = await fetchBackendJson('/submissions?status=submitted,pending_grading')
+                if (!submissionsResult.ok || !submissionsResult.data?.success || !Array.isArray(submissionsResult.data?.submissions)) {
+                    return 0
+                }
+                return dedupeAttempts(submissionsResult.data.submissions).length
+            } catch (error) {
+                devWarn('Pending submission count failed:', error)
+                return 0
+            }
+        }
 
-        // Reload periodically
-        setInterval(loadDashboardData, 30000);
+        async function loadEnrolledStudents(teacherId) {
+            const container = document.getElementById('studentsTableContainer')
+            try {
+                if (container) container.innerHTML = '<div class="loading"><p>Loading students...</p></div>'
+
+                // Use backend API -- bypasses RLS, resolves all ID variants server-side
+                const result = await fetchBackendJson('/teacher/students')
+                if (!result.ok || !result.data?.success) {
+                    throw new Error(result.data?.error || result.error || 'Failed to load students')
+                }
+
+                const students = result.data.students || []
+                const courses  = result.data.courses  || []
+
+                // Update stat counters
+                document.getElementById('totalStudents').textContent = students.length
+                const badge = document.getElementById('studentCountBadge')
+                if (badge) badge.textContent = students.length + ' student' + (students.length !== 1 ? 's' : '')
+
+                if (students.length === 0) {
+                    if (container) container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">Info</div><p>No enrolled students yet</p></div>'
+                    return
+                }
+
+                // Render table
+                let rows = ''
+                students.forEach(function(student, idx) {
+                    const fullName = [student.first_name, student.last_name].filter(Boolean).join(' ') || student.name || 'Unknown Student'
+                    const initials = fullName.split(' ').map(function(p){ return p[0] || '' }).join('').toUpperCase().slice(0, 2) || 'ST'
+                    const enrolledCourses = student.enrolled_courses || []
+                    const isActive = (student.status || 'active') === 'active'
+                    const statusColor = isActive
+                        ? 'background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);color:#059669;'
+                        : 'background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#ef4444;'
+                    const statusLabel = (student.status || 'active').charAt(0).toUpperCase() + (student.status || 'active').slice(1)
+                    const regNo = student.student_id || student.reg_no || 'N/A'
+                    const email = student.email || 'N/A'
+                    let coursePills = '<span style="color:#94a3b8;font-size:0.82rem;">&mdash;</span>'
+                    if (enrolledCourses.length > 0) {
+                        coursePills = enrolledCourses.map(function(c){
+                            return '<span style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);padding:2px 8px;border-radius:999px;font-size:0.76rem;font-weight:700;color:#1E3A8A;">' + (c.course_code || c) + '</span>'
+                        }).join('')
+                    }
+                    rows += '<tr>'
+                    rows += '<td style="color:#64748b;font-size:0.82rem;">' + (idx+1) + '</td>'
+                    rows += '<td><div style="display:flex;align-items:center;gap:0.65rem;"><div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(59,130,246,0.15));border:1px solid rgba(59,130,246,0.2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.72rem;color:#1E3A8A;flex-shrink:0;">' + initials + '</div><span style="font-weight:700;color:#1E3A8A;">' + fullName + '</span></div></td>'
+                    rows += '<td style="color:#64748b;font-size:0.88rem;">' + email + '</td>'
+                    rows += '<td><span style="background:#EFF6FF;border:1px solid #BFDBFE;padding:3px 8px;border-radius:6px;font-size:0.8rem;font-weight:700;color:#1E3A8A;">' + regNo + '</span></td>'
+                    rows += '<td><div style="display:flex;flex-wrap:wrap;gap:4px;">' + coursePills + '</div></td>'
+                    rows += '<td class="col-center"><span style="' + statusColor + 'padding:3px 10px;border-radius:999px;font-size:0.76rem;font-weight:700;">' + statusLabel + '</span></td>'
+                    rows += '</tr>'
+                })
+
+                if (container) {
+                    container.innerHTML =
+                        '<div style="margin-bottom:1rem;padding:0.75rem 1rem;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;">'
+                        + '<span style="font-size:0.82rem;color:#1E3A8A;font-weight:700;">'
+                        + students.length + ' student' + (students.length !== 1 ? 's' : '') + ' enrolled across ' + courses.length + ' course' + (courses.length !== 1 ? 's' : '')
+                        + '</span></div>'
+                        + '<table class="table"><thead><tr><th>#</th><th>Student Name</th><th>Email</th><th>Reg. No</th><th>Enrolled Courses</th><th class="col-center">Status</th></tr></thead><tbody>' + rows + '</tbody></table>'
+                }
+            } catch (error) {
+                console.error('Error loading students overview:', error)
+                if (container) container.innerHTML = '<div class="empty-state"><p>Unable to load students: ' + error.message + '</p></div>'
+                document.getElementById('totalStudents').textContent = '0'
+            }
+        }
+
+
+        async function loadTeacherExams(userId) {
+            devLog('Loading teacher-owned exams from backend')
+            
+            try {
+                let exams = []
+                
+                // Try to load from backend API first
+                try {
+                    const examsResult = await fetchBackendJson('/exams?status=published,draft,archived')
+                    if (examsResult.ok) {
+                        const data = examsResult.data || {}
+                        if (data.success && data.exams && data.exams.length > 0) {
+                            devLog('Backend exams:', data.exams.length, data.exams)
+                            exams = [...data.exams]
+                        }
+                    } else {
+                        devWarn('Backend API load skipped, using Supabase fallback:', examsResult.error)
+                    }
+                } catch (apiError) {
+                    devWarn('Backend API load skipped, using Supabase fallback')
+                }
+
+                // Supabase fallback if backend unavailable
+                if (!Array.isArray(exams) || exams.length === 0) {
+                    const fallback = await supabaseClient
+                        .from('exams')
+                        .select('*')
+                        .eq('teacher_id', userId)
+                        .in('status', ['published', 'draft', 'archived'])
+                        .order('created_at', { ascending: false })
+                        .limit(200)
+                    if (!fallback.error && Array.isArray(fallback.data)) {
+                        exams = [...fallback.data]
+                    }
+                }
+                
+                const uniqueExams = dedupeTeacherExams(exams)
+                
+                devLog('✅ Displaying exams:', uniqueExams.length, uniqueExams)
+                
+                cachedTeacherExams = uniqueExams
+                const examMetrics = await loadExamMetrics(uniqueExams)
+                cachedExamSubmissionCounts = examMetrics.counts
+                cachedExamAverageScores = examMetrics.averages
+                const averageValues = Object.values(cachedExamAverageScores || {}).filter((value) => Number.isFinite(value))
+                const averageScoreEl = document.getElementById('averageScore')
+                if (averageScoreEl) {
+                    averageScoreEl.textContent = averageValues.length
+                        ? `${(averageValues.reduce((sum, value) => sum + value, 0) / averageValues.length).toFixed(1)}%`
+                        : 'N/A'
+                }
+                if (uniqueExams.length === 0) {
+                    showEmptyState()
+                } else {
+                    renderExamsByFilter()
+                }
+            } catch (error) {
+                devWarn('Error loading exams:', error)
+                const averageScoreEl = document.getElementById('averageScore')
+                if (averageScoreEl) averageScoreEl.textContent = 'N/A'
+                showEmptyState()
+            }
+        }
+
+        function renderExamsByFilter() {
+            if (!cachedTeacherExams || cachedTeacherExams.length === 0) {
+                showEmptyState()
+                return
+            }
+
+            const filtered = examFilterMode === 'active'
+                ? cachedTeacherExams.filter(exam => {
+                    const status = (exam.status || '').toLowerCase()
+                    return status === 'published' || status === 'active'
+                })
+                : cachedTeacherExams
+
+            displayExams(filtered)
+        }
+
+        async function loadExamMetrics(exams) {
+            const ids = [...new Set((exams || []).map(getExamId).filter(Boolean))]
+            if (ids.length === 0) return { counts: {}, averages: {} }
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('exam_attempts')
+                    .select('exam_id, percentage, status')
+                    .in('exam_id', ids)
+
+                if (error || !Array.isArray(data)) {
+                    return { counts: {}, averages: {} }
+                }
+
+                const counts = {}
+                const sums = {}
+                const avgCounts = {}
+                data.forEach(item => {
+                    const id = String(item.exam_id || '').trim()
+                    if (!id) return
+                    counts[id] = (counts[id] || 0) + 1
+                    const pct = Number(item.percentage)
+                    if (Number.isFinite(pct)) {
+                        sums[id] = (sums[id] || 0) + pct
+                        avgCounts[id] = (avgCounts[id] || 0) + 1
+                    }
+                })
+
+                const averages = {}
+                Object.keys(sums).forEach(id => {
+                    if (!avgCounts[id]) return
+                    averages[id] = Math.round((sums[id] / avgCounts[id]) * 10) / 10
+                })
+
+                return { counts, averages }
+            } catch (_) {
+                return { counts: {}, averages: {} }
+            }
+        }
+
+        function setExamFilter(mode) {
+            examFilterMode = mode === 'active' ? 'active' : 'all'
+            const allBtn = document.getElementById('examFilterAll')
+            const activeBtn = document.getElementById('examFilterActive')
+            if (allBtn && activeBtn) {
+                allBtn.classList.toggle('active', examFilterMode === 'all')
+                activeBtn.classList.toggle('active', examFilterMode === 'active')
+            }
+            renderExamsByFilter()
+        }
+
+        function focusActiveExams() {
+            setExamFilter('active')
+            navigateToSection('examsSection')
+        }
+
+        function openPendingSection() {
+            navigateToSection('pendingSection')
+        }
+
+        function openResultsSection() {
+            navigateToSection('resultsSection')
+        }
+
+        function openProfileSection() {
+            navigateTeacherWorkspace('profile.html')
+        }
+
+        async function loadPendingGrading(userId) {
+            const container = document.getElementById('pendingGradingTableContainer')
+
+            try {
+                // Fetch submissions from backend API
+                const submissionsResult = await fetchBackendJson('/submissions?status=submitted,pending_grading')
+                if (!submissionsResult.ok) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">Info</div>
+                            <p>No pending submissions</p>
+                        </div>
+                    `
+                    return
+                }
+                const data = submissionsResult.data || {}
+                
+                if (!data.success || !data.submissions || data.submissions.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">Info</div>
+                            <p>No pending submissions</p>
+                        </div>
+                    `
+                    return
+                }
+
+                const attempts = data.submissions
+                const uniqueAttempts = dedupeAttempts(attempts)
+                const studentMap = await fetchStudentMap(uniqueAttempts.map((attempt) => attempt.student_id))
+
+                container.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                        <span style="color:#94a3b8;font-size:0.88rem;" id="pendingGradeCount">${uniqueAttempts.length} pending submission${uniqueAttempts.length !== 1 ? 's' : ''}</span>
+                        <button class="btn btn-primary" onclick="gradeAllPendingWithAI()" id="gradeAllBtnDynamic">
+                            Grade All Pending with AI
+                        </button>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Registration No</th>
+                                <th>Subject / Exam</th>
+                                <th class="col-center">Marks</th>
+                                <th>Submitted</th>
+                                <th class="col-center">Status</th>
+                                <th class="col-action">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${uniqueAttempts.map(attempt => {
+                                const student = studentMap[attempt.student_id] || {}
+                                const fullName = `${student.first_name || ''} ${student.last_name || ''}`.trim()
+                                const totalMarks = Number(attempt.total_marks || 0)
+                                const rawScore = Number(attempt.score || 0)
+                                const safeScore = Number.isFinite(rawScore) ? rawScore : 0
+                                return `
+                                <tr>
+                                    <td>${fullName || 'Unknown Student'}</td>
+                                    <td>${student.student_id || 'N/A'}</td>
+                                    <td>${cleanExamTitle(attempt.exam_title || attempt.exam_id)}</td>
+                                    <td class="col-center">${safeScore.toFixed(1).replace(/\.0$/, '')}${totalMarks ? ` / ${totalMarks}` : ''}</td>
+                                    <td>${formatDate(attempt.submitted_at)}</td>
+                                    <td class="col-center"><span class="badge ${getBadgeClass(attempt.status || 'submitted')}">${formatAttemptStatus(attempt.status || 'submitted')}</span></td>
+                                    <td class="col-action">
+                                        <div class="table-actions">
+                                            <button onclick="gradeSubmission('${attempt.submission_id || attempt.attempt_id}')" class="btn btn-primary btn-table">Review & Finalize</button>
+                                            <button onclick="gradeAttemptWithAI('${attempt.submission_id || attempt.attempt_id}')" class="btn btn-secondary btn-table">Auto Grade</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `}).join('')}
+                        </tbody>
+                    </table>
+                `
+            } catch (error) {
+                devWarn('Error loading pending grading:', error)
+                container.innerHTML = '<div class="empty-state"><p>Unable to load submissions</p></div>'
+            }
+        }
+
+        function gradeSubmission(submissionId) {
+            if (!submissionId) {
+                showToast('Submission ID not found.', 'error')
+                return
+            }
+            navigateTeacherWorkspace(`exam-results.html?attempt=${encodeURIComponent(submissionId)}&mode=review`)
+        }
+
+        async function checkPlagiarism(examId, examTitle) {
+            showToast('Checking for plagiarism...', 'info')
+            try {
+                const result = await fetchBackendJson(`/exams/${encodeURIComponent(examId)}/plagiarism`)
+                if (!result.ok) {
+                    showToast('Plagiarism check failed: ' + (result.error || 'Unknown error'), 'error')
+                    return
+                }
+                const data = result.data
+                const pairs = data.flagged_pairs || []
+                if (pairs.length === 0) {
+                    showToast(`No plagiarism detected in "${examTitle}" (${data.total_submissions} submissions checked).`, 'success', 5000)
+                    return
+                }
+                // Show results in a proper modal
+                const modal = document.getElementById('plagiarismModal')
+                const body = document.getElementById('plagiarismModalBody')
+                const title = document.getElementById('plagiarismModalTitle')
+                title.textContent = `Plagiarism Check — ${examTitle}`
+                if (pairs.length === 0) {
+                    body.innerHTML = `<div style="color:#6ee7b7;font-weight:700;padding:1rem;background:rgba(16,185,129,0.1);border-radius:10px;">✔ No plagiarism detected. ${data.total_submissions} submissions checked.</div>`
+                } else {
+                    body.innerHTML = `
+                        <div style="color:#fcd34d;font-weight:700;margin-bottom:12px;">⚠ ${pairs.length} suspicious pair(s) found (similarity ≥ ${(data.threshold*100).toFixed(0)}%)</div>
+                        ${pairs.map(p => `
+                            <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:12px;margin-bottom:8px;">
+                                <div style="font-weight:700;color:#fca5a5;margin-bottom:6px;">${(p.similarity*100).toFixed(0)}% similar</div>
+                                <div style="color:#e2e8f0;font-size:0.88rem;"><strong>${p.student_1.name}</strong>: "${p.student_1.preview}..."</div>
+                                <div style="color:#e2e8f0;font-size:0.88rem;margin-top:4px;"><strong>${p.student_2.name}</strong>: "${p.student_2.preview}..."</div>
+                            </div>
+                        `).join('')}
+                    `
+                }
+                modal.style.display = 'flex'
+            } catch (e) {
+                showToast('Plagiarism check error: ' + e.message, 'error')
+            }
+        }
+
+        async function gradeAttemptWithAI(attemptId) {
+            // Find the clicked button and show loading state
+            const btn = event && event.target ? event.target : null
+            const origText = btn ? btn.textContent : ''
+            if (btn) { btn.disabled = true; btn.textContent = 'Grading...' }
+
+            try {
+                const { data: answers, error } = await supabaseClient
+                    .from('student_answers')
+                    .select('answer_id, student_answer, question_id, questions(question_text, model_answer, correct_answer, marks, question_type)')
+                    .eq('attempt_id', attemptId)
+
+                if (error) throw error
+
+                const allAnswers = (answers || []).map(answer => {
+                    const question = answer.questions || {}
+                    const qType = (question.question_type || '').toString().toLowerCase().replace(/\s+/g, '_').replace('-', '_')
+                    return {
+                        answer_id: answer.answer_id,
+                        question_text: question.question_text || '',
+                        reference_answer: question.model_answer || question.correct_answer || '',
+                        student_answer: answer.student_answer || '',
+                        max_marks: question.marks || 1,
+                        question_type: qType
+                    }
+                }).filter(a => a.answer_id)
+
+                // Include subjective answers; for MCQ use backend scoring
+                const gradableAnswers = allAnswers.filter(a => a.question_type !== 'mcq' && a.question_type !== 'true_false')
+                const answersToSend = gradableAnswers.length > 0 ? gradableAnswers : allAnswers
+
+                if (answersToSend.length === 0) {
+                    showToast('No answers found for this submission.', 'info')
+                    return
+                }
+
+                isActionInProgress = true
+                const gradeHeaders = await window.AppConfig.buildAuthHeaders(supabaseClient, { 'Content-Type': 'application/json' })
+                const response = await fetch(`${AI_BACKEND_URL}/grade-batch`, {
+                    method: 'POST',
+                    headers: gradeHeaders,
+                    body: JSON.stringify({ attempt_id: attemptId, answers: answersToSend })
+                })
+
+                if (!response.ok) {
+                    const errorText = await response.text()
+                    throw new Error(errorText || 'Auto grading failed')
+                }
+
+                const result = await response.json()
+                await loadPendingGrading(localStorage.getItem('userId'))
+                await loadRecentResults(localStorage.getItem('userId'))
+                await loadTeacherStats(localStorage.getItem('userId'))
+                setLastUpdated()
+
+                const graded = result.results ? result.results.length : answersToSend.length
+                showToast(`Auto grading completed (${graded} answers). Review and finalize when ready.`, 'success')
+            } catch (error) {
+                console.error('Auto grading error:', error)
+                showToast('Failed to auto-grade: ' + error.message, 'error', 4200)
+            } finally {
+                isActionInProgress = false
+                if (btn) { btn.disabled = false; btn.textContent = origText }
+            }
+        }
+
+        async function gradeAllPendingWithAI() {
+            const btn = document.getElementById('gradeAllBtnDynamic') || document.getElementById('gradeAllBtn')
+            const countEl = document.getElementById('pendingGradeCount')
+            try {
+                const submissionsResult = await fetchBackendJson('/submissions?status=submitted,pending_grading')
+                if (!submissionsResult.ok || !submissionsResult.data?.success) {
+                    showToast('No pending submissions found.', 'info')
+                    return
+                }
+                const attempts = dedupeAttempts(submissionsResult.data.submissions || [])
+                if (attempts.length === 0) {
+                    showToast('No pending submissions to grade.', 'info')
+                    return
+                }
+                if (btn) { btn.disabled = true; btn.textContent = 'Grading...' }
+                let done = 0
+                for (const attempt of attempts) {
+                    const attemptId = attempt.submission_id || attempt.attempt_id
+                    if (!attemptId) continue
+                    if (countEl) countEl.textContent = `Grading ${done + 1}/${attempts.length} attempts...`
+                    try {
+                        await gradeAttemptWithAI(attemptId)
+                    } catch (e) {
+                        devWarn('Failed to grade attempt', attemptId, e)
+                    }
+                    done++
+                }
+                if (countEl) countEl.textContent = `Graded ${done} attempt${done !== 1 ? 's' : ''}`
+                showToast(`Graded ${done} attempt${done !== 1 ? 's' : ''} with AI.`, 'success')
+                await loadPendingGrading(localStorage.getItem('userId'))
+            } catch (error) {
+                devWarn('gradeAllPendingWithAI error:', error)
+                showToast('Failed to grade all: ' + error.message, 'error')
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = 'Auto-Grade All Pending' }
+            }
+        }
+
+        async function loadRecentResults(userId) {
+            const container = document.getElementById('resultsTableContainer')
+            try {
+                let attempts = []
+
+                const backendResults = await fetchBackendJson('/submissions?status=graded,completed')
+                if (backendResults.ok && backendResults.data?.success && Array.isArray(backendResults.data.submissions)) {
+                    attempts = backendResults.data.submissions.map((attempt) => ({
+                        ...attempt,
+                        exams: {
+                            exam_title: attempt.exam_title || 'Exam',
+                            total_marks: attempt.total_marks || 0,
+                            teacher_id: userId
+                        }
+                    }))
+                } else {
+                    // Primary query (join with exams)
+                    const primary = await supabaseClient
+                        .from('exam_attempts')
+                        .select('attempt_id, student_id, score, percentage, submitted_at, status, exams!inner(exam_title, total_marks, teacher_id)')
+                        .eq('exams.teacher_id', userId)
+                        .in('status', ['graded', 'completed'])
+                        .order('submitted_at', { ascending: false })
+                        .limit(200)
+
+                    if (!primary.error && primary.data) {
+                        attempts = primary.data
+                    } else {
+                    // Fallback path if join relation is unavailable in current DB schema.
+                        const examsResp = await supabaseClient
+                            .from('exams')
+                            .select('exam_id, id, exam_title, total_marks, teacher_id')
+                            .eq('teacher_id', userId)
+
+                        const teacherExams = examsResp.data || []
+                        const examById = {}
+                        teacherExams.forEach(ex => {
+                            const exId = ex.exam_id || ex.id
+                            if (exId) examById[exId] = ex
+                        })
+                        const examIds = Object.keys(examById)
+
+                        if (examIds.length > 0) {
+                            const attemptsResp = await supabaseClient
+                                .from('exam_attempts')
+                                .select('attempt_id, exam_id, student_id, score, percentage, submitted_at, status')
+                                .in('exam_id', examIds)
+                                .in('status', ['graded', 'completed'])
+                                .order('submitted_at', { ascending: false })
+                                .limit(200)
+
+                            attempts = (attemptsResp.data || []).map(a => ({
+                                ...a,
+                                exams: {
+                                    exam_title: examById[a.exam_id]?.exam_title || 'Exam',
+                                    total_marks: examById[a.exam_id]?.total_marks || 0,
+                                    teacher_id: userId
+                                }
+                            }))
+                        }
+                    }
+                }
+
+                if (!attempts || attempts.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">Info</div>
+                            <p>No finalized results yet</p>
+                        </div>
+                    `
+                    return
+                }
+
+                attempts = dedupeAttempts(attempts)
+
+                // Update student metric from real attempt activity.
+                const attemptStudentCount = new Set(
+                    attempts.map(a => a.student_id).filter(Boolean)
+                ).size
+                const totalStudentsEl = document.getElementById('totalStudents')
+                if (totalStudentsEl && attemptStudentCount > 0) {
+                    totalStudentsEl.textContent = String(attemptStudentCount)
+                }
+
+                const studentMap = await fetchStudentMap(attempts.map((attempt) => attempt.student_id))
+
+                container.innerHTML = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Registration No</th>
+                            <th>Subject / Exam</th>
+                            <th class="col-center">Marks</th>
+                            <th class="col-center">Percentage</th>
+                            <th class="col-center">Grade</th>
+                            <th>Submitted</th>
+                            <th class="col-center">Status</th>
+                            <th class="col-action">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${attempts.map(attempt => {
+                            const student = studentMap[attempt.student_id] || {}
+                            const fullName = `${student.first_name || ''} ${student.last_name || ''}`.trim()
+                            const totalMarks = attempt.exams?.total_marks || 0
+                            const scoreValue = Number.isFinite(Number(attempt.score)) ? Number(attempt.score) : 0
+                            const safePercentage = Number.isFinite(Number(attempt.percentage))
+                                ? Number(attempt.percentage)
+                                : calculatePercentage(scoreValue, totalMarks)
+                            const grade = calculateGrade(safePercentage)
+                            return `
+                                <tr>
+                                    <td>${fullName || 'Unknown'}</td>
+                                    <td>${student.student_id || 'N/A'}</td>
+                                    <td>${cleanExamTitle(attempt.exams?.exam_title)}</td>
+                                    <td class="col-center">${scoreValue}${totalMarks ? ` / ${totalMarks}` : ''}</td>
+                                    <td class="col-center">${Number.isFinite(safePercentage) ? `${safePercentage.toFixed(1)}%` : 'N/A'}</td>
+                                    <td class="col-center"><span class="badge badge-info">${grade}</span></td>
+                                    <td>${formatDate(attempt.submitted_at)}</td>
+                                    <td class="col-center">
+                                        <span class="badge ${getBadgeClass(attempt.status)}">
+                                            ${formatAttemptStatus(attempt.status || 'graded')}
+                                        </span>
+                                    </td>
+                                    <td class="col-action">
+                                        <a class="btn btn-outline btn-table" href="exam-results.html?attempt=${attempt.attempt_id}&mode=results">
+                                            View Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            `
+                        }).join('')}
+                    </tbody>
+                </table>
+            `
+            } catch (error) {
+                console.error('Error loading results:', error)
+                container.innerHTML = '<div class="empty-state"><p>Unable to load results</p></div>'
+            }
+        }
+
+        function displayExams(exams) {
+            const container = document.getElementById('examsTableContainer')
+            
+            if (!exams || exams.length === 0) {
+                showEmptyState()
+                return
+            }
+
+            // Populate leaderboard exam selector
+            populateLeaderboardSelector(exams)
+
+            container.innerHTML = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Exam Name</th>
+                            <th class="col-center">Status</th>
+                            <th class="col-center">Submissions</th>
+                            <th class="col-center">Average Score</th>
+                            <th class="col-action">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${exams.map(exam => {
+                            const examId = exam.exam_id || exam.id
+                            const submissionCount = cachedExamSubmissionCounts[String(examId || '').trim()] || 0
+                            const averageScore = cachedExamAverageScores[String(examId || '').trim()]
+                            const normalizedStatus = normalizeExamStatus(exam.status)
+                            return `
+                            <tr>
+                                <td><strong>${cleanExamTitle(exam.exam_title || exam.title)}</strong></td>
+                                <td class="col-center">
+                                    <span class="badge ${getBadgeClass(normalizedStatus)}">
+                                        ${normalizedStatus}
+                                    </span>
+                                </td>
+                                <td class="col-center">${submissionCount}</td>
+                                <td class="col-center">${Number.isFinite(averageScore) ? `${averageScore.toFixed(1)}%` : 'N/A'}</td>
+                                <td class="col-action">
+                                    <div class="table-actions">
+                                        ${normalizedStatus === 'draft' ? `
+                                            <button class="btn btn-secondary btn-table" onclick="openExamPreview('${examId}')">
+                                                Preview
+                                            </button>
+                                            <button class="btn btn-outline btn-table" onclick="printExamPaper('${examId}')">
+                                                Print Paper
+                                            </button>
+                                            <button class="btn btn-primary btn-table" onclick="publishDraftExam('${examId}')">
+                                                Publish
+                                            </button>
+                                        ` : `
+                                            <button class="btn btn-outline btn-table" onclick="viewExamDetails('${examId}')">
+                                                View Details
+                                            </button>
+                                            <button class="btn btn-secondary btn-table" onclick="printExamPaper('${examId}')">
+                                                Print Paper
+                                            </button>
+                                            ${(normalizedStatus === 'published') ? `
+                                                <button class="btn btn-secondary btn-table" onclick="checkPlagiarism('${examId}', '${(exam.exam_title || exam.title || 'Exam').replace(/'/g, "\\'")}')">
+                                                    Plagiarism Check
+                                                </button>
+                                                <button class="btn btn-secondary btn-table" onclick="closeExam('${examId}', '${(exam.exam_title || exam.title || 'Exam').replace(/'/g, "\\'")}')">
+                                                    Close
+                                                </button>
+                                            ` : ''}
+                                        `}
+                                    </div>
+                                </td>
+                            </tr>
+                        `}).join('')}
+                    </tbody>
+                </table>
+            `
+        }
+
+        function showEmptyState() {
+            const container = document.getElementById('examsTableContainer')
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">Info</div>
+                    <p>No exams created yet</p>
+                    <p style="margin-top: 0.5rem;">
+                        <a href="create-exam.html" class="btn btn-primary">Create Your First Exam</a>
+                    </p>
+                </div>
+            `
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Not scheduled'
+            const date = new Date(dateString)
+            const options = { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }
+            return date.toLocaleDateString('en-US', options)
+        }
+
+        function calculatePercentage(score, totalMarks) {
+            const safeScore = Number(score)
+            const safeTotal = Number(totalMarks)
+            if (!Number.isFinite(safeScore) || !Number.isFinite(safeTotal) || safeTotal <= 0) return NaN
+            return (safeScore / safeTotal) * 100
+        }
+
+        function calculateGrade(percentage) {
+            const p = Number(percentage)
+            if (!Number.isFinite(p)) return 'N/A'
+            if (p >= 90) return 'A+'
+            if (p >= 85) return 'A'
+            if (p >= 80) return 'A-'
+            if (p >= 75) return 'B+'
+            if (p >= 70) return 'B'
+            if (p >= 65) return 'B-'
+            if (p >= 60) return 'C+'
+            if (p >= 55) return 'C'
+            if (p >= 50) return 'D'
+            return 'F'
+        }
+
+        async function fetchStudentMap(studentIds) {
+            const normalizedIds = [...new Set((studentIds || []).map(id => String(id || '').trim()).filter(Boolean))]
+            const studentMap = {}
+            if (!normalizedIds.length) return studentMap
+
+            let students = null
+            let studentError = null
+
+            const byId = await supabaseClient
+                .from('users')
+                .select('id, email, student_id, first_name, last_name')
+                .in('id', normalizedIds)
+            students = byId.data
+            studentError = byId.error
+            if (students && !studentError) {
+                students = students.map((student) => ({ ...student, user_id: student.user_id || student.id }))
+            }
+
+            if (studentError) {
+                const byUserId = await supabaseClient
+                    .from('users')
+                    .select('user_id, email, student_id, first_name, last_name')
+                    .in('user_id', normalizedIds)
+                students = byUserId.data
+                studentError = byUserId.error
+            }
+
+            if (!studentError && students) {
+                students.forEach((student) => {
+                    studentMap[student.user_id] = student
+                    if (student.id) studentMap[student.id] = student
+                })
+            }
+
+            return studentMap
+        }
+
+        function getBadgeClass(status) {
+            switch(status) {
+                case 'published':
+                case 'active':
+                    return 'badge-published'
+                case 'draft':
+                    return 'badge-draft'
+                case 'submitted':
+                case 'pending_grading':
+                    return 'badge-warning'
+                case 'graded':
+                case 'completed':
+                    return 'badge-success'
+                case 'archived':
+                    return 'badge-archived'
+                default:
+                    return 'badge-info'
+            }
+        }
+
+        function formatAttemptStatus(status) {
+            const s = String(status || '').toLowerCase()
+            if (s === 'pending_grading') return 'Pending Review'
+            if (!s) return 'Submitted'
+            return s.replace(/_/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase())
+        }
+
+        function findTeacherExamById(examId) {
+            const targetId = String(examId || '').trim()
+            if (!targetId) return null
+            return (cachedTeacherExams || []).find((exam) => getExamId(exam) === targetId) || null
+        }
+
+        function openExamPreview(examId, options = {}) {
+            if (!examId) {
+                showToast('Exam ID not found.', 'error')
+                return
+            }
+
+            const params = new URLSearchParams()
+            params.set('id', examId)
+            params.set('ts', String(Date.now()))
+
+            if (options.print === true) {
+                params.set('print', '1')
+                navigateTeacherWorkspace(`exam-preview.html?${params.toString()}`)
+                return
+            }
+
+            navigateTeacherWorkspace(`exam-preview.html?${params.toString()}`)
+        }
+
+        function printExamPaper(examId) {
+            openExamPreview(examId, { print: true })
+        }
+
+        async function publishDraftExam(examId) {
+            const targetId = String(examId || '').trim()
+            if (!targetId) {
+                showToast('Exam ID not found.', 'error')
+                return
+            }
+
+            const exam = findTeacherExamById(targetId)
+            const examTitle = cleanExamTitle(exam?.exam_title || exam?.title || 'Exam')
+            if (!confirm(`Publish "${examTitle}"?\n\nThis will make the exam visible on the student dashboard.`)) {
+                return
+            }
+
+            try {
+                isActionInProgress = true
+                const teacherId = localStorage.getItem('userId') || localStorage.getItem('teacherId')
+                if (!teacherId) {
+                    throw new Error('Teacher session not found. Please log in again.')
+                }
+
+                const questionsResult = await fetchBackendJson(`/exam-questions/${encodeURIComponent(targetId)}`)
+                const backendQuestions = Array.isArray(questionsResult?.data?.questions) ? questionsResult.data.questions : []
+                const localQuestions = (() => {
+                    try {
+                        return JSON.parse(localStorage.getItem(`exam_questions_${targetId}`) || '[]')
+                    } catch (_) {
+                        return []
+                    }
+                })()
+                const questions = backendQuestions.length ? backendQuestions : localQuestions
+
+                if (!questions.length) {
+                    throw new Error('No generated questions were found for this exam. Open Preview first or regenerate questions.')
+                }
+
+                const totalMarks = Number(exam?.total_marks || 0) || questions.reduce((sum, question) => {
+                    const marks = Number(question?.marks || question?.points || 1)
+                    return sum + (Number.isFinite(marks) ? marks : 1)
+                }, 0)
+
+                const response = await fetchBackendJson(`/exams/${encodeURIComponent(targetId)}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: 'published',
+                        teacher_id: teacherId,
+                        title: exam?.exam_title || exam?.title || 'Untitled Exam',
+                        duration: Number(exam?.duration_minutes || exam?.duration || 90),
+                        total_marks: totalMarks
+                    })
+                })
+
+                if (!response.ok) {
+                    throw new Error(response.error || 'Failed to publish exam')
+                }
+
+                try {
+                    localStorage.setItem('student_dashboard_refresh', String(Date.now()))
+                    if ('BroadcastChannel' in window) {
+                        const bc = new BroadcastChannel('student_dashboard_updates')
+                        bc.postMessage({ type: 'GRADES_UPDATED', examId: targetId, ts: Date.now() })
+                        bc.close()
+                    }
+                } catch (_) {}
+
+                cachedTeacherExams = (cachedTeacherExams || []).map((item) => {
+                    if (getExamId(item) !== targetId) return item
+                    return {
+                        ...item,
+                        status: 'published',
+                        is_visible_to_students: true,
+                        published_at: new Date().toISOString()
+                    }
+                })
+                try {
+                    const storedExams = JSON.parse(localStorage.getItem('exams') || '[]')
+                    if (Array.isArray(storedExams)) {
+                        const updatedStoredExams = storedExams.map((item) => {
+                            const itemId = String(item?.exam_id || item?.id || '').trim()
+                            if (itemId !== targetId) return item
+                            return {
+                                ...item,
+                                status: 'published',
+                                is_visible_to_students: true,
+                                published_at: new Date().toISOString()
+                            }
+                        })
+                        localStorage.setItem('exams', JSON.stringify(updatedStoredExams))
+                    }
+                } catch (_) {}
+
+                showToast('Exam published. It is now visible on the student dashboard.', 'success', 3200)
+                await Promise.allSettled([loadExams(), loadTeacherStats(teacherId)])
+            } catch (error) {
+                showToast('Failed to publish exam: ' + error.message, 'error', 4200)
+            } finally {
+                isActionInProgress = false
+            }
+        }
+
+        function viewExamDetails(examId) {
+            if (!examId) {
+                showToast('Exam ID not found.', 'error')
+                return
+            }
+            navigateTeacherWorkspace(`view-exam.html?v=20260218&id=${encodeURIComponent(examId)}&ts=${Date.now()}`)
+        }
+
+        function navigateToSection(sectionId) {
+            const target = document.getElementById(sectionId)
+            if (!target) return
+            setSidebarActiveBySection(sectionId)
+            // Close mobile sidebar
+            document.body.classList.remove('sidebar-drawer-open')
+            // Scroll with navbar offset
+            const navbarHeight = document.querySelector('.navbar')?.offsetHeight || 80
+            const targetTop = target.getBoundingClientRect().top + window.pageYOffset - navbarHeight - 8
+            window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' })
+            target.classList.add('section-focus')
+            setTimeout(() => target.classList.remove('section-focus'), 1400)
+        }
+
+        async function closeExam(examId, examTitle) {
+            if (!examId) return
+            if (!confirm(`Close exam \"${examTitle}\"?\n\nStudents will no longer be able to take this exam.`)) {
+                return
+            }
+
+            try {
+                isActionInProgress = true
+                const teacherId = localStorage.getItem('userId')
+                const closeStatuses = ['archived', 'draft']
+                let selectedStatus = null
+                let lastError = null
+
+                for (const statusValue of closeStatuses) {
+                    const updateHeaders = await window.AppConfig.buildAuthHeaders(supabaseClient, { 'Content-Type': 'application/json' })
+                    const res = await fetch(`${AI_BACKEND_URL}/exams/${encodeURIComponent(examId)}`, {
+                        method: 'PUT',
+                        headers: updateHeaders,
+                        body: JSON.stringify({
+                            status: statusValue
+                        })
+                    })
+
+                    const data = await res.json().catch(() => ({}))
+                    if (res.ok) {
+                        selectedStatus = statusValue
+                        break
+                    }
+
+                    lastError = data.error || data.message || `Failed with status "${statusValue}"`
+                }
+
+                if (!selectedStatus) {
+                    throw new Error(lastError || 'Failed to close exam')
+                }
+
+                await loadTeacherStats(teacherId)
+                await loadTeacherExams(teacherId)
+                setLastUpdated()
+                showToast('Exam closed successfully.', 'success')
+            } catch (error) {
+                showToast('Failed to close exam: ' + error.message, 'error', 4200)
+            } finally {
+                isActionInProgress = false
+            }
+        }
+
+        function viewCourses() {
+            setSidebarActive('students')
+            navigateToSection('studentsSection')
+        }
+
+        function viewStudents() {
+            setSidebarActive('students')
+            navigateToSection('studentsSection')
+        }
+
+        function filterStudentTable(query) {
+            const q = (query || '').toLowerCase().trim()
+            const rows = document.querySelectorAll('#studentsTableContainer table tbody tr')
+            let visible = 0
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase()
+                const show = !q || text.includes(q)
+                row.style.display = show ? '' : 'none'
+                if (show) visible++
+            })
+            const badge = document.getElementById('studentCountBadge')
+            if (badge) badge.textContent = q ? `${visible} match${visible !== 1 ? 'es' : ''}` : `${rows.length} student${rows.length !== 1 ? 's' : ''}`
+        }
+
+        function clearAuthSession() {
+            const keys = [
+                'isLoggedIn',
+                'userRole',
+                'userEmail',
+                'userId',
+                'userName',
+                'userFirstName',
+                'userLastName',
+                'studentId',
+                'teacherId',
+                'authLoginAt',
+                'authLastActivityAt',
+                'authLogoutAt'
+            ]
+            keys.forEach(key => localStorage.removeItem(key))
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                if (window.SessionManager) {
+                    window.SessionManager.logout('manual')
+                    return
+                }
+                clearAuthSession()
+                window.location.href = 'login.html'
+            }
+        }
+
+        // ── Per-Course Analytics ──────────────────────────────
+        async function loadCourseAnalytics() {
+            const container = document.getElementById('courseAnalyticsContainer')
+            if (!container) return
+            try {
+                const result = await fetchBackendJson('/teacher/course-analytics')
+                if (!result.ok || !result.data?.success) {
+                    container.innerHTML = '<div class="empty-state"><p>Unable to load course analytics.</p></div>'
+                    return
+                }
+                const courses = result.data.courses || []
+                if (!courses.length) {
+                    container.innerHTML = '<div class="empty-state"><p>No course data available yet.</p></div>'
+                    return
+                }
+                let html = '<div style="display:grid;gap:0.75rem;">'
+                courses.forEach(c => {
+                    const passColor = c.pass_rate >= 70 ? '#10b981' : c.pass_rate >= 50 ? '#f59e0b' : '#ef4444'
+                    const avgColor  = c.avg_score  >= 70 ? '#10b981' : c.avg_score  >= 50 ? '#f59e0b' : '#ef4444'
+                    html += '<div style="background:#F8FAFC;border:1px solid #DBEAFE;border-radius:12px;padding:1rem 1.25rem;">'
+                        + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">'
+                        + '<div><span style="font-weight:800;color:#1E3A8A;font-size:0.95rem;">' + (c.course_code || '') + '</span>'
+                        + '<span style="color:#64748b;font-size:0.82rem;margin-left:8px;">' + (c.course_name || '') + '</span></div>'
+                        + '<span style="background:#EFF6FF;border:1px solid #BFDBFE;padding:2px 10px;border-radius:999px;font-size:0.76rem;font-weight:700;color:#1E3A8A;">'
+                        + c.enrolled_students + ' students enrolled</span>'
+                        + '</div>'
+                        + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:0.6rem;">'
+                        + _caStat('Exams', c.total_exams, '#6366f1')
+                        + _caStat('Attempts', c.total_attempts, '#3b82f6')
+                        + _caStat('Avg Score', c.avg_score + '%', avgColor)
+                        + _caStat('Pass Rate', c.pass_rate + '%', passColor)
+                        + _caStat('Highest', c.highest_score + '%', '#10b981')
+                        + '</div>'
+                        + '<div style="margin-top:0.75rem;background:rgba(255,255,255,0.5);border-radius:999px;height:6px;overflow:hidden;">'
+                        + '<div style="width:' + Math.min(c.avg_score, 100) + '%;height:100%;background:' + avgColor + ';border-radius:999px;transition:width 0.7s;"></div>'
+                        + '</div>'
+                        + '</div>'
+                })
+                html += '</div>'
+                container.innerHTML = html
+            } catch (e) {
+                if (container) container.innerHTML = '<div class="empty-state"><p>Unable to load course analytics.</p></div>'
+            }
+        }
+
+        function _caStat(label, value, color) {
+            return '<div style="background:#fff;border:1px solid #DBEAFE;border-radius:8px;padding:0.5rem 0.75rem;text-align:center;">'
+                + '<div style="font-size:0.7rem;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">' + label + '</div>'
+                + '<div style="font-size:1rem;font-weight:800;color:' + color + ';margin-top:2px;">' + value + '</div>'
+                + '</div>'
+        }
+
+        // ── Exam Leaderboard ──────────────────────────────────
+        async function loadLeaderboard(examId) {
+            const container = document.getElementById('leaderboardContainer')
+            if (!container || !examId) return
+            container.innerHTML = '<div class="loading" style="display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:2rem;"><div style="width:24px;height:24px;border:3px solid rgba(59,130,246,0.15);border-top:3px solid #3b82f6;border-radius:50%;animation:spin 0.8s linear infinite;"></div><span style="color:#64748b;font-size:0.85rem;">Loading leaderboard...</span></div>'
+            try {
+                const result = await fetchBackendJson('/exams/' + encodeURIComponent(examId) + '/leaderboard?limit=10')
+                if (!result.ok || !result.data?.success) {
+                    container.innerHTML = '<div class="empty-state"><p>Unable to load leaderboard.</p></div>'
+                    return
+                }
+                const board = result.data.leaderboard || []
+                const stats = result.data.stats || {}
+                if (!board.length) {
+                    container.innerHTML = '<div class="empty-state"><p>No graded submissions yet for this exam.</p></div>'
+                    return
+                }
+                const medals = ['🥇', '🥈', '🥉']
+                let html = '<div style="display:flex;flex-wrap:wrap;gap:0.6rem;margin-bottom:1rem;padding:0.75rem;background:#F8FAFC;border-radius:10px;border:1px solid #DBEAFE;">'
+                    + _caStat('Submissions', stats.total_submissions, '#3b82f6')
+                    + _caStat('Avg Score', stats.avg_score + '%', '#6366f1')
+                    + _caStat('Pass Rate', stats.pass_rate + '%', stats.pass_rate >= 60 ? '#10b981' : '#ef4444')
+                    + _caStat('Highest', stats.highest + '%', '#10b981')
+                    + '</div>'
+                html += '<table class="table"><thead><tr><th>Rank</th><th>Student</th><th>Reg. No</th><th class="col-center">Score</th><th class="col-center">%</th></tr></thead><tbody>'
+                board.forEach(entry => {
+                    const medal = medals[entry.rank - 1] || ('#' + entry.rank)
+                    const pctColor = entry.percentage >= 80 ? '#10b981' : entry.percentage >= 50 ? '#f59e0b' : '#ef4444'
+                    html += '<tr>'
+                        + '<td style="font-weight:800;font-size:1rem;">' + medal + '</td>'
+                        + '<td><span style="font-weight:700;color:#1E3A8A;">' + entry.name + '</span></td>'
+                        + '<td><span style="background:#EFF6FF;border:1px solid #BFDBFE;padding:2px 8px;border-radius:6px;font-size:0.78rem;font-weight:700;color:#1E3A8A;">' + (entry.student_id || 'N/A') + '</span></td>'
+                        + '<td class="col-center" style="font-weight:700;">' + entry.score + ' / ' + entry.total_marks + '</td>'
+                        + '<td class="col-center"><span style="background:' + pctColor + '18;border:1px solid ' + pctColor + '44;padding:3px 10px;border-radius:999px;font-size:0.8rem;font-weight:800;color:' + pctColor + ';">' + entry.percentage + '%</span></td>'
+                        + '</tr>'
+                })
+                html += '</tbody></table>'
+                container.innerHTML = html
+            } catch (e) {
+                container.innerHTML = '<div class="empty-state"><p>Unable to load leaderboard.</p></div>'
+            }
+        }
+
+        // Populate leaderboard exam selector when exams load
+        function populateLeaderboardSelector(exams) {
+            const sel = document.getElementById('leaderboardExamSelect')
+            if (!sel || !exams || !exams.length) return
+            const current = sel.value
+            sel.innerHTML = '<option value="">Select an exam...</option>'
+                + exams.filter(e => e.status === 'published' || e.status === 'archived' || e.status === 'completed')
+                    .map(e => '<option value="' + (e.exam_id || e.id) + '">' + (e.exam_title || 'Exam') + '</option>')
+                    .join('')
+            if (current) sel.value = current
+        }
     </script>
+    <script src="js/ui-feedback.js"></script>
+    <script src="js/chatbot.js?v=disabled-20260428"></script>
+<!-- FINAL COLOR OVERRIDE — loads after all CSS files and scripts -->
+<style>
+/* ── Page ── */
+html body.teacher-dashboard-page { background-color: #F0F4FF !important; background-image: none !important; }
+html body.teacher-dashboard-page::before { display: none !important; }
+
+/* ── Navbar ── */
+html body.teacher-dashboard-page .navbar { background-color: #1E3A8A !important; border-bottom: 1px solid rgba(59,130,246,0.3) !important; }
+
+/* ── Sidebar ── */
+html body.teacher-dashboard-page .sidebar { background: #1E3A8A !important; border: none !important; }
+html body.teacher-dashboard-page .sidebar::before { display: none !important; }
+html body.teacher-dashboard-page .sidebar-link { color: rgba(219,234,254,0.9) !important; background: transparent !important; }
+html body.teacher-dashboard-page .sidebar-link:hover { background: rgba(255,255,255,0.12) !important; color: #FFFFFF !important; }
+html body.teacher-dashboard-page .sidebar-link.active { background: rgba(255,255,255,0.18) !important; color: #FFFFFF !important; }
+html body.teacher-dashboard-page .sidebar-profile-name { color: #FFFFFF !important; }
+html body.teacher-dashboard-page .sidebar-profile-meta { color: rgba(219,234,254,0.9) !important; }
+html body.teacher-dashboard-page .sidebar-footer-button { background: rgba(220,38,38,0.12) !important; border-color: rgba(220,38,38,0.3) !important; color: #FCA5A5 !important; }
+
+/* ── Dashboard header card ── */
+html body.teacher-dashboard-page .dashboard-header { background: #FFFFFF !important; border: 0.5px solid #DBEAFE !important; box-shadow: 0 2px 8px rgba(10,46,31,0.06) !important; }
+html body.teacher-dashboard-page .dashboard-header h1 { color: #1E3A8A !important; }
+html body.teacher-dashboard-page .dashboard-header p { color: #4A7A65 !important; }
+html body.teacher-dashboard-page #welcomeMessage { color: #6B7280 !important; }
+html body.teacher-dashboard-page .meta-row { color: #6B7280 !important; }
+
+/* ── CREATE NEW EXAM button (btn-primary in quick-actions) ── */
+html body.teacher-dashboard-page .quick-actions .btn-primary,
+html body.teacher-dashboard-page .quick-actions a.btn-primary,
+html body.teacher-dashboard-page .dashboard-header .btn-primary {
+    background: #1E3A8A !important;
+    background-image: none !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+html body.teacher-dashboard-page .quick-actions .btn-primary:hover,
+html body.teacher-dashboard-page .dashboard-header .btn-primary:hover { background: #1e40af !important; }
+
+/* ── PENDING GRADES button (btn-secondary in quick-actions) ── */
+html body.teacher-dashboard-page .quick-actions .btn-secondary,
+html body.teacher-dashboard-page .quick-actions a.btn-secondary,
+html body.teacher-dashboard-page .dashboard-header .btn-secondary {
+    background: #EF9F27 !important;
+    background-image: none !important;
+    color: #412402 !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+html body.teacher-dashboard-page .quick-actions .btn-secondary:hover,
+html body.teacher-dashboard-page .dashboard-header .btn-secondary:hover { background: #BA7517 !important; color: #FFFFFF !important; }
+
+/* ── TABLE ACTION BUTTONS ── */
+/* View Details (btn-outline) */
+html body.teacher-dashboard-page .table-actions .btn-outline,
+html body.teacher-dashboard-page td .btn-outline,
+html body.teacher-dashboard-page .btn-outline.btn-table {
+    background: #E6F1FB !important;
+    border: 1px solid #185FA5 !important;
+    color: #0C447C !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+html body.teacher-dashboard-page .table-actions .btn-outline:hover,
+html body.teacher-dashboard-page td .btn-outline:hover { background: #185FA5 !important; color: #FFFFFF !important; }
+
+/* Print Paper / Preview / Auto Grade (btn-secondary in table) */
+html body.teacher-dashboard-page .table-actions .btn-secondary,
+html body.teacher-dashboard-page td .btn-secondary,
+html body.teacher-dashboard-page .btn-secondary.btn-table {
+    background: #F3EFFE !important;
+    border: 1px solid #534AB7 !important;
+    color: #26215C !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+html body.teacher-dashboard-page .table-actions .btn-secondary:hover,
+html body.teacher-dashboard-page td .btn-secondary:hover { background: #534AB7 !important; color: #FFFFFF !important; }
+
+/* Publish / Review & Finalize (btn-primary in table) */
+html body.teacher-dashboard-page .table-actions .btn-primary,
+html body.teacher-dashboard-page td .btn-primary,
+html body.teacher-dashboard-page .btn-primary.btn-table {
+    background: #1E3A8A !important;
+    border: none !important;
+    color: #FFFFFF !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+html body.teacher-dashboard-page .table-actions .btn-primary:hover,
+html body.teacher-dashboard-page td .btn-primary:hover { background: #1e40af !important; }
+
+/* ── STAT NUMBERS ── */
+html body.teacher-dashboard-page .stat-number {
+    color: #1E3A8A !important;
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    background: none !important;
+    background-image: none !important;
+    -webkit-background-clip: unset !important;
+    -webkit-text-fill-color: #1E3A8A !important;
+    background-clip: unset !important;
+    opacity: 1 !important;
+    filter: none !important;
+}
+html body.teacher-dashboard-page .stat-label { color: #6B7280 !important; opacity: 1 !important; }
+html body.teacher-dashboard-page .stat-footer { color: #6B7280 !important; opacity: 1 !important; }
+
+/* ── STAT CARDS ── */
+html body.teacher-dashboard-page .stat-card { background: #FFFFFF !important; border: 0.5px solid #DBEAFE !important; border-radius: 12px !important; box-shadow: 0 2px 8px rgba(10,46,31,0.06) !important; }
+html body.teacher-dashboard-page .stat-card::before { display: none !important; }
+html body.teacher-dashboard-page .stats-grid .stat-card:nth-child(1) { border-top: 3px solid #3B82F6 !important; }
+html body.teacher-dashboard-page .stats-grid .stat-card:nth-child(2) { border-top: 3px solid #185FA5 !important; }
+html body.teacher-dashboard-page .stats-grid .stat-card:nth-child(3) { border-top: 3px solid #534AB7 !important; }
+html body.teacher-dashboard-page .stats-grid .stat-card:nth-child(4) { border-top: 3px solid #EF9F27 !important; }
+html body.teacher-dashboard-page .stats-grid .stat-card:nth-child(5) { border-top: 3px solid #3B82F6 !important; }
+html body.teacher-dashboard-page .stat-icon { background: #DBEAFE !important; color: #1E3A8A !important; box-shadow: none !important; }
+html body.teacher-dashboard-page .stats-grid .stat-card:nth-child(2) .stat-icon { background: #E6F1FB !important; color: #185FA5 !important; }
+html body.teacher-dashboard-page .stats-grid .stat-card:nth-child(3) .stat-icon { background: #F3EFFE !important; color: #534AB7 !important; }
+html body.teacher-dashboard-page .stats-grid .stat-card:nth-child(4) .stat-icon { background: #FFF8E8 !important; color: #EF9F27 !important; }
+
+/* ── CARDS ── */
+html body.teacher-dashboard-page .card { background: #FFFFFF !important; border: 0.5px solid #DBEAFE !important; border-radius: 14px !important; box-shadow: 0 2px 8px rgba(10,46,31,0.06) !important; }
+html body.teacher-dashboard-page .card h3 { color: #1E3A8A !important; }
+html body.teacher-dashboard-page .card-header { border-bottom-color: #DBEAFE !important; }
+
+/* ── TABLE ── */
+html body.teacher-dashboard-page .table th, html body.teacher-dashboard-page table th { background: #1E3A8A !important; color: #FFFFFF !important; border-bottom: none !important; }
+html body.teacher-dashboard-page .table td, html body.teacher-dashboard-page table td { color: #1F2937 !important; background: #FFFFFF !important; border-bottom: 0.5px solid #DBEAFE !important; }
+html body.teacher-dashboard-page .table tr:hover td, html body.teacher-dashboard-page table tr:hover td { background: #EFF6FF !important; }
+
+/* ── BADGES ── */
+html body.teacher-dashboard-page .badge-published { background: #1E3A8A !important; color: #DBEAFE !important; border: none !important; border-radius: 20px !important; padding: 4px 14px !important; }
+html body.teacher-dashboard-page .badge-draft { background: #EF9F27 !important; color: #412402 !important; border: none !important; border-radius: 20px !important; padding: 4px 14px !important; }
+html body.teacher-dashboard-page .badge-archived, html body.teacher-dashboard-page .badge-closed { background: #E24B4A !important; color: #FCEBEB !important; border: none !important; border-radius: 20px !important; padding: 4px 14px !important; }
+html body.teacher-dashboard-page .badge-info { background: #E6F1FB !important; color: #185FA5 !important; border: none !important; border-radius: 20px !important; padding: 4px 14px !important; }
+html body.teacher-dashboard-page .badge-success { background: #DCFCE7 !important; color: #15803D !important; border: none !important; border-radius: 20px !important; padding: 4px 14px !important; }
+html body.teacher-dashboard-page .badge-warning { background: #FEF3C7 !important; color: #B45309 !important; border: none !important; border-radius: 20px !important; padding: 4px 14px !important; }
+
+/* ── TABLE ACTION BUTTONS LAYOUT ── */
+body.teacher-dashboard-page .table-actions {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 4px !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+}
+body.teacher-dashboard-page td.col-action {
+    white-space: nowrap !important;
+    width: 1% !important;
+    text-align: right !important;
+}
+body.teacher-dashboard-page .table-actions .btn,
+body.teacher-dashboard-page .btn-table {
+    padding: 4px 10px !important;
+    font-size: 0.74rem !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    white-space: nowrap !important;
+    border-radius: 6px !important;
+    line-height: 1 !important;
+}
+
+/* ── FILTER CHIPS ── */
+html body.teacher-dashboard-page .filter-chip { background: #F0F4FF !important; border: 1.5px solid #BFDBFE !important; color: #1E3A8A !important; border-radius: 8px !important; font-weight: 500 !important; padding: 0.4rem 1rem !important; }
+html body.teacher-dashboard-page .filter-chip.active { background: #1E3A8A !important; color: #FFFFFF !important; border-color: #1E3A8A !important; font-weight: 600 !important; }
+
+/* Keep the teacher sidebar pinned while the dashboard content scrolls. */
+@media (min-width: 981px) {
+    html body.teacher-dashboard-page:not(.embedded-shell) .app-shell {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 16px !important;
+        padding: 16px !important;
+        align-items: flex-start !important;
+    }
+
+    html body.teacher-dashboard-page:not(.embedded-shell) .sidebar {
+        width: 280px !important;
+        min-width: 280px !important;
+        flex-shrink: 0 !important;
+        position: sticky !important;
+        top: 96px !important;
+        height: calc(100vh - 112px) !important;
+        max-height: calc(100vh - 112px) !important;
+        left: auto !important;
+        bottom: auto !important;
+        z-index: 10 !important;
+        transform: none !important;
+        pointer-events: auto !important;
+        overflow-y: auto !important;
+    }
+
+    html body.teacher-dashboard-page:not(.embedded-shell) .content-column {
+        flex: 1 !important;
+        min-width: 0 !important;
+        margin-left: 0 !important;
+        overflow: visible !important;
+        padding: 0 !important;
+    }
+
+    html body.teacher-dashboard-page.embedded-shell .app-shell {
+        display: block !important;
+        padding: 16px !important;
+    }
+
+    html body.teacher-dashboard-page.embedded-shell .content-column {
+        margin-left: 0 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+}
+
+/* ── Mobile: sidebar slides in as drawer ── */
+@media (max-width: 980px) {
+    html body.teacher-dashboard-page:not(.embedded-shell) .app-shell {
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 12px !important;
+        gap: 12px !important;
+    }
+
+    html body.teacher-dashboard-page:not(.embedded-shell) .sidebar {
+        position: fixed !important;
+        left: 16px !important;
+        top: 104px !important;
+        bottom: 16px !important;
+        width: min(280px, calc(100vw - 32px)) !important;
+        height: auto !important;
+        max-height: none !important;
+        z-index: 1300 !important;
+        transform: translateX(calc(-100% - 24px)) !important;
+        transition: transform 220ms ease !important;
+        pointer-events: none !important;
+    }
+
+    html body.teacher-dashboard-page.sidebar-drawer-open:not(.embedded-shell) .sidebar {
+        transform: translateX(0) !important;
+        pointer-events: auto !important;
+    }
+
+    html body.teacher-dashboard-page:not(.embedded-shell) .content-column {
+        flex: 1 !important;
+        min-width: 0 !important;
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    /* Ensure all buttons are tappable */
+    html body.teacher-dashboard-page .btn,
+    html body.teacher-dashboard-page .filter-chip,
+    html body.teacher-dashboard-page .stat-card.clickable {
+        min-height: 44px !important;
+        touch-action: manipulation !important;
+        -webkit-tap-highlight-color: rgba(30,58,138,0.15) !important;
+        cursor: pointer !important;
+    }
+}
+
+html body.teacher-dashboard-page .sidebar-footer-button {
+    background: #DC2626 !important;
+    border-color: #DC2626 !important;
+    color: #FFFFFF !important;
+}
+
+html body.teacher-dashboard-page .sidebar-footer-button:hover {
+    background: #B91C1C !important;
+    border-color: #B91C1C !important;
+    color: #FFFFFF !important;
+}
+</style>
 </body>
 </html>
