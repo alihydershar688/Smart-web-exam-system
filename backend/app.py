@@ -7462,7 +7462,7 @@ def submit_feedback():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-
+if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
    
     print("\n" + "=" * 70)
