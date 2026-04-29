@@ -1994,8 +1994,11 @@
             status.textContent = 'Sending...'; status.style.color = '#94a3b8'
             if (submitBtn) submitBtn.disabled = true
 
-            // Always use live Render backend for feedback — works even when local server is off
-            const backendBase = 'https://smart-web-exam-system.onrender.com/api'
+            // Use local backend when running locally, Render when on live site
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            const backendBase = isLocal
+                ? 'http://127.0.0.1:5000/api'
+                : 'https://smart-web-exam-system.onrender.com/api'
             const controller = new AbortController()
             const timeout = setTimeout(() => controller.abort(), 12000) // 12s timeout
 

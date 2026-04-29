@@ -7423,47 +7423,39 @@ def submit_feedback():
             'status':     'new',
             'created_at': time.strftime('%Y-%m-%dT%H:%M:%SZ'),
         }
-        try:
-            db_exec(lambda: supabase.table('feedback').insert(payload).execute())
-            logger.info('[feedback] Saved %s from %s', feedback_type, email or name)
-        except Exception as db_err:
-            logger.warning('[feedback] DB insert failed (table may not exist): %s', db_err)
 
-        # ── Email notification to developer ──────────────────────────
-        try:
-            from utils.email_notify import _send, _base_template, APP_NAME
-            DEVELOPER_EMAIL = 'alihydershar688@gmail.com'
-            type_label = {'feedback': 'General Feedback', 'suggestion': 'Suggestion / Improvement', 'complaint': 'Complaint / Issue'}.get(feedback_type, feedback_type.title())
-            type_color = {'feedback': '#3B82F6', 'suggestion': '#10b981', 'complaint': '#ef4444'}.get(feedback_type, '#6366f1')
-            subject = f'[Smart Exam] New {type_label} from {name or "Anonymous"}'
-            body = f"""
-                <p>You have received a new <strong style="color:{type_color};">{type_label}</strong> via the Help Center.</p>
-                <table style="width:100%;border-collapse:collapse;margin:16px 0;">
-                    <tr><td style="padding:8px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:700;width:120px;">From</td>
-                        <td style="padding:8px 12px;border:1px solid #e2e8f0;">{name or 'Anonymous'}</td></tr>
-                    <tr><td style="padding:8px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:700;">Email</td>
-                        <td style="padding:8px 12px;border:1px solid #e2e8f0;">{email or 'Not provided'}</td></tr>
-                    <tr><td style="padding:8px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:700;">Type</td>
-                        <td style="padding:8px 12px;border:1px solid #e2e8f0;"><span style="background:{type_color}18;color:{type_color};padding:2px 8px;border-radius:4px;font-weight:700;">{type_label}</span></td></tr>
-                    <tr><td style="padding:8px 12px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:700;">Page</td>
-                        <td style="padding:8px 12px;border:1px solid #e2e8f0;">{page or 'Not specified'}</td></tr>
-                </table>
-                <div style="background:#f8fafc;border-left:4px solid {type_color};padding:16px;border-radius:0 8px 8px 0;margin:16px 0;">
-                    <p style="font-weight:700;margin-bottom:8px;color:#1f2937;">Message:</p>
-                    <p style="color:#374151;line-height:1.65;white-space:pre-wrap;">{_sanitize_text(message)}</p>
-                </div>
-                <p style="color:#6b7280;font-size:0.85rem;">Submitted at: {time.strftime('%Y-%m-%d %H:%M:%S UTC')}</p>
-            """
-            html = _base_template(f'New {type_label} — Smart Exam System', body)
-            sent = _send(DEVELOPER_EMAIL, subject, html)
-            if sent:
-                logger.info('[feedback] Email notification sent to %s', DEVELOPER_EMAIL)
-            else:
-                logger.warning('[feedback] Email notification not sent (SMTP may not be configured)')
-        except Exception as email_err:
-            logger.warning('[feedback] Email notification failed: %s', email_err)
-            # Don't fail the request if email fails
+        # Return success immediately — do DB insert and email in background
+        import threading
+        def _process_feedback_bg():
+            try:
+                db_exec(lambda: supabase.table('feedback').insert(payload).execute())
+                logger.info('[feedback] Saved %s from %s', feedback_type, email or name)
+            except Exception as db_err:
+                logger.warning('[feedback] DB insert failed: %s', db_err)
+            try:
+                from utils.email_notify import _send, _base_template
+                DEVELOPER_EMAIL = 'alihydershar688@gmail.com'
+                type_label = {'feedback': 'General Feedback', 'suggestion': 'Suggestion / Improvement', 'complaint': 'Complaint / Issue'}.get(feedback_type, feedback_type.title())
+                type_color = {'feedback': '#3B82F6', 'suggestion': '#10b981', 'complaint': '#ef4444'}.get(feedback_type, '#6366f1')
+                subj = f'[Smart Exam] New {type_label} from {name or "Anonymous"}'
+                body_html = f"""
+                    <p>New <strong style="color:{type_color};">{type_label}</strong> from Help Center.</p>
+                    <p><strong>From:</strong> {name or 'Anonymous'} ({email or 'no email'})</p>
+                    <p><strong>Type:</strong> {type_label}</p>
+                    <p><strong>Page:</strong> {page or 'N/A'}</p>
+                    <div style="background:#f8fafc;border-left:4px solid {type_color};padding:16px;margin:16px 0;border-radius:0 8px 8px 0;">
+                        <p style="font-weight:700;margin-bottom:8px;">Message:</p>
+                        <p style="white-space:pre-wrap;">{_sanitize_text(message)}</p>
+                    </div>
+                    <p style="color:#6b7280;font-size:0.85rem;">Submitted: {time.strftime('%Y-%m-%d %H:%M:%S UTC')}</p>
+                """
+                html = _base_template(f'New {type_label} — Smart Exam System', body_html)
+                _send(DEVELOPER_EMAIL, subj, html)
+                logger.info('[feedback] Email sent to %s', DEVELOPER_EMAIL)
+            except Exception as email_err:
+                logger.warning('[feedback] Email failed: %s', email_err)
 
+        threading.Thread(target=_process_feedback_bg, daemon=True).start()
         return jsonify({'success': True, 'message': 'Thank you for your feedback!'}), 200
     except Exception as e:
         logger.error('[feedback] Error: %s', e)
