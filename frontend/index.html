@@ -1989,13 +1989,21 @@
         async function submitHelpFeedback() {
             const msg = (document.getElementById('fbMessage').value || '').trim()
             const status = document.getElementById('fbStatus')
+            const submitBtn = document.querySelector('[onclick="submitHelpFeedback()"]')
             if (!msg) { status.textContent = 'Please enter a message.'; status.style.color = '#f87171'; return }
             status.textContent = 'Sending...'; status.style.color = '#94a3b8'
+            if (submitBtn) submitBtn.disabled = true
+
+            // Always use live Render backend for feedback — works even when local server is off
+            const backendBase = 'https://smart-web-exam-system.onrender.com/api'
+            const controller = new AbortController()
+            const timeout = setTimeout(() => controller.abort(), 12000) // 12s timeout
+
             try {
-                const backendBase = window.AppConfig ? window.AppConfig.getBackendBase() : 'https://smart-web-exam-system.onrender.com/api'
                 const res = await fetch(backendBase + '/feedback', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    signal: controller.signal,
                     body: JSON.stringify({
                         type: document.getElementById('fbType').value,
                         message: msg,
@@ -2004,6 +2012,7 @@
                         page: window.location.pathname
                     })
                 })
+                clearTimeout(timeout)
                 const data = await res.json()
                 if (data.success) {
                     status.textContent = 'Thank you! Your message has been received.'
@@ -2016,8 +2025,15 @@
                     status.style.color = '#f87171'
                 }
             } catch (e) {
-                status.textContent = 'Could not connect. Please try again later.'
+                clearTimeout(timeout)
+                if (e.name === 'AbortError') {
+                    status.textContent = 'Request timed out. Please try again.'
+                } else {
+                    status.textContent = 'Could not connect. Please try again later.'
+                }
                 status.style.color = '#f87171'
+            } finally {
+                if (submitBtn) submitBtn.disabled = false
             }
         }
         // Close on Escape key
