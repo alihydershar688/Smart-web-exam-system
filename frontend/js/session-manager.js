@@ -21,10 +21,10 @@
     const LAST_ACTIVITY_KEY = 'authLastActivityAt';
     const LOGOUT_BROADCAST_KEY = 'authLogoutAt';
     const PAGE_TRANSITION_KEY = 'authPageTransitionAt';
-    const DEFAULT_IDLE_TIMEOUT_MS = 4 * 60 * 1000;
-    const DEFAULT_ABSOLUTE_TIMEOUT_MS = 8 * 60 * 60 * 1000;
-    /* ── Session timeout re-enabled for production ── */
-    const TESTING_MODE_DISABLE_TIMEOUT = false;
+    const DEFAULT_IDLE_TIMEOUT_MS = 60 * 60 * 1000;      // 60 minutes idle timeout
+    const DEFAULT_ABSOLUTE_TIMEOUT_MS = 12 * 60 * 60 * 1000; // 12 hours absolute
+    /* ── Session timeout disabled for demo stability ── */
+    const TESTING_MODE_DISABLE_TIMEOUT = true;
     const ACTIVITY_THROTTLE_MS = 15000;
     const CHECK_INTERVAL_MS = 30000;
     const LOCK_RENEW_INTERVAL_MS = 60 * 1000;
@@ -37,6 +37,9 @@
     let lastTouchAt = 0;
     let storageHandlerBound = false;
     let authClient = null;
+    
+    /* ── Session timeout disabled — keep user logged in ── */
+    const DISABLE_SESSION_TIMEOUT = true;
 
     function nowMs() {
         return Date.now();
@@ -198,7 +201,7 @@
 
     async function syncServerSessionLock() {
         /* ── TESTING MODE: lock sync disabled ── */
-        if (TESTING_MODE_DISABLE_TIMEOUT) return true;
+        if (DISABLE_SESSION_TIMEOUT) return true;
 
         const identity = getSessionLockIdentity();
         if (!identity) return true;
@@ -278,7 +281,7 @@
 
     function isExpired() {
         /* ── TESTING MODE: timeout disabled ── */
-        if (TESTING_MODE_DISABLE_TIMEOUT) return false;
+        if (DISABLE_SESSION_TIMEOUT) return false;
 
         const loginAt = readNumber(LOGIN_AT_KEY);
         const lastActivityAt = readNumber(LAST_ACTIVITY_KEY);
@@ -304,7 +307,7 @@
     function checkSession() {
         if (!currentConfig) return true;
         /* ── TESTING MODE: always valid ── */
-        if (TESTING_MODE_DISABLE_TIMEOUT) return true;
+        if (DISABLE_SESSION_TIMEOUT) return true;
         if (!getStore('isLoggedIn')) return false;
         if (isExpired()) {
             broadcastLogout('expired');
@@ -318,7 +321,7 @@
         storageHandlerBound = true;
         window.addEventListener('storage', function (event) {
             /* ── TESTING MODE: ignore logout broadcasts ── */
-            if (TESTING_MODE_DISABLE_TIMEOUT) return;
+            if (DISABLE_SESSION_TIMEOUT) return;
             if (event.key === LOGOUT_BROADCAST_KEY && event.newValue) {
                 redirectToLogin('expired');
             }
