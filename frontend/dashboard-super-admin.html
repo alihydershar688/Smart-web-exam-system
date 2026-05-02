@@ -1,0 +1,1233 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%234f46e5'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='28' fill='white' font-family='Arial' font-weight='bold'%3ESE%3C/text%3E%3C/svg%3E">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Super Admin Dashboard | Smart Exam System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --adm-bg:           #F0F4FF;
+            --adm-bg2:          #EFF6FF;
+            --adm-card:         #FFFFFF;
+            --adm-card-hover:   #EFF6FF;
+            --adm-border:       #DBEAFE;
+            --adm-sidebar:      #1E3A8A;
+            --adm-menu-item:    rgba(255,255,255,0.06);
+            --adm-active:       #1e40af;
+            --adm-hover:        #2563EB;
+            --adm-sidebar-text: #CBD5E8;
+            --adm-topbar:       #1E3A8A;
+            --adm-input-bg:     #F0F4FF;
+            --adm-input-border: #BFDBFE;
+            --adm-heading:      #1E3A8A;
+            --adm-text:         #1F2937;
+            --adm-muted:        #6B7280;
+            --adm-primary:      #1E3A8A;
+            --adm-primary-hov:  #1e40af;
+            --adm-secondary:    #FFFFFF;
+            --adm-danger:       #DC2626;
+            --adm-danger-hov:   #B91C1C;
+            --adm-shadow:       0 4px 16px rgba(30, 58, 138, 0.1);
+            --adm-shadow-sm:    0 2px 8px rgba(30, 58, 138, 0.07);
+            --radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Manrope", sans-serif;
+            background: var(--adm-bg);
+            color: var(--adm-text);
+            min-height: 100vh;
+            overflow-x: clip;
+            font-size: 14px;
+            -webkit-font-smoothing: antialiased;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #EEF2F9; }
+        ::-webkit-scrollbar-thumb { background: #B0BDD4; border-radius: 999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2547B0; }
+
+        /* Navbar */
+        .navbar {
+            position: sticky; top: 0; z-index: 1001;
+            background: var(--adm-topbar);
+            border-bottom: 1px solid rgba(219,234,254,0.2);
+            box-shadow: var(--adm-shadow-sm);
+        }
+        .navbar-content {
+            min-height: 68px; display: flex; justify-content: space-between;
+            align-items: center; gap: 1.25rem; width: 100%; padding: 0 1.5rem;
+        }
+        .brand-wrap { display: flex; align-items: center; gap: 0.75rem; }
+        .logo {
+            text-decoration: none; font-size: 0.95rem; font-weight: 800;
+            color: #fff; display: inline-flex; align-items: center; gap: 0.75rem;
+        }
+        .logo-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: linear-gradient(140deg, #1E3A8A, #2563EB);
+            color: #fff; display: inline-flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 800; letter-spacing: 0.06em;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.35); flex-shrink: 0;
+        }
+        .brand-copy { display: grid; gap: 0.14rem; }
+        .brand-name { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.14em; color: #60A5FA; font-weight: 800; }
+        .brand-page { font-size: 0.95rem; color: #fff; font-weight: 700; }
+        .super-admin-badge {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            background: linear-gradient(135deg, #7C3AED, #4F46E5);
+            color: #fff; font-size: 0.65rem; font-weight: 800;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            padding: 0.28rem 0.65rem; border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(124,58,237,0.4);
+            border: 1px solid rgba(167,139,250,0.4);
+        }
+        .header-utility { display: flex; align-items: center; gap: 10px; position: relative; }
+        .header-profile-trigger {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 38px; height: 38px; border-radius: 50%;
+            background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+            text-decoration: none; transition: background 0.2s;
+        }
+        .header-profile-trigger:hover { background: rgba(255,255,255,0.2); }
+        .header-profile-avatar {
+            font-size: 0.75rem; font-weight: 800; color: #fff;
+            width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+        }
+
+        /* Buttons */
+        .btn {
+            border: 1px solid transparent; border-radius: 8px; padding: 0.5rem 0.85rem;
+            font-size: 0.8rem; font-weight: 700; cursor: pointer; text-decoration: none;
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+            transition: all 0.2s ease; font-family: "Manrope", sans-serif;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+        .btn-primary { background: var(--adm-primary); color: #fff; box-shadow: 0 2px 6px rgba(30,58,138,0.25); }
+        .btn-primary:hover { background: var(--adm-primary-hov); }
+        .btn-secondary { background: #3B82F6; color: #fff; border-color: #3B82F6; }
+        .btn-secondary:hover { background: #1E40AF; border-color: #1E40AF; }
+        .btn-danger { background: var(--adm-danger); color: #fff; }
+        .btn-danger:hover { background: var(--adm-danger-hov); }
+        .btn-warning { background: #D97706; color: #fff; }
+        .btn-warning:hover { background: #B45309; }
+        .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.72rem; }
+        .btn-outline { background: transparent; border-color: var(--adm-border); color: var(--adm-heading); }
+        .btn-outline:hover { background: var(--adm-bg2); }
+
+        /* Layout */
+        .container { width: 100%; margin: 0; padding: 1.2rem 1.4rem 1.6rem 0.85rem; }
+        .app-shell { display: grid; grid-template-columns: 268px minmax(0, 1fr); gap: 1.25rem; align-items: start; }
+
+        /* Sidebar */
+        .sidebar {
+            position: sticky; top: 80px;
+            min-height: calc(100vh - 96px); max-height: calc(100vh - 96px);
+            display: flex; flex-direction: column;
+            background: var(--adm-sidebar); border: 1px solid rgba(219,234,254,0.15);
+            border-radius: 14px; box-shadow: var(--adm-shadow); padding: 1rem; overflow: hidden;
+        }
+        .sidebar-nav { display: grid; gap: 0.35rem; overflow-y: auto; padding-right: 0.1rem; flex: 1; }
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(219,234,254,0.2); border-radius: 999px; }
+        .sidebar-link {
+            position: relative; display: flex; align-items: center; justify-content: space-between;
+            gap: 0.75rem; border: 1px solid transparent; border-radius: 10px;
+            padding: 0.7rem 0.8rem; text-decoration: none; color: var(--adm-sidebar-text);
+            background: rgba(255,255,255,0.04); transition: all 0.18s ease; overflow: hidden;
+        }
+        .sidebar-link::before {
+            content: ""; position: absolute; left: 0; top: 8px; bottom: 8px;
+            width: 3px; border-radius: 999px; background: transparent; transition: background 0.18s ease;
+        }
+        .sidebar-link-main { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
+        .sidebar-link-icon {
+            width: 34px; height: 34px; border-radius: 8px;
+            border: 1px solid rgba(219,234,254,0.15); background: rgba(255,255,255,0.04);
+            color: #93C5FD; display: inline-flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; flex-shrink: 0; transition: all 0.18s ease;
+        }
+        .sidebar-link-title { display: block; color: var(--adm-sidebar-text); font-size: 0.85rem; font-weight: 700; }
+        .sidebar-link:hover { background: rgba(255,255,255,0.08); border-color: rgba(96,165,250,0.2); color: #fff; }
+        .sidebar-link.active {
+            background: linear-gradient(135deg, rgba(59,130,246,0.25), rgba(37,99,235,0.15));
+            border-color: rgba(96,165,250,0.4); color: #fff;
+            box-shadow: inset 0 0 12px rgba(96,165,250,0.15);
+        }
+        .sidebar-link:hover::before { background: #60A5FA; }
+        .sidebar-link.active::before { background: #BFDBFE; height: calc(100% - 8px); }
+        .sidebar-link:hover .sidebar-link-icon,
+        .sidebar-link.active .sidebar-link-icon { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); color: #fff; }
+        .sidebar-footer { margin-top: auto; padding-top: 0.85rem; border-top: 1px solid rgba(219,234,254,0.15); flex-shrink: 0; }
+        .sidebar-footer-button {
+            width: 100%; min-height: 40px; display: flex; align-items: center; justify-content: center;
+            gap: 0.5rem; background: rgba(220,38,38,0.08); color: #FDA8A8;
+            border: 1px solid rgba(220,38,38,0.2); border-radius: 8px; padding: 0.6rem 0.9rem;
+            font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.2s ease;
+            font-family: "Manrope", sans-serif;
+        }
+        .sidebar-footer-button:hover { background: rgba(220,38,38,0.15); color: #FECACA; transform: translateY(-1px); }
+
+        /* Content */
+        .content-column { min-width: 0; }
+        .section-panel { display: none; }
+        .section-panel.active { display: block; }
+
+        /* Hero */
+        .hero {
+            background: var(--adm-card); border: 1px solid var(--adm-border);
+            border-radius: 10px; box-shadow: var(--adm-shadow-sm);
+            padding: 0.85rem 1.1rem; margin-bottom: 1rem;
+            display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+        }
+        .hero-text h1 { font-size: 1.28rem; color: var(--adm-heading); margin-bottom: 0.1rem; }
+        .hero-text p { color: #5B6B7F; font-size: 0.8rem; font-weight: 500; }
+
+        /* Stat Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+        .stat-card {
+            background: var(--adm-card); border: 1px solid #E5E7EB; border-radius: 10px;
+            box-shadow: var(--adm-shadow-sm); padding: 1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease; position: relative; overflow: hidden;
+        }
+        .stat-card::before {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+            height: 4px; background: var(--stat-accent, #2563EB); transition: height 0.2s ease;
+        }
+        .stat-card:hover { transform: translateY(-3px); background: #F9FAFB; box-shadow: var(--adm-shadow); }
+        .stat-card:hover::before { height: 5px; }
+        .stats-grid .stat-card:nth-child(1) { --stat-accent: #2563EB; }
+        .stats-grid .stat-card:nth-child(2) { --stat-accent: #7C3AED; }
+        .stats-grid .stat-card:nth-child(3) { --stat-accent: #16A34A; }
+        .stats-grid .stat-card:nth-child(4) { --stat-accent: #F59E0B; }
+        .stats-grid .stat-card:nth-child(1) .stat-number { color: #2563EB; }
+        .stats-grid .stat-card:nth-child(2) .stat-number { color: #7C3AED; }
+        .stats-grid .stat-card:nth-child(3) .stat-number { color: #16A34A; }
+        .stats-grid .stat-card:nth-child(4) .stat-number { color: #F59E0B; }
+        .stat-label { color: #6B7280; font-size: 0.7rem; display: block; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+        .stat-number { font-size: 2rem; font-weight: 900; display: block; color: var(--adm-heading); line-height: 1.1; margin-bottom: 0.3rem; }
+        .stat-footer { color: #6B7280; font-size: 0.7rem; line-height: 1.4; font-weight: 500; }
+
+        /* Cards */
+        .card {
+            background: var(--adm-card); border: 1px solid var(--adm-border);
+            border-radius: 10px; box-shadow: var(--adm-shadow-sm); padding: 1rem; margin-bottom: 1rem;
+        }
+        .card-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 0.85rem; padding-bottom: 0.65rem; border-bottom: 1px solid var(--adm-border);
+        }
+        .card-title { font-size: 0.95rem; font-weight: 700; color: var(--adm-heading); display: flex; align-items: center; gap: 0.5rem; }
+        .card-title i { color: #3B82F6; }
+
+        /* Tables */
+        .data-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #E0E7FF; }
+        .data-table th, .data-table td { text-align: left; padding: 0.8rem 0.95rem; border-bottom: 1px solid #E0E7FF; font-size: 0.78rem; }
+        .data-table th { background: #1E3A8A; color: #fff; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+        .data-table td { color: #1F2937; font-weight: 500; }
+        .data-table tbody tr { background: #fff; transition: background 0.15s ease; }
+        .data-table tbody tr:hover { background: #F0F7FF; }
+        .table-wrap { overflow-x: auto; border-radius: 10px; }
+
+        /* Badges */
+        .badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.28rem 0.65rem; border-radius: 6px; font-size: 0.72rem; font-weight: 700; border: 1px solid transparent; }
+        .badge-student { background: #DBEAFE; color: #0C2340; border-color: #7DD3FC; }
+        .badge-teacher { background: #BFDBFE; color: #0C2340; border-color: #60A5FA; }
+        .badge-admin { background: #FEF08A; color: #713F12; border-color: #FCD34D; }
+        .badge-super-admin { background: linear-gradient(135deg,#EDE9FE,#DDD6FE); color: #4C1D95; border-color: #A78BFA; }
+        .badge-active { background: #DCFCE7; color: #14532D; border-color: #86EFAC; }
+        .badge-inactive, .badge-suspended { background: #FECACA; color: #7F1D1D; border-color: #FCA5A5; }
+        .badge-pending { background: #FEF08A; color: #713F12; border-color: #FEDE8D; }
+        .badge-on { background: #DCFCE7; color: #14532D; border-color: #86EFAC; }
+        .badge-off { background: #F3F4F6; color: #374151; border-color: #D1D5DB; }
+
+        /* Forms */
+        .field-group { display: flex; flex-direction: column; gap: 0.32rem; margin-bottom: 0.75rem; }
+        .field-group label { font-weight: 700; font-size: 0.72rem; color: var(--adm-text); text-transform: uppercase; letter-spacing: 0.06em; }
+        .field-group input, .field-group textarea, .field-group select {
+            border: 1px solid #D1D5DB; border-radius: 8px; padding: 0.52rem 0.68rem;
+            font: inherit; font-size: 0.82rem; color: #1F2937; background: #F9FAFB;
+            transition: border-color 0.2s ease; width: 100%;
+        }
+        .field-group input:focus, .field-group textarea:focus, .field-group select:focus {
+            outline: none; border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+        .field-group textarea { resize: vertical; min-height: 80px; }
+        .field-group input[type="range"] { padding: 0; background: transparent; border: none; box-shadow: none; }
+        .field-group input[type="range"]:focus { box-shadow: none; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+        /* Toggle Switch */
+        .toggle-wrap { display: flex; align-items: center; gap: 0.75rem; }
+        .toggle { position: relative; display: inline-block; width: 48px; height: 26px; }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background: #D1D5DB; border-radius: 26px; transition: 0.3s;
+        }
+        .toggle-slider:before {
+            position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px;
+            background: #fff; border-radius: 50%; transition: 0.3s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        }
+        .toggle input:checked + .toggle-slider { background: #16A34A; }
+        .toggle input:checked + .toggle-slider:before { transform: translateX(22px); }
+        .toggle-label { font-weight: 700; font-size: 0.85rem; color: var(--adm-text); }
+
+        /* Progress bars */
+        .progress-bar-wrap { margin-bottom: 0.65rem; }
+        .progress-bar-label { display: flex; justify-content: space-between; font-size: 0.72rem; font-weight: 600; color: var(--adm-text); margin-bottom: 0.3rem; }
+        .progress-bar-track { height: 8px; background: #E5E7EB; border-radius: 999px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; border-radius: 999px; transition: width 0.6s ease; }
+
+        /* Toast */
+        #toastContainer {
+            position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999;
+            display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none;
+        }
+        .toast {
+            background: #1F2937; color: #fff; padding: 0.75rem 1.1rem; border-radius: 10px;
+            font-size: 0.82rem; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            display: flex; align-items: center; gap: 0.6rem; pointer-events: auto;
+            animation: toastIn 0.3s ease; max-width: 340px;
+        }
+        .toast.success { background: #065F46; border-left: 4px solid #10B981; }
+        .toast.error { background: #7F1D1D; border-left: 4px solid #EF4444; }
+        .toast.warning { background: #78350F; border-left: 4px solid #F59E0B; }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Spinner */
+        .spinner {
+            display: inline-block; width: 20px; height: 20px;
+            border: 2px solid rgba(37,99,235,0.2); border-top-color: #2563EB;
+            border-radius: 50%; animation: spin 0.7s linear infinite;
+        }
+        .spinner-sm { width: 14px; height: 14px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-row { text-align: center; padding: 1.5rem; color: var(--adm-muted); }
+
+        /* Warning card */
+        .warning-card {
+            background: #FFF7ED; border: 2px solid #F97316; border-radius: 10px;
+            padding: 1rem; margin-bottom: 1rem;
+        }
+        .danger-card {
+            background: #FFF1F2; border: 2px solid #F43F5E; border-radius: 10px;
+            padding: 1rem; margin-bottom: 1rem;
+        }
+        .danger-card .card-title { color: #BE123C; }
+        .warning-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+
+        /* Maintenance status */
+        .maintenance-status {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; font-size: 0.85rem;
+        }
+        .maintenance-status.on { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+        .maintenance-status.off { background: #F0FDF4; color: #16A34A; border: 1px solid #BBF7D0; }
+
+        /* Slider value display */
+        .slider-value {
+            display: inline-block; background: #1E3A8A; color: #fff;
+            padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700;
+            min-width: 40px; text-align: center;
+        }
+
+        /* Empty state */
+        .empty { color: #9CA3AF; text-align: center; padding: 1.5rem 0; font-size: 0.82rem; }
+
+        /* Responsive */
+        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 980px) {
+            .app-shell { grid-template-columns: 1fr; }
+            .sidebar { position: static; min-height: auto; max-height: none; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .form-row { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 640px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .navbar-content { padding: 0 1rem; }
+            .container { padding: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="brand-wrap">
+                <a href="index.html" class="logo">
+                    <span class="logo-icon">SE</span>
+                    <span class="brand-copy">
+                        <span class="brand-name">Smart Exam System</span>
+                        <span class="brand-page">Super Admin Dashboard</span>
+                    </span>
+                </a>
+                <span class="super-admin-badge"><i class="bi bi-shield-fill-check"></i> SUPER ADMIN</span>
+            </div>
+            <div class="header-utility">
+                <a class="header-profile-trigger" href="profile.html" aria-label="Open profile">
+                    <span class="header-profile-avatar" id="headerProfileAvatar">SA</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Layout -->
+    <div class="container">
+        <div class="app-shell">
+
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <nav class="sidebar-nav">
+                    <a href="#" class="sidebar-link active" data-section="dashboard" onclick="showSection('dashboard'); return false;">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon"><i class="bi bi-grid-1x2-fill"></i></span>
+                            <span class="sidebar-link-title">Dashboard</span>
+                        </span>
+                    </a>
+                    <a href="#" class="sidebar-link" data-section="manage-admins" onclick="showSection('manage-admins'); return false;">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon"><i class="bi bi-person-badge-fill"></i></span>
+                            <span class="sidebar-link-title">Manage Admins</span>
+                        </span>
+                    </a>
+                    <a href="#" class="sidebar-link" data-section="audit-log" onclick="showSection('audit-log'); return false;">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon"><i class="bi bi-journal-text"></i></span>
+                            <span class="sidebar-link-title">Audit Log</span>
+                        </span>
+                    </a>
+                    <a href="#" class="sidebar-link" data-section="ai-settings" onclick="showSection('ai-settings'); return false;">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon"><i class="bi bi-cpu-fill"></i></span>
+                            <span class="sidebar-link-title">AI Settings</span>
+                        </span>
+                    </a>
+                    <a href="#" class="sidebar-link" data-section="maintenance" onclick="showSection('maintenance'); return false;">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon"><i class="bi bi-tools"></i></span>
+                            <span class="sidebar-link-title">Maintenance Mode</span>
+                        </span>
+                    </a>
+                    <a href="#" class="sidebar-link" data-section="platform-stats" onclick="showSection('platform-stats'); return false;">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon"><i class="bi bi-bar-chart-fill"></i></span>
+                            <span class="sidebar-link-title">Platform Stats</span>
+                        </span>
+                    </a>
+                    <a href="#" class="sidebar-link" data-section="transfer" onclick="showSection('transfer'); return false;">
+                        <span class="sidebar-link-main">
+                            <span class="sidebar-link-icon"><i class="bi bi-arrow-left-right"></i></span>
+                            <span class="sidebar-link-title">Transfer Super Admin</span>
+                        </span>
+                    </a>
+                </nav>
+                <div class="sidebar-footer">
+                    <button class="sidebar-footer-button" type="button" onclick="logout()">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Content Column -->
+            <div class="content-column">
+
+                <!-- ═══════════════════════════════════════════════════════
+                     SECTION 1: Dashboard Overview
+                ═══════════════════════════════════════════════════════ -->
+                <div class="section-panel active" id="section-dashboard">
+                    <div class="hero">
+                        <div class="hero-text">
+                            <h1>Super Admin Dashboard</h1>
+                            <p>Full platform control — manage admins, AI, maintenance, and system health.</p>
+                        </div>
+                        <button class="btn btn-secondary" onclick="loadPlatformStats()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-label">Total Users</span>
+                            <span class="stat-number" id="stat-total-users"><span class="spinner spinner-sm"></span></span>
+                            <div class="stat-footer" id="stat-users-footer">Loading...</div>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Total Admins</span>
+                            <span class="stat-number" id="stat-total-admins"><span class="spinner spinner-sm"></span></span>
+                            <div class="stat-footer">Platform administrators</div>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Total Exams</span>
+                            <span class="stat-number" id="stat-total-exams"><span class="spinner spinner-sm"></span></span>
+                            <div class="stat-footer" id="stat-exams-footer">Loading...</div>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Platform Avg Score</span>
+                            <span class="stat-number" id="stat-avg-score"><span class="spinner spinner-sm"></span></span>
+                            <div class="stat-footer">Across all attempts</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════
+                     SECTION 2: Manage Admins
+                ═══════════════════════════════════════════════════════ -->
+                <div class="section-panel" id="section-manage-admins">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title"><i class="bi bi-person-badge-fill"></i> Manage Admins</span>
+                            <button class="btn btn-primary btn-sm" onclick="openPromoteModal()">
+                                <i class="bi bi-person-plus-fill"></i> Promote to Admin
+                            </button>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="data-table" id="admins-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admins-tbody">
+                                    <tr><td colspan="5" class="loading-row"><span class="spinner"></span> Loading admins...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════
+                     SECTION 3: Audit Log
+                ═══════════════════════════════════════════════════════ -->
+                <div class="section-panel" id="section-audit-log">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title"><i class="bi bi-journal-text"></i> Audit Log</span>
+                            <div style="display:flex;align-items:center;gap:0.5rem;">
+                                <span style="font-size:0.72rem;color:var(--adm-muted);">Auto-refreshes every 30s</span>
+                                <button class="btn btn-outline btn-sm" onclick="loadAuditLog()">
+                                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Actor</th>
+                                        <th>Action</th>
+                                        <th>Target</th>
+                                        <th>Timestamp</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="audit-tbody">
+                                    <tr><td colspan="4" class="loading-row"><span class="spinner"></span> Loading audit log...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════
+                     SECTION 4: AI Settings
+                ═══════════════════════════════════════════════════════ -->
+                <div class="section-panel" id="section-ai-settings">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title"><i class="bi bi-cpu-fill"></i> AI Settings</span>
+                        </div>
+                        <form id="ai-settings-form" onsubmit="saveAiSettings(event)">
+                            <div class="field-group">
+                                <label for="ai-confidence">AI Confidence Threshold</label>
+                                <div style="display:flex;align-items:center;gap:0.75rem;">
+                                    <input type="range" id="ai-confidence" name="confidence_threshold"
+                                        min="0" max="1" step="0.01" value="0.7"
+                                        oninput="document.getElementById('confidence-val').textContent=parseFloat(this.value).toFixed(2)"
+                                        style="flex:1;">
+                                    <span class="slider-value" id="confidence-val">0.70</span>
+                                </div>
+                                <span style="font-size:0.72rem;color:var(--adm-muted);">Minimum confidence score for AI-generated answers (0.0 – 1.0)</span>
+                            </div>
+                            <div class="form-row">
+                                <div class="field-group">
+                                    <label for="ollama-model">Ollama Model</label>
+                                    <input type="text" id="ollama-model" name="ollama_model" placeholder="e.g. llama3, mistral, phi3">
+                                </div>
+                                <div class="field-group">
+                                    <label for="ollama-host">Ollama Host</label>
+                                    <input type="text" id="ollama-host" name="ollama_host" placeholder="e.g. http://localhost:11434">
+                                </div>
+                            </div>
+                            <div style="display:flex;gap:0.5rem;align-items:center;margin-top:0.5rem;">
+                                <button type="submit" class="btn btn-primary" id="ai-save-btn">
+                                    <i class="bi bi-floppy-fill"></i> Save AI Settings
+                                </button>
+                                <button type="button" class="btn btn-outline" onclick="loadAiSettings()">
+                                    <i class="bi bi-arrow-clockwise"></i> Reload
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════
+                     SECTION 5: Maintenance Mode
+                ═══════════════════════════════════════════════════════ -->
+                <div class="section-panel" id="section-maintenance">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title"><i class="bi bi-tools"></i> Maintenance Mode</span>
+                            <div id="maintenance-badge" class="maintenance-status off">
+                                <i class="bi bi-circle-fill" style="font-size:0.5rem;"></i> OFFLINE
+                            </div>
+                        </div>
+                        <form id="maintenance-form" onsubmit="saveMaintenanceMode(event)">
+                            <div class="field-group" style="margin-bottom:1rem;">
+                                <label>Maintenance Mode</label>
+                                <div class="toggle-wrap">
+                                    <label class="toggle">
+                                        <input type="checkbox" id="maintenance-toggle" onchange="updateMaintenanceBadge()">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <span class="toggle-label" id="maintenance-toggle-label">Disabled</span>
+                                </div>
+                            </div>
+                            <div class="field-group">
+                                <label for="maintenance-message">Maintenance Message</label>
+                                <textarea id="maintenance-message" name="message" placeholder="e.g. The platform is currently undergoing scheduled maintenance. Please check back in 30 minutes."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="maintenance-save-btn">
+                                <i class="bi bi-floppy-fill"></i> Save Maintenance Settings
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════
+                     SECTION 6: Platform Statistics
+                ═══════════════════════════════════════════════════════ -->
+                <div class="section-panel" id="section-platform-stats">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title"><i class="bi bi-bar-chart-fill"></i> Platform Statistics</span>
+                            <button class="btn btn-outline btn-sm" onclick="loadDetailedStats()">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                        <div id="platform-stats-content">
+                            <div class="loading-row"><span class="spinner"></span> Loading statistics...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════
+                     SECTION 7: Transfer Super Admin
+                ═══════════════════════════════════════════════════════ -->
+                <div class="section-panel" id="section-transfer">
+                    <div class="danger-card">
+                        <div class="card-header" style="border-bottom-color:#FECDD3;">
+                            <span class="card-title" style="color:#BE123C;">
+                                <i class="bi bi-exclamation-triangle-fill" style="color:#F43F5E;"></i>
+                                Transfer Super Admin Access
+                            </span>
+                        </div>
+                        <div style="background:#FFF1F2;border:1px solid #FECDD3;border-radius:8px;padding:0.85rem;margin-bottom:1rem;">
+                            <p style="font-weight:700;color:#BE123C;font-size:0.85rem;margin-bottom:0.35rem;">
+                                <i class="bi bi-shield-exclamation"></i> Warning: This action cannot be undone.
+                            </p>
+                            <p style="color:#9F1239;font-size:0.8rem;line-height:1.6;">
+                                Transferring Super Admin access will permanently revoke your Super Admin privileges.
+                                You will lose access to this dashboard and all Super Admin capabilities immediately.
+                                The new Super Admin must already have an account on the platform.
+                            </p>
+                        </div>
+                        <form id="transfer-form" onsubmit="initiateTransfer(event)">
+                            <div class="field-group">
+                                <label for="transfer-email">New Super Admin Email</label>
+                                <input type="email" id="transfer-email" name="new_super_admin_email"
+                                    placeholder="Enter the email of the new Super Admin"
+                                    required style="border-color:#FECDD3;">
+                            </div>
+                            <div style="display:flex;gap:0.5rem;align-items:center;margin-top:0.75rem;">
+                                <button type="submit" class="btn btn-danger" id="transfer-btn">
+                                    <i class="bi bi-arrow-left-right"></i> Transfer Super Admin Access
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div><!-- /content-column -->
+        </div><!-- /app-shell -->
+    </div><!-- /container -->
+
+    <!-- ═══════════════════════════════════════════════════════
+         MODAL: Promote to Admin
+    ═══════════════════════════════════════════════════════ -->
+    <div id="promote-modal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:14px;padding:1.5rem;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.25);margin:1rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                <h3 style="font-size:1rem;font-weight:700;color:#1E3A8A;">Promote User to Admin</h3>
+                <button onclick="closePromoteModal()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#6B7280;">&times;</button>
+            </div>
+            <form id="promote-form" onsubmit="promoteUser(event)">
+                <div class="field-group">
+                    <label for="promote-email">User Email</label>
+                    <input type="email" id="promote-email" placeholder="user@example.com" required>
+                </div>
+                <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:0.5rem;">
+                    <button type="button" class="btn btn-outline" onclick="closePromoteModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="promote-btn">
+                        <i class="bi bi-person-plus-fill"></i> Promote
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/supabase.min.js"></script>
+    <script src="js/app-config.js"></script>
+    <script src="js/session-manager.js"></script>
+    <script src="js/user-profile.js"></script>
+    <script>
+    // ── Auth Check ──────────────────────────────────────────────────────────
+    (function() {
+        const role = localStorage.getItem('userRole')
+        if (role !== 'super_admin') {
+            window.location.href = 'login.html'
+        }
+    })()
+
+    // ── Config & Supabase ───────────────────────────────────────────────────
+    const BACKEND = window.AppConfig ? window.AppConfig.getBackendBase() : 'http://127.0.0.1:5000/api'
+    let supabaseClient = null
+
+    async function initSupabase() {
+        if (window.AppConfig && window.supabase) {
+            const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.AppConfig
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            window.supabaseClient = supabaseClient
+        }
+    }
+
+    async function saRequest(path, options = {}) {
+        const headers = await window.AppConfig.buildAuthHeaders(supabaseClient, options.headers || {})
+        return fetch(BACKEND + path, { ...options, headers })
+    }
+
+    // ── Toast Notifications ─────────────────────────────────────────────────
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer')
+        const toast = document.createElement('div')
+        toast.className = `toast ${type}`
+        const icons = { success: 'bi-check-circle-fill', error: 'bi-x-circle-fill', warning: 'bi-exclamation-triangle-fill' }
+        toast.innerHTML = `<i class="bi ${icons[type] || 'bi-info-circle-fill'}"></i><span>${escHtml(message)}</span>`
+        container.appendChild(toast)
+        setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(8px)'; toast.style.transition = 'all 0.3s'; setTimeout(() => toast.remove(), 300) }, 3500)
+    }
+
+    function escHtml(v) {
+        return String(v || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')
+    }
+
+    function formatDate(iso) {
+        if (!iso) return '—'
+        try { return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) }
+        catch { return iso }
+    }
+
+    // ── Section Navigation ──────────────────────────────────────────────────
+    function showSection(name) {
+        document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'))
+        document.querySelectorAll('.sidebar-link[data-section]').forEach(l => l.classList.remove('active'))
+        const panel = document.getElementById('section-' + name)
+        if (panel) panel.classList.add('active')
+        const link = document.querySelector(`.sidebar-link[data-section="${name}"]`)
+        if (link) link.classList.add('active')
+        // Scroll to top of content
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        // Lazy-load section data
+        const loaders = {
+            'dashboard': loadPlatformStats,
+            'manage-admins': loadAdmins,
+            'audit-log': loadAuditLog,
+            'ai-settings': loadAiSettings,
+            'maintenance': loadMaintenanceStatus,
+            'platform-stats': loadDetailedStats,
+        }
+        if (loaders[name]) loaders[name]()
+    }
+
+    // ── Logout ──────────────────────────────────────────────────────────────
+    function logout() {
+        ['isLoggedIn','userRole','userEmail','userId','userName','userFirstName','userLastName',
+         'studentId','teacherId','adminId','authLoginAt','authLastActivityAt','authLogoutAt'
+        ].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k) })
+        if (supabaseClient) supabaseClient.auth.signOut().catch(() => {})
+        window.location.href = 'login.html'
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // SECTION 1: Platform Stats (Dashboard Overview)
+    // ══════════════════════════════════════════════════════════════════════
+    async function loadPlatformStats() {
+        try {
+            const res = await saRequest('/super-admin/platform-stats')
+            if (!res.ok) throw new Error('Failed to load stats')
+            const data = await res.json()
+            const s = data.stats || data || {}
+            document.getElementById('stat-total-users').textContent = s.total_users ?? '—'
+            document.getElementById('stat-total-admins').textContent = s.total_admins ?? '—'
+            document.getElementById('stat-total-exams').textContent = s.total_exams ?? '—'
+            const avg = s.platform_avg_score
+            document.getElementById('stat-avg-score').textContent = avg != null ? parseFloat(avg).toFixed(1) + '%' : '—'
+            document.getElementById('stat-users-footer').textContent =
+                `Students: ${s.students ?? 0} | Teachers: ${s.teachers ?? 0}`
+            document.getElementById('stat-exams-footer').textContent =
+                `Published: ${s.published_exams ?? 0} | Draft: ${s.draft_exams ?? 0}`
+        } catch (e) {
+            // Fallback: load from Supabase directly
+            await loadPlatformStatsFallback()
+        }
+    }
+
+    async function loadPlatformStatsFallback() {
+        if (!supabaseClient) return
+        try {
+            const [{ data: users }, { data: exams }, { data: attempts }] = await Promise.all([
+                supabaseClient.from('users').select('id,role'),
+                supabaseClient.from('exams').select('exam_id,status'),
+                supabaseClient.from('exam_attempts').select('score')
+            ])
+            const u = users || []
+            const e = exams || []
+            const a = attempts || []
+            const roleCount = u.reduce((acc, x) => { acc[x.role] = (acc[x.role] || 0) + 1; return acc }, {})
+            const scores = a.map(x => parseFloat(x.score)).filter(x => !isNaN(x))
+            const avg = scores.length ? (scores.reduce((s, x) => s + x, 0) / scores.length) : null
+            document.getElementById('stat-total-users').textContent = u.length
+            document.getElementById('stat-total-admins').textContent = (roleCount.admin || 0) + (roleCount.super_admin || 0)
+            document.getElementById('stat-total-exams').textContent = e.length
+            document.getElementById('stat-avg-score').textContent = avg != null ? avg.toFixed(1) + '%' : '—'
+            document.getElementById('stat-users-footer').textContent =
+                `Students: ${roleCount.student || 0} | Teachers: ${roleCount.teacher || 0}`
+            document.getElementById('stat-exams-footer').textContent =
+                `Published: ${e.filter(x => x.status === 'published').length} | Draft: ${e.filter(x => x.status === 'draft').length}`
+        } catch (e) {
+            ['stat-total-users','stat-total-admins','stat-total-exams','stat-avg-score'].forEach(id => {
+                document.getElementById(id).textContent = '—'
+            })
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // SECTION 2: Manage Admins
+    // ══════════════════════════════════════════════════════════════════════
+    async function loadAdmins() {
+        const tbody = document.getElementById('admins-tbody')
+        tbody.innerHTML = '<tr><td colspan="5" class="loading-row"><span class="spinner"></span> Loading...</td></tr>'
+        try {
+            if (!supabaseClient) throw new Error('No Supabase client')
+            const { data, error } = await supabaseClient
+                .from('users')
+                .select('id,first_name,last_name,email,role,status')
+                .in('role', ['admin','super_admin'])
+                .order('role', { ascending: false })
+            if (error) throw error
+            if (!data || !data.length) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty">No admin users found.</td></tr>'
+                return
+            }
+            tbody.innerHTML = data.map(u => {
+                const name = [u.first_name, u.last_name].filter(Boolean).join(' ') || 'Unnamed'
+                const isSuperAdmin = u.role === 'super_admin'
+                const roleClass = isSuperAdmin ? 'super-admin' : 'admin'
+                const statusClass = (u.status || 'active').toLowerCase()
+                const demoteBtn = isSuperAdmin
+                    ? `<button class="btn btn-sm btn-outline" disabled title="Cannot demote Super Admin" style="opacity:0.4;cursor:not-allowed;">Demote</button>`
+                    : `<button class="btn btn-sm btn-danger" onclick="demoteUser('${escHtml(u.email)}','${escHtml(name)}')">Demote</button>`
+                return `<tr>
+                    <td><strong>${escHtml(name)}</strong></td>
+                    <td>${escHtml(u.email)}</td>
+                    <td><span class="badge badge-${roleClass}">${escHtml(u.role.replace('_',' ').toUpperCase())}</span></td>
+                    <td><span class="badge badge-${statusClass}">${escHtml(u.status || 'active')}</span></td>
+                    <td>${demoteBtn}</td>
+                </tr>`
+            }).join('')
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="5" class="empty">Failed to load admins: ${escHtml(e.message)}</td></tr>`
+        }
+    }
+
+    function openPromoteModal() {
+        const modal = document.getElementById('promote-modal')
+        modal.style.display = 'flex'
+        document.getElementById('promote-email').value = ''
+        document.getElementById('promote-email').focus()
+    }
+
+    function closePromoteModal() {
+        document.getElementById('promote-modal').style.display = 'none'
+    }
+
+    async function promoteUser(e) {
+        e.preventDefault()
+        const email = document.getElementById('promote-email').value.trim()
+        if (!email) return
+        const btn = document.getElementById('promote-btn')
+        btn.disabled = true
+        btn.innerHTML = '<span class="spinner spinner-sm"></span> Promoting...'
+        try {
+            const res = await saRequest('/super-admin/promote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            })
+            const data = await res.json().catch(() => ({}))
+            if (!res.ok) throw new Error(data.error || data.message || 'Promotion failed')
+            showToast(`${email} promoted to Admin successfully.`, 'success')
+            closePromoteModal()
+            loadAdmins()
+        } catch (err) {
+            showToast(err.message, 'error')
+        } finally {
+            btn.disabled = false
+            btn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Promote'
+        }
+    }
+
+    async function demoteUser(email, name) {
+        if (!confirm(`Demote ${name} (${email}) from Admin? They will become a regular user.`)) return
+        try {
+            const res = await saRequest('/super-admin/demote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            })
+            const data = await res.json().catch(() => ({}))
+            if (!res.ok) throw new Error(data.error || data.message || 'Demotion failed')
+            showToast(`${email} has been demoted.`, 'success')
+            loadAdmins()
+        } catch (err) {
+            showToast(err.message, 'error')
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // SECTION 3: Audit Log
+    // ══════════════════════════════════════════════════════════════════════
+    let auditRefreshTimer = null
+
+    async function loadAuditLog() {
+        const tbody = document.getElementById('audit-tbody')
+        tbody.innerHTML = '<tr><td colspan="4" class="loading-row"><span class="spinner"></span> Loading...</td></tr>'
+        try {
+            const res = await saRequest('/super-admin/audit-log')
+            if (!res.ok) throw new Error('Failed to load audit log')
+            const data = await res.json()
+            const logs = data.logs || data || []
+            if (!logs.length) {
+                tbody.innerHTML = '<tr><td colspan="4" class="empty">No audit log entries found.</td></tr>'
+                return
+            }
+            tbody.innerHTML = logs.slice(0, 50).map(log => `<tr>
+                <td>${escHtml(log.actor || log.actor_email || '—')}</td>
+                <td><strong>${escHtml(log.action || log.activity_type || '—')}</strong></td>
+                <td>${escHtml(log.target || log.description || '—')}</td>
+                <td style="white-space:nowrap;color:var(--adm-muted);font-size:0.72rem;">${escHtml(formatDate(log.timestamp || log.created_at))}</td>
+            </tr>`).join('')
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="4" class="empty">Failed to load audit log: ${escHtml(e.message)}</td></tr>`
+        }
+    }
+
+    function startAuditAutoRefresh() {
+        if (auditRefreshTimer) clearInterval(auditRefreshTimer)
+        auditRefreshTimer = setInterval(() => {
+            const panel = document.getElementById('section-audit-log')
+            if (panel && panel.classList.contains('active')) loadAuditLog()
+        }, 30000)
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // SECTION 4: AI Settings
+    // ══════════════════════════════════════════════════════════════════════
+    async function loadAiSettings() {
+        try {
+            const res = await saRequest('/super-admin/ai-settings')
+            if (!res.ok) throw new Error('Failed to load AI settings')
+            const data = await res.json()
+            const s = data.settings || data || {}
+            const threshold = parseFloat(s.confidence_threshold ?? 0.7)
+            document.getElementById('ai-confidence').value = threshold
+            document.getElementById('confidence-val').textContent = threshold.toFixed(2)
+            document.getElementById('ollama-model').value = s.ollama_model || ''
+            document.getElementById('ollama-host').value = s.ollama_host || ''
+        } catch (e) {
+            showToast('Could not load AI settings: ' + e.message, 'warning')
+        }
+    }
+
+    async function saveAiSettings(e) {
+        e.preventDefault()
+        const btn = document.getElementById('ai-save-btn')
+        btn.disabled = true
+        btn.innerHTML = '<span class="spinner spinner-sm"></span> Saving...'
+        const payload = {
+            confidence_threshold: parseFloat(document.getElementById('ai-confidence').value),
+            ollama_model: document.getElementById('ollama-model').value.trim(),
+            ollama_host: document.getElementById('ollama-host').value.trim()
+        }
+        try {
+            const res = await saRequest('/super-admin/ai-settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            const data = await res.json().catch(() => ({}))
+            if (!res.ok) throw new Error(data.error || data.message || 'Save failed')
+            showToast('AI settings saved successfully.', 'success')
+        } catch (err) {
+            showToast(err.message, 'error')
+        } finally {
+            btn.disabled = false
+            btn.innerHTML = '<i class="bi bi-floppy-fill"></i> Save AI Settings'
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // SECTION 5: Maintenance Mode
+    // ══════════════════════════════════════════════════════════════════════
+    function updateMaintenanceBadge() {
+        const on = document.getElementById('maintenance-toggle').checked
+        const badge = document.getElementById('maintenance-badge')
+        const label = document.getElementById('maintenance-toggle-label')
+        badge.className = 'maintenance-status ' + (on ? 'on' : 'off')
+        badge.innerHTML = `<i class="bi bi-circle-fill" style="font-size:0.5rem;"></i> ${on ? 'MAINTENANCE ON' : 'OFFLINE'}`
+        label.textContent = on ? 'Enabled' : 'Disabled'
+    }
+
+    async function loadMaintenanceStatus() {
+        try {
+            const res = await saRequest('/super-admin/maintenance')
+            if (!res.ok) throw new Error('Failed to load maintenance status')
+            const data = await res.json()
+            const s = data.maintenance || data || {}
+            document.getElementById('maintenance-toggle').checked = !!s.enabled
+            document.getElementById('maintenance-message').value = s.message || ''
+            updateMaintenanceBadge()
+        } catch (e) {
+            showToast('Could not load maintenance status: ' + e.message, 'warning')
+        }
+    }
+
+    async function saveMaintenanceMode(e) {
+        e.preventDefault()
+        const btn = document.getElementById('maintenance-save-btn')
+        btn.disabled = true
+        btn.innerHTML = '<span class="spinner spinner-sm"></span> Saving...'
+        const payload = {
+            enabled: document.getElementById('maintenance-toggle').checked,
+            message: document.getElementById('maintenance-message').value.trim()
+        }
+        try {
+            const res = await saRequest('/super-admin/maintenance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            const data = await res.json().catch(() => ({}))
+            if (!res.ok) throw new Error(data.error || data.message || 'Save failed')
+            showToast('Maintenance settings saved.', 'success')
+            updateMaintenanceBadge()
+        } catch (err) {
+            showToast(err.message, 'error')
+        } finally {
+            btn.disabled = false
+            btn.innerHTML = '<i class="bi bi-floppy-fill"></i> Save Maintenance Settings'
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // SECTION 6: Platform Statistics (Detailed)
+    // ══════════════════════════════════════════════════════════════════════
+    async function loadDetailedStats() {
+        const container = document.getElementById('platform-stats-content')
+        container.innerHTML = '<div class="loading-row"><span class="spinner"></span> Loading statistics...</div>'
+        try {
+            const res = await saRequest('/super-admin/platform-stats')
+            if (!res.ok) throw new Error('Failed to load stats')
+            const data = await res.json()
+            renderDetailedStats(data.stats || data)
+        } catch (e) {
+            // Fallback to Supabase
+            await loadDetailedStatsFallback(container)
+        }
+    }
+
+    function renderDetailedStats(s) {
+        const container = document.getElementById('platform-stats-content')
+        const total = (s.total_users || 0)
+        const students = s.students || 0
+        const teachers = s.teachers || 0
+        const admins = (s.total_admins || 0)
+        const totalExams = s.total_exams || 0
+        const published = s.published_exams || 0
+        const draft = s.draft_exams || 0
+        const attempts = s.total_attempts || 0
+        const avg = s.platform_avg_score != null ? parseFloat(s.platform_avg_score).toFixed(1) : '—'
+
+        function bar(label, value, max, color) {
+            const pct = max > 0 ? Math.round((value / max) * 100) : 0
+            return `<div class="progress-bar-wrap">
+                <div class="progress-bar-label"><span>${escHtml(label)}</span><span>${value} (${pct}%)</span></div>
+                <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${pct}%;background:${color};"></div></div>
+            </div>`
+        }
+
+        container.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div>
+                <h4 style="font-size:0.82rem;font-weight:700;color:var(--adm-heading);margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.08em;">Users by Role</h4>
+                ${bar('Students', students, total, '#2563EB')}
+                ${bar('Teachers', teachers, total, '#7C3AED')}
+                ${bar('Admins', admins, total, '#F59E0B')}
+                <div style="margin-top:0.75rem;padding:0.75rem;background:var(--adm-bg2);border-radius:8px;border:1px solid var(--adm-border);">
+                    <div style="font-size:0.72rem;color:var(--adm-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.35rem;">Total Users</div>
+                    <div style="font-size:1.5rem;font-weight:900;color:#2563EB;">${total}</div>
+                </div>
+            </div>
+            <div>
+                <h4 style="font-size:0.82rem;font-weight:700;color:var(--adm-heading);margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.08em;">Exams & Attempts</h4>
+                ${bar('Published Exams', published, totalExams, '#16A34A')}
+                ${bar('Draft Exams', draft, totalExams, '#9CA3AF')}
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.75rem;">
+                    <div style="padding:0.75rem;background:var(--adm-bg2);border-radius:8px;border:1px solid var(--adm-border);">
+                        <div style="font-size:0.72rem;color:var(--adm-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.35rem;">Total Attempts</div>
+                        <div style="font-size:1.5rem;font-weight:900;color:#7C3AED;">${attempts}</div>
+                    </div>
+                    <div style="padding:0.75rem;background:var(--adm-bg2);border-radius:8px;border:1px solid var(--adm-border);">
+                        <div style="font-size:0.72rem;color:var(--adm-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.35rem;">Avg Score</div>
+                        <div style="font-size:1.5rem;font-weight:900;color:#F59E0B;">${avg}%</div>
+                    </div>
+                </div>
+            </div>
+        </div>`
+    }
+
+    async function loadDetailedStatsFallback(container) {
+        if (!supabaseClient) { container.innerHTML = '<div class="empty">No data available.</div>'; return }
+        try {
+            const [{ data: users }, { data: exams }, { data: attempts }] = await Promise.all([
+                supabaseClient.from('users').select('id,role'),
+                supabaseClient.from('exams').select('exam_id,status'),
+                supabaseClient.from('exam_attempts').select('score')
+            ])
+            const u = users || []
+            const e = exams || []
+            const a = attempts || []
+            const roleCount = u.reduce((acc, x) => { acc[x.role] = (acc[x.role] || 0) + 1; return acc }, {})
+            const scores = a.map(x => parseFloat(x.score)).filter(x => !isNaN(x))
+            const avg = scores.length ? (scores.reduce((s, x) => s + x, 0) / scores.length) : null
+            renderDetailedStats({
+                total_users: u.length,
+                students: roleCount.student || 0,
+                teachers: roleCount.teacher || 0,
+                total_admins: (roleCount.admin || 0) + (roleCount.super_admin || 0),
+                total_exams: e.length,
+                published_exams: e.filter(x => x.status === 'published').length,
+                draft_exams: e.filter(x => x.status === 'draft').length,
+                total_attempts: a.length,
+                platform_avg_score: avg
+            })
+        } catch (err) {
+            container.innerHTML = `<div class="empty">Failed to load statistics: ${escHtml(err.message)}</div>`
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // SECTION 7: Transfer Super Admin
+    // ══════════════════════════════════════════════════════════════════════
+    async function initiateTransfer(e) {
+        e.preventDefault()
+        const email = document.getElementById('transfer-email').value.trim()
+        if (!email) return
+
+        const confirmed1 = confirm(
+            `You are about to transfer Super Admin access to:\n\n${email}\n\nThis action CANNOT be undone. You will immediately lose Super Admin access.\n\nAre you sure you want to continue?`
+        )
+        if (!confirmed1) return
+
+        const confirmed2 = confirm(
+            `FINAL CONFIRMATION\n\nTransfer Super Admin to: ${email}\n\nAfter this action:\n• You will lose Super Admin access\n• You will be redirected to login\n• This cannot be reversed\n\nType OK to confirm.`
+        )
+        if (!confirmed2) return
+
+        const btn = document.getElementById('transfer-btn')
+        btn.disabled = true
+        btn.innerHTML = '<span class="spinner spinner-sm"></span> Transferring...'
+
+        try {
+            const res = await saRequest('/super-admin/transfer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ new_super_admin_email: email })
+            })
+            const data = await res.json().catch(() => ({}))
+            if (!res.ok) throw new Error(data.error || data.message || 'Transfer failed')
+            showToast('Super Admin access transferred. Logging out...', 'success')
+            setTimeout(() => logout(), 2500)
+        } catch (err) {
+            showToast(err.message, 'error')
+            btn.disabled = false
+            btn.innerHTML = '<i class="bi bi-arrow-left-right"></i> Transfer Super Admin Access'
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // Init
+    // ══════════════════════════════════════════════════════════════════════
+    window.addEventListener('DOMContentLoaded', async () => {
+        await initSupabase()
+
+        // Render user avatar
+        const profile = window.UserProfile ? window.UserProfile.getStoredProfile() : null
+        const userName = profile?.displayName || localStorage.getItem('userName') || 'Super Admin'
+        const avatarEl = document.getElementById('headerProfileAvatar')
+        if (avatarEl) {
+            const initials = userName.split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]?.toUpperCase() || '').join('') || 'SA'
+            if (window.UserProfile && window.UserProfile.renderAvatar) {
+                window.UserProfile.renderAvatar(avatarEl, { name: userName, initials, photoUrl: profile?.profile_photo_url || '' })
+            } else {
+                avatarEl.textContent = initials
+            }
+        }
+
+        // Load initial section
+        showSection('dashboard')
+        startAuditAutoRefresh()
+
+        // Close promote modal on backdrop click
+        document.getElementById('promote-modal').addEventListener('click', function(e) {
+            if (e.target === this) closePromoteModal()
+        })
+    })
+    </script>
+</body>
+</html>

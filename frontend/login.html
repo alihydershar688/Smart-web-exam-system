@@ -1054,7 +1054,9 @@
 
         const redirectToDashboard = (role) => {
             let dashboardUrl;
-            if (role === 'admin') {
+            if (role === 'super_admin') {
+                dashboardUrl = 'dashboard-super-admin.html';
+            } else if (role === 'admin') {
                 dashboardUrl = 'dashboard-admin.html';
             } else if (role === 'teacher') {
                 dashboardUrl = 'dashboard-teacher.html';

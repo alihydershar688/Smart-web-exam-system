@@ -1,7 +1,4 @@
-"""
-AI-Based Smart Exam Web System - Backend API
-Integrates Question Generation, Essay Grading, and Topic Extraction
-"""
+
 import sys
 import os
 # Ensure the backend directory is in Python path so 'models' package is found
@@ -268,8 +265,9 @@ def _require_active_admin(payload=None):
         'auth_id': user_ctx.get('auth_id'),
     }
     state = load_admin_control()
-    # Any active admin in the database has full access
-    if user_ctx.get('role') != 'admin' or user_ctx.get('status') != 'active':
+    # Any active admin OR super_admin in the database has full access
+    role = user_ctx.get('role', '')
+    if role not in ('admin', 'super_admin') or user_ctx.get('status') != 'active':
         return None, identity, (jsonify({'success': False, 'error': 'Forbidden: active admin account required'}), 403)
     return state, identity, None
 
@@ -285,10 +283,21 @@ def _require_authorized_admin(payload=None):
         'auth_id': user_ctx.get('auth_id'),
     }
     state = load_admin_control()
-    # Any active admin in the database has full access — no JSON file check needed
-    if user_ctx.get('role') != 'admin' or user_ctx.get('status') != 'active':
+    # Any active admin OR super_admin in the database has full access — no JSON file check needed
+    role = user_ctx.get('role', '')
+    if role not in ('admin', 'super_admin') or user_ctx.get('status') != 'active':
         return None, identity, (jsonify({'success': False, 'error': 'Forbidden: active admin account required'}), 403)
     return state, identity, None
+
+
+def _require_super_admin():
+    """Only super_admin role can call this endpoint."""
+    user_ctx, auth_error = _require_authenticated_user()
+    if auth_error:
+        return None, auth_error
+    if user_ctx.get('role') != 'super_admin' or user_ctx.get('status') != 'active':
+        return None, (jsonify({'success': False, 'error': 'Forbidden: Super Admin access required'}), 403)
+    return user_ctx, None
 
 
 def _require_session_lock_payload(payload=None):
@@ -7386,6 +7395,218 @@ def chatbot():
         logger.error("[chatbot] Error: %s", e)
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
+
+
+# ==========================================
+# SUPER ADMIN ROUTES
+# ==========================================
+
+@app.route('/api/super-admin/check', methods=['GET'])
+def super_admin_check():
+    """Check if current user is super admin."""
+    user_ctx, err = _require_super_admin()
+    if err: return err
+    return jsonify({'success': True, 'is_super_admin': True, 'email': user_ctx.get('email')}), 200
+
+
+@app.route('/api/super-admin/admins', methods=['GET'])
+def super_admin_list_admins():
+    """List all admin and super_admin users."""
+    user_ctx, err = _require_super_admin()
+    if err: return err
+    supabase = get_supabase()
+    resp = db_exec(lambda: supabase.table('users').select('id,email,first_name,last_name,role,status,created_at,admin_id').in_('role', ['admin', 'super_admin']).execute())
+    return jsonify({'success': True, 'admins': resp.data or []}), 200
+
+
+@app.route('/api/super-admin/promote', methods=['POST'])
+def super_admin_promote():
+    """Promote a user to admin role. Super Admin only."""
+    user_ctx, err = _require_super_admin()
+    if err: return err
+    data = request.get_json(silent=True) or {}
+    target_email = str(data.get('email') or '').strip().lower()
+    if not target_email:
+        return jsonify({'success': False, 'error': 'Email is required'}), 400
+    supabase = get_supabase()
+    # Find user
+    resp = db_exec(lambda: supabase.table('users').select('id,email,role,status').eq('email', target_email).limit(1).execute())
+    if not resp.data:
+        return jsonify({'success': False, 'error': 'User not found'}), 404
+    user = resp.data[0]
+    if user.get('role') in ('admin', 'super_admin'):
+        return jsonify({'success': False, 'error': 'User is already an admin'}), 400
+    db_exec(lambda: supabase.table('users').update({'role': 'admin', 'status': 'active'}).eq('email', target_email).execute())
+    # Log action
+    _log_audit(supabase, user_ctx.get('email'), 'promote_to_admin', target_email)
+    logger.info('[super_admin] %s promoted %s to admin', user_ctx.get('email'), target_email)
+    return jsonify({'success': True, 'message': f'{target_email} promoted to Admin'}), 200
+
+
+@app.route('/api/super-admin/demote', methods=['POST'])
+def super_admin_demote():
+    """Demote an admin back to teacher or suspend. Super Admin only."""
+    user_ctx, err = _require_super_admin()
+    if err: return err
+    data = request.get_json(silent=True) or {}
+    target_email = str(data.get('email') or '').strip().lower()
+    new_role = str(data.get('new_role') or 'teacher').strip().lower()
+    if not target_email:
+        return jsonify({'success': False, 'error': 'Email is required'}), 400
+    if target_email == user_ctx.get('email'):
+        return jsonify({'success': False, 'error': 'Cannot demote yourself'}), 400
+    if new_role not in ('teacher', 'student'):
+        new_role = 'teacher'
+    supabase = get_supabase()
+    resp = db_exec(lambda: supabase.table('users').select('id,email,role').eq('email', target_email).limit(1).execute())
+    if not resp.data:
+        return jsonify({'success': False, 'error': 'User not found'}), 404
+    if resp.data[0].get('role') == 'super_admin':
+        return jsonify({'success': False, 'error': 'Cannot demote Super Admin'}), 403
+    db_exec(lambda: supabase.table('users').update({'role': new_role}).eq('email', target_email).execute())
+    _log_audit(supabase, user_ctx.get('email'), 'demote_admin', target_email, {'new_role': new_role})
+    logger.info('[super_admin] %s demoted %s to %s', user_ctx.get('email'), target_email, new_role)
+    return jsonify({'success': True, 'message': f'{target_email} demoted to {new_role}'}), 200
+
+
+@app.route('/api/super-admin/transfer', methods=['POST'])
+def super_admin_transfer():
+    """Transfer Super Admin role to another user."""
+    user_ctx, err = _require_super_admin()
+    if err: return err
+    data = request.get_json(silent=True) or {}
+    target_email = str(data.get('email') or '').strip().lower()
+    if not target_email:
+        return jsonify({'success': False, 'error': 'Target email is required'}), 400
+    if target_email == user_ctx.get('email'):
+        return jsonify({'success': False, 'error': 'Cannot transfer to yourself'}), 400
+    supabase = get_supabase()
+    resp = db_exec(lambda: supabase.table('users').select('id,email,role,status').eq('email', target_email).limit(1).execute())
+    if not resp.data:
+        return jsonify({'success': False, 'error': 'Target user not found'}), 404
+    # Downgrade current super admin to admin
+    db_exec(lambda: supabase.table('users').update({'role': 'admin'}).eq('email', user_ctx.get('email')).execute())
+    # Upgrade target to super admin
+    db_exec(lambda: supabase.table('users').update({'role': 'super_admin', 'status': 'active'}).eq('email', target_email).execute())
+    _log_audit(supabase, user_ctx.get('email'), 'transfer_super_admin', target_email)
+    logger.info('[super_admin] %s transferred super_admin to %s', user_ctx.get('email'), target_email)
+    return jsonify({'success': True, 'message': f'Super Admin transferred to {target_email}'}), 200
+
+
+@app.route('/api/super-admin/audit-log', methods=['GET'])
+def super_admin_audit_log():
+    """Get full audit log. Super Admin only."""
+    user_ctx, err = _require_super_admin()
+    if err: return err
+    supabase = get_supabase()
+    limit = min(int(request.args.get('limit', 100)), 500)
+    try:
+        resp = db_exec(lambda: supabase.table('audit_log').select('*').order('created_at', desc=True).limit(limit).execute())
+        return jsonify({'success': True, 'logs': resp.data or []}), 200
+    except Exception:
+        return jsonify({'success': True, 'logs': [], 'note': 'audit_log table not yet created'}), 200
+
+
+@app.route('/api/super-admin/maintenance', methods=['POST'])
+def super_admin_maintenance():
+    """Toggle maintenance mode. Super Admin only."""
+    user_ctx, err = _require_super_admin()
+    if err: return err
+    data = request.get_json(silent=True) or {}
+    enabled = bool(data.get('enabled', False))
+    message = str(data.get('message') or 'System is under maintenance. Please try again later.').strip()
+    # Store in a simple env-like table or return current state
+    supabase = get_supabase()
+    try:
+        db_exec(lambda: supabase.table('system_settings').upsert({
+            'key': 'maintenance_mode',
+            'value': str(enabled).lower(),
+            'message': message,
+            'updated_by': user_ctx.get('email'),
+            'updated_at': time.strftime('%Y-%m-%dT%H:%M:%SZ')
+        }).execute())
+    except Exception:
+        pass  # Table may not exist yet
+    _log_audit(supabase, user_ctx.get('email'), 'maintenance_mode', str(enabled))
+    return jsonify({'success': True, 'maintenance_mode': enabled, 'message': message}), 200
+
+
+@app.route('/api/super-admin/ai-settings', methods=['GET', 'POST'])
+def super_admin_ai_settings():
+    """Get or update global AI settings. Super Admin only."""
+    user_ctx, err = _require_super_admin()
+    if err: return err
+    if request.method == 'GET':
+        return jsonify({
+            'success': True,
+            'settings': {
+                'ai_confidence_threshold': float(os.getenv('AI_CONFIDENCE_THRESHOLD', '0.75')),
+                'ollama_model': os.getenv('OLLAMA_MODEL', 'qwen2.5:7b-instruct-q5_K_M'),
+                'ollama_host': os.getenv('OLLAMA_HOST', 'http://localhost:11434'),
+                'use_qwen_lora': os.getenv('USE_QWEN_LORA', 'false'),
+                'hf_space_url': os.getenv('HF_SPACE_URL', ''),
+            }
+        }), 200
+    data = request.get_json(silent=True) or {}
+    # Update env vars at runtime (not persisted across restarts — for demo purposes)
+    if 'ai_confidence_threshold' in data:
+        val = max(0.0, min(1.0, float(data['ai_confidence_threshold'])))
+        os.environ['AI_CONFIDENCE_THRESHOLD'] = str(val)
+    if 'ollama_model' in data:
+        os.environ['OLLAMA_MODEL'] = str(data['ollama_model'])
+    _log_audit(supabase if False else get_supabase(), user_ctx.get('email'), 'update_ai_settings', str(data))
+    return jsonify({'success': True, 'message': 'AI settings updated for this session'}), 200
+
+
+@app.route('/api/super-admin/platform-stats', methods=['GET'])
+def super_admin_platform_stats():
+    """Full platform statistics. Super Admin only."""
+    user_ctx, err = _require_super_admin()
+    if err: return err
+    supabase = get_supabase()
+    try:
+        users_resp = db_exec(lambda: supabase.table('users').select('id,role,status,created_at').execute())
+        exams_resp = db_exec(lambda: supabase.table('exams').select('exam_id,status,created_at').execute())
+        attempts_resp = db_exec(lambda: supabase.table('exam_attempts').select('attempt_id,status,percentage,submitted_at').limit(1000).execute())
+        users = users_resp.data or []
+        exams = exams_resp.data or []
+        attempts = attempts_resp.data or []
+        role_counts = {}
+        for u in users:
+            r = u.get('role', 'unknown')
+            role_counts[r] = role_counts.get(r, 0) + 1
+        scored = [a for a in attempts if a.get('percentage') is not None]
+        avg = round(sum(float(a['percentage']) for a in scored) / len(scored), 1) if scored else 0
+        return jsonify({
+            'success': True,
+            'stats': {
+                'total_users': len(users),
+                'role_breakdown': role_counts,
+                'total_exams': len(exams),
+                'total_attempts': len(attempts),
+                'average_score': avg,
+                'pending_users': sum(1 for u in users if u.get('status') == 'pending'),
+            }
+        }), 200
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+def _log_audit(supabase, actor, action, target, extra=None):
+    """Insert an audit log entry. Non-blocking."""
+    import threading
+    def _insert():
+        try:
+            db_exec(lambda: supabase.table('audit_log').insert({
+                'actor_email': actor,
+                'action': action,
+                'target': target,
+                'extra': str(extra or ''),
+                'created_at': time.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            }).execute())
+        except Exception:
+            pass  # audit_log table may not exist yet
+    threading.Thread(target=_insert, daemon=True).start()
 
 
 # ==========================================
