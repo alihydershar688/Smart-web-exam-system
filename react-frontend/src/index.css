@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Manrope', sans-serif;
+  background: #F0F4FF;
+  color: #1F2937;
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #EEF2F9; }
+::-webkit-scrollbar-thumb { background: #B0BDD4; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #2547B0; }
+
+a { color: inherit; }
+button { font-family: inherit; }
+input, select, textarea { font-family: inherit; }
