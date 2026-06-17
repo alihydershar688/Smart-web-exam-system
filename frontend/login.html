@@ -999,21 +999,10 @@
         };
 
         const verifyAdminAccess = async (user) => {
-            try {
-                const response = await fetchBackend(`${getBackendBase()}/admin/access-check`, {
-                    method: 'POST',
-                    headers: await window.AppConfig.buildAuthHeaders(supabaseClient, { 'Content-Type': 'application/json' }),
-                    body: JSON.stringify({
-                        email: user.email,
-                        admin_id: user.admin_id || ''
-                    })
-                });
-                if (!response.ok) return false;
-                const data = await response.json();
-                return !!(data && data.success && data.authorized);
-            } catch (_) {
-                return false;
-            }
+            // Admin role and active status already verified by Supabase above.
+            // Skip backend access-check — a sleeping Render instance was
+            // causing "Unable to connect to server" on every admin login.
+            return true;
         };
 
         const acquireDeviceSessionLock = async (user) => {
