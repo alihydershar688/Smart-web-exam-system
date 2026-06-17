@@ -1006,6 +1006,8 @@
         };
 
         const acquireDeviceSessionLock = async (user) => {
+            // Session lock is a backend feature — if Render is sleeping,
+            // skip it gracefully so login is not blocked.
             if (!['teacher', 'admin'].includes(String(user?.role || '').toLowerCase())) {
                 return true;
             }
@@ -1015,30 +1017,36 @@
                 device_id: getOrCreateDeviceId()
             };
 
-            let response = await fetchBackend(`${getBackendBase()}/auth/session/acquire`, {
-                method: 'POST',
-                headers: await window.AppConfig.buildAuthHeaders(supabaseClient, { 'Content-Type': 'application/json' }),
-                body: JSON.stringify(payload)
-            });
-
-            if (response.ok) return true;
-
-            let data = await response.json().catch(() => ({}));
-            const errorMessage = String(data.error || '');
-            if (/another device/i.test(errorMessage)) {
-                response = await fetchBackend(`${getBackendBase()}/auth/session/acquire`, {
+            try {
+                let response = await fetchBackend(`${getBackendBase()}/auth/session/acquire`, {
                     method: 'POST',
                     headers: await window.AppConfig.buildAuthHeaders(supabaseClient, { 'Content-Type': 'application/json' }),
-                    body: JSON.stringify({
-                        ...payload,
-                        force_takeover: true
-                    })
+                    body: JSON.stringify(payload)
                 });
-                if (response.ok) return true;
-                data = await response.json().catch(() => ({}));
-            }
 
-            throw new Error(data.error || 'This account is already active on another device.');
+                if (response.ok) return true;
+
+                let data = await response.json().catch(() => ({}));
+                const errMsg = String(data.error || '');
+                if (/another device/i.test(errMsg)) {
+                    response = await fetchBackend(`${getBackendBase()}/auth/session/acquire`, {
+                        method: 'POST',
+                        headers: await window.AppConfig.buildAuthHeaders(supabaseClient, { 'Content-Type': 'application/json' }),
+                        body: JSON.stringify({ ...payload, force_takeover: true })
+                    });
+                    if (response.ok) return true;
+                    data = await response.json().catch(() => ({}));
+                    throw new Error(data.error || 'This account is already active on another device.');
+                }
+                // Any other backend error — allow login anyway
+                return true;
+            } catch (err) {
+                // Backend unreachable (Render sleeping) — allow login
+                if (String(err?.message || '').toLowerCase().includes('another device')) {
+                    throw err; // Re-throw only real device conflict errors
+                }
+                return true;
+            }
         };
 
         const redirectToDashboard = (role) => {
