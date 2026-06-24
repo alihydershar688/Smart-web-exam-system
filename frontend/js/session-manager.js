@@ -28,7 +28,7 @@
     const ACTIVITY_THROTTLE_MS = 15000;
     const CHECK_INTERVAL_MS = 30000;
     const LOCK_RENEW_INTERVAL_MS = 60 * 1000;
-    const PAGE_TRANSITION_GRACE_MS = 10000;
+    const PAGE_TRANSITION_GRACE_MS = 60000; // 60 seconds grace — prevents logout on slow page loads
     const DEVICE_ID_KEY = 'deviceId';
 
     let currentConfig = null;
@@ -111,14 +111,9 @@
     function restoreSessionFromLocalStorage() {
         if (sessionStorage.getItem('isLoggedIn')) return true;
         if (localStorage.getItem('isLoggedIn') !== 'true') return false;
-        const navigationType = getNavigationType();
-        const canRestore =
-            navigationType === 'reload'
-            || hasSameOriginReferrer()
-            || hasRecentPageTransition();
 
-        if (!canRestore) return false;
-
+        // Always restore from localStorage — prevents logout when navigating between pages.
+        // DISABLE_SESSION_TIMEOUT is true so we never expire sessions anyway.
         [...ACTIVE_AUTH_KEYS, LOGIN_AT_KEY, LAST_ACTIVITY_KEY].forEach((key) => {
             const value = localStorage.getItem(key);
             if (value !== null && value !== undefined && value !== '') {
